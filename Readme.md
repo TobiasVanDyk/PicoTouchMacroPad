@@ -14,7 +14,7 @@
 <img src="PicoMacropadpCApp.gif" height="140" />   
 </p>
 
-The [**Pico 1 RP2040**](https://www.raspberrypi.org/products/raspberry-pi-pico/), the [**Pico 2 RP2350**](https://www.raspberrypi.com/products/raspberry-pi-pico-2/), the [**Waveshare RP2350 Plus**](https://www.waveshare.com/rp2350-plus.htm?sku=29761), and the [**Waveshare RP2350B**](https://www.waveshare.com/RP2350-Touch-LCD-3.5.htm), in combination with 12 different capacitive-and resistive-touch LCDs, are used as a **File-and-Folder-centric Touch LCD MacroPad** - where everything that the macropad is using are files and folders, located on an SDCard and Flash memory. 
+The [**Pico 1 RP2040**](https://www.raspberrypi.org/products/raspberry-pi-pico/), the [**Pico 2 RP2350**](https://www.raspberrypi.com/products/raspberry-pi-pico-2/), the [**Waveshare RP2350 Plus**](https://www.waveshare.com/rp2350-plus.htm?sku=29761), and the [**Waveshare RP2350B**](https://www.waveshare.com/RP2350-Touch-LCD-3.5.htm), in combination with 12 different capacitive-and-resistive-touch LCDs, are used as a **File-and-Folder-centric Touch LCD MacroPad** - where everything that the macropad is using are files and folders, located on an SDCard and Flash memory. 
 
 [**Capacitive Touch LCD Macropads**](/Capacitive-Touch-LCD) Two capacitive touch macropads, using FT6336 + ST7796 and GT911 + ILI9488 touch-controller + LCD combinations, have been constructed. Further development will focus on the Waveshare RP2350B + FT6336 + ST7796 LCD. Build files details and source files are available in the [**Capacitive-Touch-LCD folder**](/Capacitive-Touch-LCD). 
 
