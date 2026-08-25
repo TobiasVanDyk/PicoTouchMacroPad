@@ -1,0 +1,14 @@
+Changes to make Arduino-Pico compatible but hard-coded for Pico 1,2 Wire1:
+Tobias van Dyk August 2026
+Original libray at: https://github.com/TAMCTec/gt911-arduino
+
+
+void TAMC_GT911::begin(uint8_t _addr) {
+  addr = _addr;
+  Wire1.setSDA(pinSda);
+  Wire1.setSCL(pinScl);
+  Wire1.begin();
+  reset();
+}
+
+Replace all other Wire with Wire1 but not #include <Wire.h>
