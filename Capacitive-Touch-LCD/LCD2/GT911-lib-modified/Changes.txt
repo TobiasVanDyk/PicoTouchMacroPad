@@ -1,0 +1,131 @@
+Changes to make Arduino-Pico compatible but hard-coded for Pico 1,2 Wire1:
+Tobias van Dyk August 2026
+Original libray at: https://github.com/TAMCTec/gt911-arduino
+
+
+void TAMC_GT911::begin(uint8_t _addr) {
+  addr = _addr;
+  Wire1.setSDA(pinSda);
+  Wire1.setSCL(pinScl);
+  Wire1.begin();
+  reset();
+}
+
+Replace all other Wire with Wire1 but not #include <Wire.h>
+
+Fix from Anthropic Claude:
+
+void TAMC_GT911::calculateChecksum() {
+  uint8_t checksum = 0;
+  for (uint8_t i=0; i<GT911_CONFIG_SIZE; i++) {
+    checksum += configBuf[i];
+  }
+  checksum = (~checksum) + 1;
+  configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
+}
+
+
+Suggested Fixes from Anthropic Claude:
+--------------------------------------------------------------------------------------------------------------
+(1) Add I2C bus recovery, since you can't hardware-reset the chip. This is the part that actually protects you against the "needs a power cycle" failure mode. Standard technique - bit-bang SCL to force a stuck slave to release SDA, before Wire1.begin():
+
+void i2cBusRecovery(uint8_t sdaPin, uint8_t sclPin) {
+  pinMode(sdaPin, INPUT_PULLUP);
+  pinMode(sclPin, OUTPUT);
+  for (int i = 0; i < 9; i++) {               // up to 9 clocks to free a stuck slave
+    digitalWrite(sclPin, HIGH); delayMicroseconds(5);
+    digitalWrite(sclPin, LOW);  delayMicroseconds(5);
+  }
+  // generate a STOP condition
+  pinMode(sdaPin, OUTPUT); digitalWrite(sdaPin, LOW); delayMicroseconds(5);
+  digitalWrite(sclPin, HIGH); delayMicroseconds(5);
+  digitalWrite(sdaPin, HIGH); delayMicroseconds(5);
+}
+
+Call this once at boot before Wire1.begin(), and - more importantly - call it whenever you detect the touch controller has stopped responding (e.g., readByteData()/readBlockData() failing repeatedly, or requestFrom() returning 0 several polls in a row), then re-init (Wire1.begin(); tp.begin();). This is the realistic substitute for a hardware RST pin you don't have access to.
+--------------------------------------------------------------------------------------------------------------
+(2) Add a watchdog on the touch read path in your .ino: track consecutive readByteData/readBlockData failures; after N in a row, run the recovery routine above and re-begin() the touch controller. Right now, nothing detects the freeze at all - the loop just silently stops getting fresh touch data.
+
+Can use the same approach as already used in the FT6336 main loop start - refer to the LCD1 code
+---------------------------------------------------------------------------------------------------------------
+(3) Use repeated starts in the new library, matching the old one GT911-Lite library:
+ 
+void TAMC_GT911::readBlockData(uint8_t *buf, uint16_t reg, uint8_t size) {
+  Wire1.beginTransmission(addr);
+  Wire1.write(highByte(reg));
+  Wire1.write(lowByte(reg));
+  Wire1.endTransmission(false);              // repeated start, not STOP
+  uint8_t got = Wire1.requestFrom(addr, size);
+  if (got != size) return;                   // bail instead of reading garbage
+  for (uint8_t i = 0; i < size; i++) buf[i] = Wire1.read();
+}
+
+Do the same in readByteData and writeByteData/writeBlockData (check endTransmission()'s return code there too).
+----------------------------------------------------------------------------------------------------------------
+(4) This fix is implemented
+
+The real bug: an uninitialized checksum variable in TAMC_GT911::calculateChecksum()
+cpp
+void TAMC_GT911::calculateChecksum() {
+  uint8_t checksum;                        // <-- never initialized!
+  for (uint8_t i=0; i<GT911_CONFIG_SIZE; i++) {
+    checksum += configBuf[i];
+  }
+  checksum = (~checksum) + 1;
+  configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
+}
+checksum starts from whatever garbage happens to be sitting on the stack at that address - it's never set to 0. That's undefined behavior, and it's called from exactly one place, at exactly one time in the program's life:
+cpp
+void TAMC_GT911::reset() {
+  ...
+  readBlockData(configBuf, GT911_CONFIG_START, GT911_CONFIG_SIZE);  // read real config from chip
+  setResolution(width, height);   // -> reflashConfig() -> calculateChecksum() -> writeByteData(FRESH, 1)
+}
+So once, during tp.begin() at boot, it computes a checksum starting from stack garbage, writes that (likely-wrong) checksum into the GT911's config table, then tells the chip "config is FRESH, apply it." If the checksum is wrong, the GT911's firmware either rejects the config (fine) or - on some firmware revisions - gets stuck partway through applying a config it can't validate, and its touch-reporting engine never comes back up. Since you have no RST line, there's no way to kick it back to a known state short of a real power cycle.
+This explains every part of your symptom:
+"	Only at boot - calculateChecksum() is only ever called once, inside reset()/begin(). It's never called again during normal operation, so it can't cause a runtime freeze - which matches exactly what you're seeing.
+"	Intermittent, not deterministic - the leftover stack contents at that call site depend on what ran just before it (USB init, SD/LittleFS init, TFT init - all of which have their own timing-dependent branches), so the garbage seed varies from boot to boot. Some boots it happens to compute a checksum the chip accepts; others it doesn't. That's a very good match for "about 1 in 10."
+"	Happens on both cold boot and reflash - both are full re-executions of setup() from a fresh stack, so both re-trigger the same uninitialized read every time.
+"	The old library never had this problem because it never does this. Its setResolution() writes the four X/Y-max bytes and sets FRESH=1, and stops there - it never touches the checksum register at all:
+cpp
+void GT911_Lite::setResolution(uint16_t width, uint16_t height) {
+  writeByteData(0x8048, lowByte(width));
+  writeByteData(0x8049, highByte(width));
+  writeByteData(0x804A, lowByte(height));
+  writeByteData(0x804B, highByte(height));
+  writeByteData(0x8100, 1); // GT911_CONFIG_FRESH
+  delay(100);
+}
+It relies on the chip's existing checksum (from its own internal config) rather than trying to compute and write a new one. That sidesteps the bug in the new library entirely - which is exactly why switching libraries introduced this.
+The fix
+One-line fix, trivially safe:
+cpp
+void TAMC_GT911::calculateChecksum() {
+  uint8_t checksum = 0;                    // <-- initialize
+  for (uint8_t i=0; i<GT911_CONFIG_SIZE; i++) {
+    checksum += configBuf[i];
+  }
+  checksum = (~checksum) + 1;
+  configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
+}
+I'd try this on its own first, with nothing else changed, since it's the cleanest test of the theory - do several dozen cold boots / reflashes and see if the freeze reproduces at all. If it's gone, that confirms it. Given how precisely this matches your symptom (boot-only, never runtime, intermittent), my earlier I2C-transaction and bus-recovery suggestions were solving a problem you don't actually have - I'd deprioritize those unless this fix doesn't fully resolve it.
+For extra safety on top of the one-line fix, you could also skip the checksum write path entirely and mirror the old library's approach (just write the four resolution bytes + FRESH=1, don't touch the checksum register), since the chip doesn't strictly need you to recompute it:
+cpp
+void TAMC_GT911::setResolution(uint16_t _width, uint16_t _height) {
+  configBuf[GT911_X_OUTPUT_MAX_LOW  - GT911_CONFIG_START] = lowByte(_width);
+  configBuf[GT911_X_OUTPUT_MAX_HIGH - GT911_CONFIG_START] = highByte(_width);
+  configBuf[GT911_Y_OUTPUT_MAX_LOW  - GT911_CONFIG_START] = lowByte(_height);
+  configBuf[GT911_Y_OUTPUT_MAX_HIGH - GT911_CONFIG_START] = highByte(_height);
+  writeByteData(GT911_X_OUTPUT_MAX_LOW,  lowByte(_width));
+  writeByteData(GT911_X_OUTPUT_MAX_HIGH, highByte(_width));
+  writeByteData(GT911_Y_OUTPUT_MAX_LOW,  lowByte(_height));
+  writeByteData(GT911_Y_OUTPUT_MAX_HIGH, highByte(_height));
+  writeByteData(GT911_CONFIG_FRESH, 1);
+}
+
+
+
+
+
+
+
