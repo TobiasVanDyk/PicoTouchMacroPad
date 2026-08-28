@@ -147,11 +147,11 @@ char twistX[5]  = { "*/=-" };                       // Characters used in option
 //////////////////////////////////////////////////// GT911 https://github.com/TAMCTec/gt911-arduino changed for Arduino-Pico and Wire1
 #define TOUCH_SDA 26          // 26 27 is i2c1 Wire1
 #define TOUCH_SCL 27  
-#define TOUCH_INT -1          // Not used
+#define TOUCH_INT -1          // Not used but library converts to pin 255
 #define TOUCH_RST -1          // Not used
 #define TOUCH_WIDTH  480
 #define TOUCH_HEIGHT 320
-TAMC_GT911 tp = TAMC_GT911(TOUCH_SDA, TOUCH_SCL, TOUCH_INT, TOUCH_RST, TOUCH_WIDTH, TOUCH_HEIGHT);
+TAMC_GT911 tp = TAMC_GT911(TOUCH_SDA, TOUCH_SCL, TOUCH_INT, TOUCH_RST, TOUCH_WIDTH, TOUCH_HEIGHT);  
 
 volatile bool Change = false;          // Indicators changed at any time
 volatile bool BusyCNS = false;         // Lock changes when in CNS callback
@@ -884,17 +884,10 @@ void setup()
   for (int i=0; i<twX; i++) { if (Twist[i]) { UpdateTwist(4); break; }  }    // Only do UpdateTwist once
   Wire.setClock(400000);                                                     // Twist devices > 1 only works if done this way
   
-  Wire1.setSDA(TOUCH_SDA);                                                   // GT911
-  Wire1.setSCL(TOUCH_SCL);
-  Wire1.begin();
-  Wire1.setClock(100000); 
-  
   InitMCP23xx(1);                    
   
   //if (!LittleFS.begin()) {LittleFS.format(); LittleFS.begin(); }   
   LittleFS.begin(); // LittleFs automatically format the filesystem if one is not detected
-
-  InitMCP23xx(1);
 
   usb_hid.setPollInterval(2);
   usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));  
@@ -921,13 +914,18 @@ void setup()
               else tft.setFreeFont(&FreeSans12pt7b);       
   tft.setTextSize(KEY_TEXTSIZE); 
   BackLightOn = true;                   // TFT init will turn it on
-          
+  
+  Wire1.setSDA(TOUCH_SDA);              // GT911 only device on i2c1
+  Wire1.setSCL(TOUCH_SCL);
+  Wire1.begin();
+  Wire1.setClock(100000); 
+  delay(300);        
   tp.begin();                           // GT911
   tp.setRotation(ROTATION_NORMAL);
 
   if (SDNum>0) SDCardSelectFiles(0);    // SDCard File use is enabled
 
-  ResetOnce = ResetOnceEnable;          // Both false unless *r1* state true
+  // ResetOnce = ResetOnceEnable;       // Not used - one reset after start if *r1* state true
   
   if (SaveLayout>0) Layout = SaveLayout; else Layout = 2;  // if SaveLayout > 0 Layout 1 to 4 else default Layout 2 (Cfg)  
   ConfigKeyCount = 0;                                      // Start up
@@ -948,18 +946,17 @@ void setup()
 // Main Loop
 /////////////////////////////
 void loop() 
-{ if (tp.isTouched && tp.touches > 0) { delay(KeyRepeat2);            // default 20mS use *de*xxx to adjust
-                                        int rawX = tp.points[0].x;
-                                        int rawY = tp.points[0].y;
-                                        if (Rotate180) {  t_x = map(rawY, 315, 5, 0, 479);
-                                                          t_y = map(rawX, 5, 475, 0, 319); }
-                                                  else {  t_x = map(rawY, 5, 315, 0, 479);     
-                                                          t_y = map(rawX, 475, 5, 0, 319); }
-                                        t_x = constrain(t_x, 0, 479);
-                                        t_y = constrain(t_y, 0, 319);
-                                        pressed = true;   } else pressed = false; 
-  
-  tp.read();       // Skip first cycle avoid ghost press first time 
+{ tp.read();       // Sometimes ghost press on cold boot or reflash 
+  if (tp.isTouched && tp.touches>0) { delay(KeyRepeat2);            // default 20mS use *de*xxx to adjust
+                                      int rawX = tp.points[0].x;
+                                      int rawY = tp.points[0].y;
+                                      if (Rotate180) {  t_x = map(rawY, 315, 5, 0, 479);
+                                                        t_y = map(rawX, 5, 475, 0, 319); }
+                                                else {  t_x = map(rawY, 5, 315, 0, 479);     
+                                                        t_y = map(rawX, 475, 5, 0, 319); }
+                                      t_x = constrain(t_x, 0, 479);
+                                      t_y = constrain(t_y, 0, 319);
+                                      pressed = true;   } else pressed = false;   // pressed = false on start
   
   NowMillis = millis();
   wiggleCheck = mcpNow = NowMillis;  
@@ -5979,4 +5976,4 @@ void showKeyData(byte Option)
          
  }
  
-/************* EOF line 5982 *****************/
+/************* EOF line 5979 *****************/

@@ -19,14 +19,14 @@ Using library SparkFun_Qwiic_Twist at version 1.0.4 in folder: C:\Users\Tobias\D
 Using library Adafruit-MCP23017 at version 2.3.2 in folder: C:\Users\Tobias\Documents\Arduino\libraries\Adafruit-MCP23017 
 Using library Adafruit_BusIO at version 1.17.4 in folder: C:\Users\Tobias\Documents\Arduino\libraries\Adafruit_BusIO 
 "C:\\Users\\Tobias\\AppData\\Local\\Arduino15\\packages\\rp2040\\tools\\pqt-gcc\\5.0.0-9576866/bin/arm-none-eabi-size" -A "I:\\Data\\Win10\\Arduino/VolumeMacroPad603.ino.elf"
-Sketch uses 287140 bytes (27%) of program storage space. Maximum is 1044480 bytes.
+Sketch uses 287116 bytes (27%) of program storage space. Maximum is 1044480 bytes.
 Global variables use 71416 bytes (27%) of dynamic memory, leaving 190728 bytes for local variables. Maximum is 262144 bytes.
 C:\Users\Tobias\AppData\Local\Arduino15\packages\rp2040\tools\pqt-python3\1.0.1-base-3a57aed-1/python3 -I C:\Users\Tobias\AppData\Local\Arduino15\packages\rp2040\hardware\rp2040\6.0.0/tools/uf2conv.py --serial COM4 --family RP2040 --deploy I:\Data\Win10\Arduino/VolumeMacroPad603.ino.uf2 
 Resetting COM4
-Converting to uf2, output size: 654336, start address: 0x2000
+Converting to uf2, output size: 653824, start address: 0x2000
 Scanning for RP2040 devices
 Flashing D: (RPI-RP2)
-Wrote 654336 bytes to D:/NEW.UF2
+Wrote 653824 bytes to D:/NEW.UF2
 ----------------------------------------------------------------------------------------------------------------
 
 To install new version of Arduino Pico first delete it from boards manager, then delete the folder 
@@ -37,7 +37,7 @@ Wire i2c0 External Devices SDA/SCL GP4/GP5 and Wire1 i2c1 External Devices on GP
 Sparkfun Twist RGB Rotary Encoder and MPC23xxx GPIO Expanders on Wire i2c0
 
 New changes:
-1. Fixes and Google Gemini fixes for functions DoLinkStr() DoNKeys() DoKeyMST() DoKey16()
+1. Fixes and Google Gemini fixes for functions DoLinkStr() DoNKeys() DoKeyMST() DoKey16() and Anthropic Claude further fixes for GT911 lib 
 2. Arduino Pico 6.0.0 and Pico SDK 2.3.0 and nKeysL134 = false CheckSerial = true KeyHeldEnable = false as defaults
 3. No calibration required for modified GT911 library and KeyHeld now works for both Volume and [*Cm] keys.
 4. Added *ic* i2c bus scanner
