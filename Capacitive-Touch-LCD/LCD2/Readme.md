@@ -7,7 +7,7 @@
 
 The [**Pico 1 RP2040**](https://www.raspberrypi.org/products/raspberry-pi-pico/) is used with a DFRobot 3.5" capacitive touch LCD - namely the [**DFRobot Fermion Display DFR0669**](https://www.dfrobot.com/product-2107.html). It is a 3.5-inch IPS display with a resolution of 480x320 pixels and capacitive touch using the GT911 touch chip. The module uses the ILI9488 driver chip and communicates via a 4-wire SPI interface. It also features a "General Display Interface" (GDI) for direct connection to compatible controllers. The board includes an onboard SDCard slot for storage and operates on a voltage of 3.3V to 5.5V. The Pico 1 handles the shared SDCard and LCD SPI driver well, and allows it to operate at the maximum speed. Earlier the Pico 2 was tried but it was the problematic A2 stepping version, and therefore required the SPI read and write speed to be considerably reduced. 
 
-The standard (Bodmer) TFT_eSPI library was used with the addition of a modified [**GT911 library**](https://github.com/TAMCTec/gt911-arduino).
+The standard (Bodmer) TFT_eSPI library was used with the addition of a [**modified**](https://github.com/TobiasVanDyk/PicoTouchMacroPad/tree/main/Capacitive-Touch-LCD/LCD2/GT911-lib-modified) [**GT911 library**](https://github.com/TAMCTec/gt911-arduino).
 
 A 3D-case is provided in two sections - front and back, and prototyping stripboard was used for the construction. The Pico 1 used the same connection pins as the resistive touch Waveshare LCDs originally used for the macropad. The connection details can be found in the (Bodmer) TFT_eSPI configuration files and in the main source code file for each Pico type.  The details are also listed here at the bottom.
 
