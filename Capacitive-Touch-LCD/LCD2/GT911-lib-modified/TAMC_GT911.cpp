@@ -15,19 +15,21 @@ void TAMC_GT911::begin(uint8_t _addr) {
   reset();
 }
 void TAMC_GT911::reset() {
-  pinMode(pinInt, OUTPUT);
-  pinMode(pinRst, OUTPUT);
-  digitalWrite(pinInt, 0);
-  digitalWrite(pinRst, 0);
-  delay(10);
-  digitalWrite(pinInt, addr==GT911_ADDR2);
-  delay(1);
-  digitalWrite(pinRst, 1);
-  delay(5);
-  digitalWrite(pinInt, 0);
-  delay(50);
-  pinMode(pinInt, INPUT);
-  // attachInterrupt(pinInt, TAMC_GT911::onInterrupt, RISING);
+  if (pinInt != 255 && pinRst != 255) {   
+      pinMode(pinInt, OUTPUT);
+      pinMode(pinRst, OUTPUT);
+      digitalWrite(pinInt, 0);
+      digitalWrite(pinRst, 0);
+      delay(10);
+      digitalWrite(pinInt, addr==GT911_ADDR2);
+      delay(1);
+      digitalWrite(pinRst, 1);
+      delay(5);
+      digitalWrite(pinInt, 0);
+      delay(50);
+      pinMode(pinInt, INPUT);
+      // attachInterrupt(pinInt, TAMC_GT911::onInterrupt, RISING);
+  }
   delay(50);
   readBlockData(configBuf, GT911_CONFIG_START, GT911_CONFIG_SIZE);
   setResolution(width, height);
@@ -53,11 +55,15 @@ void TAMC_GT911::setRotation(uint8_t rot) {
   rotation = rot;
 }
 void TAMC_GT911::setResolution(uint16_t _width, uint16_t _height) {
-  configBuf[GT911_X_OUTPUT_MAX_LOW - GT911_CONFIG_START] = lowByte(_width);
+  configBuf[GT911_X_OUTPUT_MAX_LOW  - GT911_CONFIG_START] = lowByte(_width);
   configBuf[GT911_X_OUTPUT_MAX_HIGH - GT911_CONFIG_START] = highByte(_width);
-  configBuf[GT911_Y_OUTPUT_MAX_LOW - GT911_CONFIG_START] = lowByte(_height);
+  configBuf[GT911_Y_OUTPUT_MAX_LOW  - GT911_CONFIG_START] = lowByte(_height);
   configBuf[GT911_Y_OUTPUT_MAX_HIGH - GT911_CONFIG_START] = highByte(_height);
-  reflashConfig();
+  writeByteData(GT911_X_OUTPUT_MAX_LOW,  lowByte(_width));
+  writeByteData(GT911_X_OUTPUT_MAX_HIGH, highByte(_width));
+  writeByteData(GT911_Y_OUTPUT_MAX_LOW,  lowByte(_height));
+  writeByteData(GT911_Y_OUTPUT_MAX_HIGH, highByte(_height));
+  writeByteData(GT911_CONFIG_FRESH, 1);
 }
 // void TAMC_GT911::setOnRead(void (*isr)()) {
 //   onRead = isr;

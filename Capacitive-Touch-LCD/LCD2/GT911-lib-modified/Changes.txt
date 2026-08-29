@@ -13,8 +13,9 @@ void TAMC_GT911::begin(uint8_t _addr) {
 
 Replace all other Wire with Wire1 but not #include <Wire.h>
 
-Fix from Anthropic Claude:
-
+============================
+Fixes from Anthropic Claude:
+============================
 void TAMC_GT911::calculateChecksum() {
   uint8_t checksum = 0;
   for (uint8_t i=0; i<GT911_CONFIG_SIZE; i++) {
@@ -22,6 +23,39 @@ void TAMC_GT911::calculateChecksum() {
   }
   checksum = (~checksum) + 1;
   configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
+}
+
+void TAMC_GT911::setResolution(uint16_t _width, uint16_t _height) {
+  configBuf[GT911_X_OUTPUT_MAX_LOW  - GT911_CONFIG_START] = lowByte(_width);
+  configBuf[GT911_X_OUTPUT_MAX_HIGH - GT911_CONFIG_START] = highByte(_width);
+  configBuf[GT911_Y_OUTPUT_MAX_LOW  - GT911_CONFIG_START] = lowByte(_height);
+  configBuf[GT911_Y_OUTPUT_MAX_HIGH - GT911_CONFIG_START] = highByte(_height);
+  writeByteData(GT911_X_OUTPUT_MAX_LOW,  lowByte(_width));
+  writeByteData(GT911_X_OUTPUT_MAX_HIGH, highByte(_width));
+  writeByteData(GT911_Y_OUTPUT_MAX_LOW,  lowByte(_height));
+  writeByteData(GT911_Y_OUTPUT_MAX_HIGH, highByte(_height));
+  writeByteData(GT911_CONFIG_FRESH, 1);
+}
+
+void TAMC_GT911::reset() {
+  if (pinInt != 255 && pinRst != 255) {   
+      pinMode(pinInt, OUTPUT);
+      pinMode(pinRst, OUTPUT);
+      digitalWrite(pinInt, 0);
+      digitalWrite(pinRst, 0);
+      delay(10);
+      digitalWrite(pinInt, addr==GT911_ADDR2);
+      delay(1);
+      digitalWrite(pinRst, 1);
+      delay(5);
+      digitalWrite(pinInt, 0);
+      delay(50);
+      pinMode(pinInt, INPUT);
+      // attachInterrupt(pinInt, TAMC_GT911::onInterrupt, RISING);
+  }
+  delay(50);
+  readBlockData(configBuf, GT911_CONFIG_START, GT911_CONFIG_SIZE);
+  setResolution(width, height);
 }
 
 
@@ -62,10 +96,8 @@ void TAMC_GT911::readBlockData(uint8_t *buf, uint16_t reg, uint8_t size) {
 
 Do the same in readByteData and writeByteData/writeBlockData (check endTransmission()'s return code there too).
 ----------------------------------------------------------------------------------------------------------------
-(4) This fix is implemented
-
-The real bug: an uninitialized checksum variable in TAMC_GT911::calculateChecksum()
-cpp
+(4) The real bug: an uninitialized checksum variable in TAMC_GT911::calculateChecksum()
+ 
 void TAMC_GT911::calculateChecksum() {
   uint8_t checksum;                        // <-- never initialized!
   for (uint8_t i=0; i<GT911_CONFIG_SIZE; i++) {
@@ -75,7 +107,7 @@ void TAMC_GT911::calculateChecksum() {
   configBuf[GT911_CONFIG_CHKSUM - GT911_CONFIG_START] = checksum;
 }
 checksum starts from whatever garbage happens to be sitting on the stack at that address - it's never set to 0. That's undefined behavior, and it's called from exactly one place, at exactly one time in the program's life:
-cpp
+ 
 void TAMC_GT911::reset() {
   ...
   readBlockData(configBuf, GT911_CONFIG_START, GT911_CONFIG_SIZE);  // read real config from chip
@@ -87,7 +119,7 @@ This explains every part of your symptom:
 "	Intermittent, not deterministic - the leftover stack contents at that call site depend on what ran just before it (USB init, SD/LittleFS init, TFT init - all of which have their own timing-dependent branches), so the garbage seed varies from boot to boot. Some boots it happens to compute a checksum the chip accepts; others it doesn't. That's a very good match for "about 1 in 10."
 "	Happens on both cold boot and reflash - both are full re-executions of setup() from a fresh stack, so both re-trigger the same uninitialized read every time.
 "	The old library never had this problem because it never does this. Its setResolution() writes the four X/Y-max bytes and sets FRESH=1, and stops there - it never touches the checksum register at all:
-cpp
+ 
 void GT911_Lite::setResolution(uint16_t width, uint16_t height) {
   writeByteData(0x8048, lowByte(width));
   writeByteData(0x8049, highByte(width));
@@ -99,7 +131,7 @@ void GT911_Lite::setResolution(uint16_t width, uint16_t height) {
 It relies on the chip's existing checksum (from its own internal config) rather than trying to compute and write a new one. That sidesteps the bug in the new library entirely - which is exactly why switching libraries introduced this.
 The fix
 One-line fix, trivially safe:
-cpp
+ 
 void TAMC_GT911::calculateChecksum() {
   uint8_t checksum = 0;                    // <-- initialize
   for (uint8_t i=0; i<GT911_CONFIG_SIZE; i++) {
@@ -110,7 +142,7 @@ void TAMC_GT911::calculateChecksum() {
 }
 I'd try this on its own first, with nothing else changed, since it's the cleanest test of the theory - do several dozen cold boots / reflashes and see if the freeze reproduces at all. If it's gone, that confirms it. Given how precisely this matches your symptom (boot-only, never runtime, intermittent), my earlier I2C-transaction and bus-recovery suggestions were solving a problem you don't actually have - I'd deprioritize those unless this fix doesn't fully resolve it.
 For extra safety on top of the one-line fix, you could also skip the checksum write path entirely and mirror the old library's approach (just write the four resolution bytes + FRESH=1, don't touch the checksum register), since the chip doesn't strictly need you to recompute it:
-cpp
+ 
 void TAMC_GT911::setResolution(uint16_t _width, uint16_t _height) {
   configBuf[GT911_X_OUTPUT_MAX_LOW  - GT911_CONFIG_START] = lowByte(_width);
   configBuf[GT911_X_OUTPUT_MAX_HIGH - GT911_CONFIG_START] = highByte(_width);
