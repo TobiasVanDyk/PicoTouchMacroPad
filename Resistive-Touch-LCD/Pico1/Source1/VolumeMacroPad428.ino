@@ -12,7 +12,7 @@
 // shares a similar layout approach to what is used here - their design dates back to early 2021. 
 // https://learn.adafruit.com/touch-deck-diy-tft-customized-control-pad?view=all
 //
-// Adapted by Tobias van Dyk August 2022 - August 2026 for Pico 1 RP2040 and ILI9488 480x320 LCD
+// Adapted by Tobias van Dyk August 2022 - September 2026 for Pico 1 RP2040 and ILI9488 480x320 LCD
 // This use the Waveshare 3.5inch Touch Display Module for Raspberry Pi Pico 1 and 2 with included SDCard module:
 // https://www.waveshare.com/pico-restouch-lcd-3.5.htm
 //
@@ -222,27 +222,29 @@ byte EndMarker2   = 0x03;         // Or use backtick/grave ` Change with *2e*cha
 // uint8_t static const conv_table2[128][2] =  { HID_KEYCODE_TO_ASCII }; 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 0   KeySkip 1  CheckSerial 1  KeyHeldEnable  0           BLOnOff 1    Rotate180 0              KeyFontBold 0      ResetOnceEnable 0
-// 7     nKeys 1       nChar  n      nKeysPage  8  nKeysCharSet[10] c         CRLF 0                    crlf1 0x0D             crlf2 0x0A
-// 23    iList 0       MuteOn 0           VolOn 1          LayerAxD 0        Media 0                   XFiles 0           Brightness 0           
-// 30   BsDNum 0       RetNum 8         LayerAD 0     KeyFontColour 0   SaveLayout 2                 OptionOS 0            KeyRepeat 6 
-// 37  NormVal 0       DimVal 3         nKeys34 1          nDir[20] c        nDirZ always=0  nKeysLnkChar[10] 10               nDirX 0,1,2,3
-// 72   MLabel 0       SLabel 0          TLabel 0      DelayTimeVal 0      VolOn1  0                  VolOn2  1               VolOn3 1          ToneOn 0  
-// 80  MathSet 0       MouseZ 0  MediaConfig[0] 0      StartMarker  0x02 EndMarker 0x03               MacroUL 0            nKeysL134  1         KeyRepeat2 65 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 0    KeySkip 1   CheckSerial 1  KeyHeldEnable  0           BLOnOff 1    Rotate180 0              KeyFontBold 0      ResetOnceEnable 0
+// 7      nKeys 1        nChar  n      nKeysPage  8  nKeysCharSet[10] c         CRLF 0                    crlf1 0x0D             crlf2 0x0A
+// 23     iList 0        MuteOn 0           VolOn 1          LayerAxD 0        Media 0                   XFiles 0           Brightness 0           
+// 30    BsDNum 0        RetNum 8         LayerAD 0     KeyFontColour 0   SaveLayout 2                 OptionOS 0            KeyRepeat 6 
+// 37   NormVal 0        DimVal 3         nKeys34 1          nDir[20] c        nDirZ always=0  nKeysLnkChar[10] 10               nDirX 0,1,2,3
+// 72    MLabel 0        SLabel 0          TLabel 0      DelayTimeVal 0      VolOn1  0                  VolOn2  1               VolOn3 1          ToneOn 0  
+// 80   MathSet 0        MouseZ 0  MediaConfig[0] 0      StartMarker  0x02 EndMarker 0x03               MacroUL 0            nKeysL134 0          KeyRepeat2 20 
+// 88  TwistSDA 26     TwistSCL 27            Fxx 0            FxxMod 0
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Last 3 entries KeyRepeat2 TwistSDA TwistSCL Config1[87,88,89] Can use strcpy((char *)&Config1[40], nDir); and inverse, to access char string array nDirZ=0=EOS 
+// Last entries KeyRepeat2 TwistSDA TwistSCL Fxx FxxMod Config1[87,88,89, 90, 91] 
+// Can use strcpy((char *)&Config1[40], nDir); and inverse, to access char string array nDirZ=0=EOS 
 // Note only nDir only saved if 20 bytes max in size excluding last 0x00 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-cSt byte Config1Size = 90;       //   0   1   2   3   4   5   6   7  8  9  10  11  12  13  14  15  16  17  18  19 20 21   22   23 24 25 26 27 28 29  30  31 
+cSt byte Config1Size = 96;       //   0   1   2   3   4   5   6   7  8  9  10  11  12  13  14  15  16  17  18  19 20 21   22   23 24 25 26 27 28 29  30  31 
 byte Config1[Config1Size]          = {1,  1,  0,  1,  0,  0,  0,  1,'n',8,'n','o','p','q','r','s','t','m','a','k',0, 0x0D,0x0A,0, 1, 0, 0, 0, 0, 0,  0,  8, 
                                       0,  0,  2,  0,  6,  0,  3,  1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0,   0,   0, 0, 0, 0, 0, 0,'n','o','p',
-                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   1,  65, 26, 27  };
+                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   0,  65, 26, 27, 0, 0, 0, 0, 0, 0 };
 cSt byte Config1Reset[Config1Size] = {1,1,0,1,0,0,0,1,'n',8,'n','o','p','q','r','s','t','m','a','k',0,0x0D,0x0A,0, 1, 0, 0, 0, 0, 0,  0,  8, 
                                       0,0,2,0,6,0,3,1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 'n','o','p',
-                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   1,  65, 26, 27  };                                    
+                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   0,  65, 26, 27, 0, 0, 0, 0, 0, 0  };                                    
 bool WriteConfig1Change = false; // Do save if true
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 static const unsigned long int tHr  = 60*60*1000; // hour
 static const unsigned long int tMin = 60*1000;    // minute
 unsigned long int WiggleTime = 0;                 // *mW*nn MouseWiggler blocking unsigned for -1000 steps
@@ -567,30 +569,32 @@ const static byte FxyArr[10] =   // Special use if maco start with 0xF0 0xF1 0xF
 {0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9 };
 const static char FxyChr[10][4] = // F01 to F24
 {"F+0", "F+1", "F+2", "F+3", "F+4", "F+5", "F+6", "F+7", "F+8", "F+9" };
+byte Fxx = 0;      // F keys option *fx*s,a,c such *fx*a *fx*sc ^fx*acs *fx* = disable  F1 to F24 nKeys do F1-F24, Shift_F1-F24, Alt+F1-F24 etc
+byte FxxMod = 0;   // Modifier byte Shift Control Alt Gui L+R in here for F1-F24 keys
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool CmKey = false;                  // Check if *codes are from pressing [*Cm] key or entered directly
-const static int StarCodesMax = 137; // StarCodes Count 16+16+16+16+16+16+16+16+9 StarNum = 0-136
+const static int StarCodesMax = 138; // StarCodes Count 16+16+16+16+16+16+16+16+10 StarNum = 0-137
 const static char StarCode[StarCodesMax][3] =    
 { "ad", "ae", "am", "ap", "as", "at", "bb", "bl", "br", "ca", "cf", "cm", "cp", "cr", "ct", "cx", 
   "c1", "c2", "db", "de", "df", "dt", "e0", "e1", "e2", "e3", "e4", "e5", "e6", "fa", "fc", "fm", 
-  "fo", "fs", "ft", "i1", "ic", "im", "is", "it", "ix", "kb", "ke", "kh", "kr", "ks", "ld", "lf", 
-  "lm", "ls", "lt", "lx", "m0", "m1", "m2", "ma", "mb", "mc", "md", "mm", "ms", "mt", "mT", "mw", 
-  "mW", "mZ", "nd", "nf", "nn", "np", "nt", "nT", "os", "ot", "oT", "pc", "po", "p+", "p-", "pp", 
-  "ps", "r0", "r1", "r2", "r3", "rm", "rn", "ro", "rt", "rT", "sa", "sd", "se", "sf", "sF", "sm", 
-  "ss", "st", "sx", "ta", "tb", "tc", "tf", "tm", "tp", "tt", "tw", "ua", "ul", "up", "vx", "v+", 
-  "v-", "vm", "wa", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "0R", "09", "0d", 
-  "0n", "0p", "0s", "0t", "0x", "1s", "1e", "2s", "2e"  };
+  "fo", "fs", "ft", "fx", "i1", "ic", "im", "is", "it", "ix", "kb", "ke", "kh", "kr", "ks", "ld", 
+  "lf", "lm", "ls", "lt", "lx", "m0", "m1", "m2", "ma", "mb", "mc", "md", "mm", "ms", "mt", "mT", 
+  "mw", "mW", "mZ", "nd", "nf", "nn", "np", "nt", "nT", "os", "ot", "oT", "pc", "po", "p+", "p-", 
+  "pp", "ps", "r0", "r1", "r2", "r3", "rm", "rn", "ro", "rt", "rT", "sa", "sd", "se", "sf", "sF", 
+  "sm", "ss", "st", "sx", "ta", "tb", "tc", "tf", "tm", "tp", "tt", "tw", "ua", "ul", "up", "vx",
+  "v+", "v-", "vm", "wa", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "0R", "09", 
+  "0d", "0n", "0p", "0s", "0t", "0x", "1s", "1e", "2s", "2e"  };
 
 const static byte StarCodeType[StarCodesMax] =    
 { 57,   59,   1,    86,   1,    1,    2,    36,   5,    6,    56,   7,    93,   50,   8,    51,   
   63,   64,   3,    9,    17,   60,   10,   10,   10,   10,   10,   10,   10,   11,   12,   11,   
-  13,   11,   11,   94,   95,   44,   44,   44,   44,   14,   39,   92,   38,   15,   16,   42,   55,   
-  55,   55,   58,   67,   18,   19,   62,   66,   20,   65,   71,   66,   20,   20,   68,   69,   
-  70,   76,   73,   74,   75,   21,   21,   22,   23,   23,   72,   25,   88,   88,   88,   88,   
-  37,   26,   40,   41,   77,   49,   27,   24,   24,   28,   29,   30,   78,   79,   28,   28,   
-  28,   81,   31,   4,    91,   90,   89,   31,   31,   31,   33,   32,   43,   61,   87,   87,   
-  87,   80,   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,   34,   45,   53,   46,   
-  47,   48,   54,   52,   82,   83,   84,   85    };
+  13,   11,   11,   96,   94,   95,   44,   44,   44,   44,   14,   39,   92,   38,   15,   16,   
+  42,   55,   55,   55,   58,   67,   18,   19,   62,   66,   20,   65,   71,   66,   20,   20,   
+  68,   69,   70,   76,   73,   74,   75,   21,   21,   22,   23,   23,   72,   25,   88,   88,   
+  88,   88,   37,   26,   40,   41,   77,   49,   27,   24,   24,   28,   29,   30,   78,   79,   
+  28,   28,   28,   81,   31,   4,    91,   90,   89,   31,   31,   31,   33,   32,   43,   61,   
+  87,   87,   87,   80,   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,   34,   45,  
+  53,   46,   47,   48,   54,   52,   82,   83,   84,   85    };
   
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 5 Small Config Buttons between 1 st and 3rd row Red Blue Green SkyBlue Gold - if MacroUL=1 then o->O m s t -> M S T
@@ -1643,7 +1647,7 @@ void DoBsdCodes(byte Num)
   for (int n=0; n<6; n++) keycode[n] = 0x00;
 
   // Do Linkfiles K01Link to K24Link on SDCard or Flash
-  if (Num>26) { DoKey16(Num); if (LinkOk) return; }; 
+  if (Num>26 && Num<51) { DoKey16(Num); if (LinkOk) return; }; // Kxx keys
   status(" "); // clear LinkMacro not found message 
                
   // Check if Key have defines i.e not 0x00 see macroBanks.h then do defines in BSD1-3
@@ -1874,7 +1878,7 @@ void PadKeysState(int Pbutton, bool Restore)  // Pads are now Pbuttons 1 to 5
 
   if (Kbrd)    status("NXT-Page  ADD-Char  EXE-Macro-or-Function"); 
   if (MouseK)  status("Mouse Buttons-LMR-BF  Scroll-UD  Cursor-UD-LR"); 
-  if (NumKeys) status("Pad (+)(-) Page-nChr Up-Dwn (e)(s) Execute-Show"); 
+  if (NumKeys) if (Fxx && nChar=='F') status("Function Keys F1 - F24 Page (+)(-)"); else status("Pad (+)(-) Page-nChr Up-Dwn (e)(s) Execute-Show");
   if (Math)    status("Load-SymbolSet0-9  Page1-Page4  Send-Symbol"); 
 }
 
@@ -2058,29 +2062,34 @@ bool MacroKeys(byte c, byte Option)
   return MacroKeysOK;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void DoNKeys(int Button)      
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-// Note that nKeys has the filename of which the contents will be executed with the two exceptions:
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Note that nKeys has the filename of which the contents will be executed with the three exceptions:
 // (1) Filename starts with *: Executed as a *Code. Two ** codes will be ignored i.e. not valid nKey
 // (2) File name is a Linkfile i.e. XnnLink: Executed as a normal link file i.e. valid nKey
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+// (3) Option Fxx is enabled (*fx*s,c,a,g), then nKeys=F1-F24 will behave as function keys F1-F24 + Shift,Control,Alt,Gui in any combination
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The 996 n01-n996 keys (n changeable to 0-9, aA-zZ) are default white label on Cyan background
-// nKeysShow is setto 0 in DoLink and maybe also in DimLCD timeout in main()
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+// nKeysShow is set to 0 in DoLink and maybe also in DimLCD timeout in main()
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 { char *ChrPtr;
   int k, n, s, NameStrLen = 0, StrLen = 0, nStrLen = 0;
+  uint8_t keycode[6] = { 0 };   // simultaneous keys pressed in here
   uint8_t a, b, m; 
   byte *BPtr; 
   bool isLink = false;
   bool isMacro = false;  
   bool DoneM = false; 
   File f;
-
+  
+  for (n=0; n<6; n++) keycode[n] = 0x00;
   int c = Button+(Numkeys123)*12;   // c = 0,1,2, 996 used in MacroKeys(c, 3)
   BPtr = MacroBuff; 
   MacroBuffSize = 0;
   MacroBuff[0] = 0x00;
+
+  if (nChar=='F' && Fxx>0 && c<24) { if (c<12) keycode[0]=0x3A + c; else keycode[0]=0x68 + (c-12); usb_hid.keyboardReport(HIDKbrd, FxxMod, keycode); delay(dt25); usb_hid.keyboardRelease(HIDKbrd); return; }
 
   if (Button==20) { nStrLen = MacroBuffSize; goto NotnKey; }      // nFile already has indirected i.e. 2nd filename
   if (Button==30) { goto FromTimers1to8; }                        // Timers1-8 is caller 
@@ -3384,6 +3393,8 @@ void ReadConfig1()
   KeyRepeat2 =     Config1[87]*10; if (KeyRepeat2==0) KeyRepeat2=650;  // Unusable Macropad if 0
   TwistSDA =       Config1[88];                                        // i2c 0,1 SDA depends on LCD used  
   TwistSCL =       Config1[89];                                        // i2c 0,1 SCL depends on LCD used 
+  Fxx =            Config1[90];                                        // nKeys = F now function keys F1 - F24 + modifiers *fx*sacg  
+  FxxMod =         Config1[91];                                        // nKeys = F modifiers *fx*sacg byte    
   if (TwistSDA==TwistSCL) { status("i2c SDA/SCL invalid"); TwistSDA = 26; TwistSCL = 27; }   // Or 4 and 5 - default value depends on LCD used 
 }
 
@@ -3438,7 +3449,9 @@ void WriteConfig1(bool Option)
                   Config1[86] = nKeysL134;                                    // nChar replaces L in L1, L3, L4 
                   Config1[87] = (byte)(KeyRepeat2/10);                        // x 10 = threshold see touch.h 
                   Config1[88] = TwistSDA;                                     // i2c 0,1 SDA depends on LCD used  
-                  Config1[89] = TwistSCL;                                     // i2c 0,1 SCL depends on LCD used                                                                                                             
+                  Config1[89] = TwistSCL;                                     // i2c 0,1 SCL depends on LCD used   
+                  Config1[90] = Fxx;                                          // nKeys = F now function keys F1 - F24 + modifiers *fx*sacg  
+                  Config1[91] = FxxMod;                                       // nKeys = F modifiers *fx*sacg byte                                                                                                                             
                 }
   
   if (AppState>0) return;
@@ -4201,31 +4214,36 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
          case 34: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x52 *0R* = Zero R Resistor Colours NumPad Toggle On/Off 
        { Resistor = !Resistor; if (Resistor) status("Resistors active"); else status("Resistors passive"); StarOk = true; break;  }
          case 35: ////////////////////// KeyBrdByte[1]==0x78   *xn* n=1-6 x1-x3 keys M x1 - x3 S T x4 - x6 keys n=7,8 [Del[Ret] keys
-       { if (knum>5) b = c99;           // *xn*bc b values entered are b = 0, 1-54, n values are 0, 1-9
+       { if (knum>5) b = c99;           // *xn*bc b values entered are b = 0, 1-81, n values are 0, 1-9
          n = k2-48; if (n==0) b = 0;    // n = 0, 1 - 6 or 7,8 for [Del][Ret] or 9 for list 8 keys
-         if (knum<4&&n>0) { status("Add 1-54 or 0 clear"); delay(1500); break; }    // *x0*0 = clear all but *xn*m n>0 requires m
-         if (b>BSDMax)             { Serial.println(b); status("Invalid Number");      delay(1500); break; }    // Out of range          
+         if (knum<4&&n>0) { status("Add 1-81 or 0 clear"); delay(1500); break; }            // *x0*0 = clear all but *xn*m n>0 requires m
+         if (b>BSDMax)    { Serial.println(b); status("Use 0-81"); delay(1500); break; }    // Out of range          
          if (b==0) {if (n==0||n==9) { for (m=14; m<17; m++) { XNum[m-14]=m; XNum[m-11]=m; } // *x9*0 Clear 1-6 2 x (Cut Copy Paste) + Del + Ret
                                       BsDNum = 0; RetNum = 8; XFiles = false; }  
-                    if (n==8)       { BsDNum = 0; }                               // *x8*0 Reset Del to default
-                    if (n==7)       { RetNum = 8; }                               // *x9*0 Reset Del to default 
-                    if (n>3&&n<7)   { for (m=14; m<17; m++) XNum[m-11]=m; }       // *x4,5,6*0 Reset 4-6 (cX cC cV)
-                    if (n<4)        { for (m=14; m<17; m++) XNum[m-14]=m; }       // *x1,2,3*0 Reset 1-3 (Cut Copy Paste)
+                    if (n==8)       { BsDNum = 0; }                                // *x8*0 Reset Del to default
+                    if (n==7)       { RetNum = 8; }                                // *x9*0 Reset Del to default 
+                    if (n>3&&n<7)   { for (m=14; m<17; m++) XNum[m-11]=m; }        // *x4,5,6*0 Reset 4-6 (cX cC cV)
+                    if (n<4)        { for (m=14; m<17; m++) XNum[m-14]=m; }        // *x1,2,3*0 Reset 1-3 (Cut Copy Paste)
                     XFiles = TestXFiles(); GetSysInfo(4); StarOk = true; break; }  // if (b==0)   
                            
          if (n==7) { BsDNum = b-1; }                                               // [Del] key options 1-54
          if (n==8) { RetNum = b-1; }                                               // [Ret] key options 1-54
-         if (n==9) { h = 0; for (m=0; m<6; m++) { XNum[m] = ((KeyBrdByte[4+h]-48)*10 + KeyBrdByte[5+h]-48)-1; h = h+2; } // *x9*list all 8 values 1-6 7,8
-                     BsDNum = ((KeyBrdByte[16]-48)*10 + KeyBrdByte[17]-48)-1; RetNum = ((KeyBrdByte[18]-48)*10 + KeyBrdByte[19]-48)-1; }                                      
-         if (b>0) { XNum[n-1] = b-1; }                                             // *x1,2,3,4,5,6*nn nn  1-54       
+         if (n==9) { h = 0; for (m=0; m<6; m++) { a = ((KeyBrdByte[4+h]-48)*10 + KeyBrdByte[5+h]-48)-1;  // *x9*list all 8 values 1-6 7,8
+                                                  if (a<BSDMax) XNum[m] = a;  h = h+2; } 
+                     a = ((KeyBrdByte[16]-48)*10 + KeyBrdByte[17]-48)-1; if (a<BSDMax) BsDNum = a; 
+                     a = ((KeyBrdByte[18]-48)*10 + KeyBrdByte[19]-48)-1; if (a<BSDMax) RetNum = a; }                                      
+         if (b>0) { XNum[n-1] = b-1; }                                                                   // *x1,2,3,4,5,6*nn nn  1-54       
          XFiles = TestXFiles(); GetSysInfo(4); StarOk = true; break; }  
-         case 36: ////////////////////// KeyBrdByte[1]==0x62&&KeyBrdByte[2]==0x6c *bl* Black Switch BL On/Off *bl*0 or *bl*1 switch BL Off/On or *bl*nn
-       { if (knum==4) { BLOnOff = !BLOnOff; Config1[3] = BLOnOff; WriteConfig1(0);  // Toggle On/Off 
+         case 36: ////////////////////// KeyBrdByte[1]==0x62&&KeyBrdByte[2]==0x6c *bl* Black Switch BL On/Off *bl*0 or *bl*1 switch BL Off/On or *bl*nn         
+       { if (knum==4) { BLOnOff = !BLOnOff; Config1[3] = BLOnOff; WriteConfig1(0);   // Toggle Enable On/Off 
                         if (BLOnOff) status("Black Switch BL On/Off Enabled"); else status("Black Switch BL On/Off Disabled"); }
-         if (knum==5) { digitalWrite(LCDBackLight, b);  }                            // b = 0,1   
+         if (knum==5) { if (b==2) { if (BackLightOn) { BLOnOffToggle = false; LastMillis = NowMillis - TimePeriod; } else DoWakeUp(); }        // *bl*2 toggle dimmed/normal
+                        else if (b==3) { if (BackLightOn) { digitalWrite(LCDBackLight, LOW);  BackLightOn = false; }                           // *bl*3 toggle off/full-on
+                                                     else { digitalWrite(LCDBackLight, HIGH); BackLightOn = true; LastMillis = NowMillis; } }  // force true full ON
+                        else digitalWrite(LCDBackLight, b); }                                                                                  // *bl*0,1 off/full-on
          if (knum==6) { analogWrite(LCDBackLight, c99); }                            // c99 = 00 - 99 (max = 255)
          if (knum>6)  { BLOnOffToggle = false; LastMillis = -TimePeriod; }           // Magic - try <*bl*000>         
-         StarOk = true; break; }  
+         StarOk = true; break; }    
          case 37: ///////////////////// KeyBrdByte[1]==0x72&&KeyBrdByte[2]==0x30 *r0* Reset/Reboot LCD
        { status("Rebooting LCD in 2.222 seconds..."); delay(2222); rp2040.reboot(); break; }
          case 38: ////////////////////// KeyBrdByte[1]==0x6b&&KeyBrdByte[2]==0x72 *kr* Duration/100 before KeyRepeat activein milliseconds
@@ -4389,7 +4407,7 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
         for (n=0; n<8; n++)                  Serial.print(mcpAddr[n]-32);          Serial.println();   
         for (n=0; n<8; n++) { for (i=0; i<16; i++)                                 Serial.print(mcpPins[n][i]);        Serial.println(); }
         Serial.println(mcpDir);              Serial.println(mcpStr);               Serial.println(mcp23018);           Serial.println(twistStar);            Serial.println(twC);   
-        Serial.println("EOC"); 
+        Serial.println(Fxx);                 Serial.println(FxxMod);               Serial.println("EOC"); 
         status("Text Data sent to PC"); StarOk = true; break; } } 
         case 73: ///////////////////// KeyBrdByte[1]==n3&&KeyBrdByte[2]==f *nf*xmmm x = nChar mmm = nKeyNumber Send content of nkeyfile to PC App
       { if (nKeys34 && d999<100) { NameStr3[0] = k4; NameStr3[1] = k6; NameStr3[2] = k7; NameStr3[3] = 0x00; }         
@@ -4565,7 +4583,20 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
          if (knum==9) { const byte* p = KeyBrdByte + 4;  // *ic*0,1aabb aa bb hex value SDA SCL aa,bb = 00-7F 
                         if (k4=='0') { TwistSDA = hex2int8(p); p += 2; TwistSCL = hex2int8(p); status("I2C 0 SDA/SCL changed"); } // *ic*0aabb SDA,SCL 00-7F Wire  
                         if (k4=='1') { TwistSDA = hex2int8(p); p += 2; TwistSCL = hex2int8(p); status("I2C 1 SDA/SCL changed"); WriteConfig1Change = true;}  }  // i2c1 saved                        // *ic*1aabb SDA.SCL 00-7F Wire1 i2c1 not saved
-         StarOk = true; break; }           
+         StarOk = true; break; } 
+         case 96: ///////////////////// KeyBrdByte[1]=='f'&&KeyBrdByte[2]=='x' nKeys=F now keys F1-F24 + Shift, Alt, Control, Gui in any combination - disable with *fx* or *fx*0 else use *fx*s,a,c,g
+        { byte NewFxx, NewFxxMod = FxxMod; bool BadChar = true; char FxxStr[22] = "Fnn keys "; char Fxx01[2][9] = { "Disabled", "Enabled" }; // Enable with no mod keys with *fx*n
+          if (knum==4) { NewFxx = 0; NewFxxMod = 0; BadChar = false; }              // *fx* = disable
+          if (knum==5 && (k4=='0'||k4=='1')) { NewFxx = k4 - 48; BadChar = false; } // *fx*0 / *fx*1 = disable/enable 
+          if (knum==5 && k4=='n') { NewFxx = 1; NewFxxMod = 0; BadChar = false; }   // *fx*n no mod keys but enable 
+          if (knum>4 && knum<=8 && BadChar) { NewFxxMod = 0;
+                                              for (n=0; n<knum-4; n++) { if (KeyBrdByte[n+4]=='s') { NewFxxMod |= 0x02; BadChar = false; }   // Shift L
+                                                                    else if (KeyBrdByte[n+4]=='a') { NewFxxMod |= 0x04; BadChar = false; }   // Alt L
+                                                                    else if (KeyBrdByte[n+4]=='c') { NewFxxMod |= 0x01; BadChar = false; }   // Ctrl L
+                                                                    else if (KeyBrdByte[n+4]=='g') { NewFxxMod |= 0x08; BadChar = false; } } // Gui L 
+                                               if (BadChar) { status("Wrong *fx* syntax"); StarOk = false; break; }
+                                               NewFxx = 1;  }                                        
+          Fxx = NewFxx; FxxMod = NewFxxMod; WriteConfig1Change = true; strcat(FxxStr, Fxx01[Fxx]); status(FxxStr); StarOk = true; break; }                    
       } return StarOk;                
 }
                        
@@ -6001,11 +6032,15 @@ void showKeyData(byte Option)
    Serial.print("Buff 20bytes " ); Serial.print(MacroBuffSize); SerPr1;
           for ( n = 0; n <= 20; n++) 
               { b =  MacroBuff[n]; Serial.print(b, HEX); SerPr1; }
-   SerPr2;     
+   SerPr2;   
+
+   SerPr2;
+   Serial.print("Function Keys F1 - F24 " ); if (Fxx) Serial.print("Enabled Mode:"); else Serial.print("Disabled Mode:"); Serial.print(FxxMod, HEX);
+   SerPr2;      
 
    SerPr2;
    Serial.println("K Keys BSD:" ); 
-          for ( n = 27; n <= 50; n++) 
+          for ( n = 27; n < 51; n++) 
               { Serial.print(n);  SerPr1;
                 b =  BsDCode1[n]; Serial.print(b, HEX); SerPr1;
                 b =  BsDCode2[n]; Serial.print(b, HEX); SerPr1;
@@ -6052,4 +6087,4 @@ void showKeyData(byte Option)
          SerPr2;  } 
          
  } 
-/************* EOF line 6045 *****************/
+/************* EOF line 6090 *****************/
