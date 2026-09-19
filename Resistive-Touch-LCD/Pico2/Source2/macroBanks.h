@@ -60,7 +60,7 @@ bool XFiles = false;                                                            
 bool SaveX1X6 = false;                                                           // Save changes top 3 keys only once  
 bool Key1Key6 = false;                                                           // Top 3 keys + Del + Ret when = K1-K24 programmable 
 byte BSDKeyKArr[72];                                                             // Store Keys K1-K24 BSD1-BSD3 defines                       
-static const int BSDMax = 54;     // Number of choices for actions
+static const int BSDMax = 81;     // Number of choices for actions
 int BsDNum = 0 ;                  // Index into BsDLabel[0-3] used for 4th key top row default [Del]ete
 int RetNum = 8 ;                  // Index into BsDLabel[0-3] used for 4th key bottom row default [Ret]urn
 // Keys K1-K6 Filenames on SDCard, make with *sd*K then send <1...> from Layout 3 Layer orange A see SDCardSelectFiles
@@ -70,23 +70,29 @@ int RetNum = 8 ;                  // Index into BsDLabel[0-3] used for 4th key b
 //                             42    43    44    45    46    47    48    49    50    51    52    53
 cSt char BsDLabel[BSDMax][4]={"Del","Bks","Tab","aTb","Ins","Esc","PrS","aPr","Ret","Snp","Osk","UnD","ReD","caD","Cut","Cpy","Pst","Tsk","Run","wX", "CPi",
                               "Ts1","Ts2","Ts3","Ts4","Ts5","Ts6","K1", "K2", "K3", "K4", "K5", "K6", "K7", "K8", "K9", "K10","K11","K12","K13","K14","K15",  
-                              "K16","K17","K18","K19","K20","K21","K22","K23","K24","Num","Cap","Scr" };  
+                              "K16","K17","K18","K19","K20","K21","K22","K23","K24","Num","Cap","Scr","cA", "cN", "cO", "cS", "cP", "cF", "cX", "cC", "cV", 
+                              "cZ", "cY", "cT", "cW", "cR", "cD", "cH", "All","New","Opn","Sav","Prt","Fnd","nTb","cTb","Rfr","BkM","Hst" };  
 byte BsDCode1[BSDMax] =     { DelK, BckS, Tab,  AltL, Ins,  Esc,  PScr, AltL, KEnt, GuiL, GuiL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, GuiL, GuiL, GuiL, 
                               GuiL, GuiL, GuiL, GuiL, GuiL, GuiL, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x53, 0x39, 0x47  };  
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x53, 0x39, 0x47, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL,
+                              CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL, CtrL  };  
 byte BsDCode2[BSDMax] =     { 0x00, 0x00, 0x00, Tab,  0x00, 0x00, 0x00, PScr, 0x00, ShfL, CtrL, KeyZ, KeyY, AltL, KeyX, KeyC, KeyV, ShfL, KeyR, KeyX, ShfL,
                               Key1, Key2, Key3, Key4, Key5, Key6, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  }; 
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, KeyA, KeyN, KeyO, KeyS, KeyP, KeyF, KeyX, KeyC, KeyV,
+                              KeyZ, KeyY, KeyT, KeyW, KeyR, KeyD, KeyH, KeyA, KeyN, KeyO, KeyS, KeyP, KeyF, KeyT, KeyW, KeyR, KeyD, KeyH  }; 
 byte BsDCode3[BSDMax] =     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, KeyS, KeyO, 0x00, 0x00, DelK, 0x00, 0x00, 0x00, Esc,  0x00, 0x00, F23,  
                               0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  }; 
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                              0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  }; 
 //                            GUI + Number: Open the Item Number on the Taskbar - if 1st item is the Calculator it will open this
 cSt char BsDName[BSDMax][17]=
-   {"Delete",   "Backspace", "Tab",        "AltTab",     "Insert","Escape","PrintScreen","AltPrintScreen","Return",   "Snipping", "OnScreenKeyBoard","UnDo",     "ReDo", "Ctr-Alt-Del",
-    "Cut Ctr-X","Copy Ctr-C","Paste Ctr-V","TaskManager","Run",   "MenuX", "CoPilot",   "Taskbar 1",      "Taskbar 2","Taskbar 3","Taskbar 4",       "Taskbar 5","Taskbar 6",
-    "Key 1",    "Key 2",    "Key 3",       "Key 4",      "Key 5", "Key 6", "Key 7",     "Key 8",          "Key 9",    "Key 10",   "Key 11",          "Key 12",
-    "Key 13",   "Key 14",   "Key 15",      "Key 16",     "Key 17","Key 18","Key 19",    "Key 20",         "Key 21",   "Key 22",   "Key 23",          "Key 24",
-    "NumLock",  "CapsLock", "ScrollLock"  };
+   {"Delete",   "Backspace", "Tab",        "AltTab",     "Insert", "Escape",  "PrintScreen","AltPrintScreen", "Return",   "Snipping", "OnScreenKeyBoard","UnDo",     "ReDo", "Ctr-Alt-Del",
+    "Cut Ctr-X","Copy Ctr-C","Paste Ctr-V","TaskManager","Run",    "MenuX",   "CoPilot",    "Taskbar 1",      "Taskbar 2","Taskbar 3","Taskbar 4",       "Taskbar 5","Taskbar 6",
+    "Key 1",    "Key 2",    "Key 3",       "Key 4",      "Key 5",  "Key 6",   "Key 7",      "Key 8",          "Key 9",    "Key 10",   "Key 11",          "Key 12",
+    "Key 13",   "Key 14",   "Key 15",      "Key 16",     "Key 17", "Key 18",  "Key 19",     "Key 20",         "Key 21",   "Key 22",   "Key 23",          "Key 24",
+    "NumLock",  "CapsLock", "ScrollLock",  "Select All", "New",    "Open",    "Save",       "Print",          "Find",     "Cut",      "Copy",            "Paste", 
+    "UnDo",     "ReDo",     "New Tab",     "Close Tab",  "Refresh","Bookmark","History",    "All",            "New",      "Open",      "Save",           "Print",    "Find", "New Tab",
+    "Close Tab","Refresh",  "Bookmark",    "History" };
                           
 
 

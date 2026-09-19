@@ -40,10 +40,11 @@ If the nKeys or the S1-S24 keys are used to print a large text file from the SDC
 use the *code *cr*0-3 to filter i.e. remove, CR 0D \n and LF 0A \r during sending nKeys text files. To add filter 
 CR using the *Macro Editor: Press Pad[k], then press [*Cm] until *cr* shows then press [012]2x[ADD]EXE].   
 
-As a replacement for the Volume [V+] key choose from a set of 54 options (Del Bks Tab aTb Ins Esc PrS aPr Ret Snp 
-Osk UnD ReD Scr Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap). With the Volume key off, press [Cfg] and then 
-[Key] once for [Del] key options, and twice for [Ret] key options. Press the bottom Pad [o] to select from the other 
-54 options. Press the [Sav] key to save the option chosen.
+As a replacement for the Volume [V+] key choose from a set of 81 options (Del Bks Tab aTb Ins Esc PrS aPr Ret Snp 
+Osk UnD ReD Scr Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr Control + Keys A, N, O, S, P, F, X, C, V, 
+Z, Y, T, W, R, D, H). With the Volume key off, press [Cfg] and then [Key] once for [Del] key options, and twice 
+for [Ret] key options. Press the bottom Pad [o] to select from the other 80 options. Press the [Sav] key to save 
+the option chosen.
 
 When using the Symbols-SpecialChar-Math-Greek-Algebra Keyboard - press Pad [s], watch out for MSWord insisting on
 capitalising the first letter of a sentence - which will change the math symbol to something else. Pressing [Load]
@@ -83,9 +84,11 @@ which contains the /folder/filename of the file that has the custom key labels. 
 label2, label3. Refer to the manual section (K) for more details.
 
 [Cut][Copy][Paste][Delete][Enter] are 8 keys - Layout 1 has one group of 3 (+2) keys and Layouts 3 and 4 another 
-group of 3 (+2) keys - that can be each assigned from 54 options:
-1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  22 - 27  28 - 51  52  53  54 
-Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr
+group of 3 (+2) keys - that can be each assigned from 81 options:
+1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20  21   
+Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi 
+22 - 27  28 - 51  52  53  54  55 - 81
+Ts1 Ts6  K1 - K24 Num Cap Scr Control + Keys A N O S P F X C V Z Y T W R D H
 
 1 Delete 2 Backspace 3 Tab  4 AltTab 5 Insert 6 Esc 7 PScr 8 AltPScr 9 Return 10 Snipping 11 OnScrKeyBrd
 12 UnDo 13 ReDo 14 CtrAltDel 15 Cut 16 Copy 17 Paste 18 TaskMan 19 Run 20 GuiX 21 Copilot 22-27 Tskbar1-6
@@ -93,7 +96,7 @@ Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX C
 Keys K1 to K24 read the content of files K01Link to K24Link (selectable from the SDCard and/or flash memory), 
 which contains a list of 3-letter file names containing macro definitions and/or text strings, such as a01-a99, 
 m01-m24, s01-s24, t01-t24 or any other 3-letter name, to be executed in sequence, with separately defined 
-repetitions and delays. 
+repetitions and delays. The last is a set of Control + Keys A N O S P F X C V Z Y T W R D H 
 
 If K1-K24 are pressed with no KxxLink file on either the SDCard or Flash, and a macro (max 3 bytes), has been 
 defined for the Kxx key (by using *cm*nnKxx with nn file a01-a99 that will be copied to Key Kxx), then the short 
@@ -140,14 +143,14 @@ another linkfile - the name follows after L0n - can continue ad infinitum.
            
 The 8 keys Cut-Cpy-Pst-Del-Ret-cX-cC-cV, can also be programmed through starcodes x1, x2, x3 Layout 1, x4, x5,
 x6 for Layout 3 and 4, and x7 and x8 for the [Del] and [Ret] keys. They can use any of the 54 actions for x1 - x8.
-Program as *xn*number n=1-8, number = 1-54.
+Program as *xn*number n=1-8, number = 1-81.
 
-Press [Cfg] once, and then press [Key] once or twice, to select 54 options for either the [Del] or the [Ret] 
+Press [Cfg] once, and then press [Key] once or twice, to select 81 options for either the [Del] or the [Ret] 
 key which are then selected by pressing the red bottom Pad [o] which will cycle through the 54 options for both the 
 [Del]ete key top right and the [Ret]urn key bottom right. Pressing the [Key] key 3x, 4x or 5x times will select the 
 Layer 1 [Cut], second [Cpy], or third [Pst] key respectively which can then be changed by pressing the bottom Pad 
 i.e. option [o]. Pressing the [Key] key, 6x, 7x, or 8x will select this top-row 3 keys in Layouts 3 or 4, which
-can then be changed to one of the 54 options using the bottom Pad key. The status line will show which key is chosen
+can then be changed to one of the 81 options using the bottom Pad key. The status line will show which key is chosen
 and which option is selected. To save the choice press the [Sav] key just below it, else it will reset to the 
 default [Del], [Ret], [Cut,Copy,Paste] keys after the next reboot. If the [Sav] key is not pressed the new 
 choice(s) will be valid for current session only. To reset the keys to their default options, use the *x1*0 code 
@@ -345,8 +348,11 @@ Press Config Key (new set of config keys change colour):
       [Cfg][ROf]   - Includes long (T) or short (t) Timer options as well and Countdown and Clock Timers
 
 Select Key Actions [Del] and [Ret] keys:
-1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  22 - 27  28 - 51  52  53  54
-Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr
+Select Key Actions [Del] and [Ret] keys:
+1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  
+Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi 
+22 - 27  28 - 51  52  53  54  55 - 81
+Ts1-Ts6  K1 - K24 Num Cap Scr Control + Keys A N O S P F X C V Z Y T W R D H
 -----------------------------------------------------------------------------------------------------------------------
 Mouse Keyboard: When in Layer 2 - press middle pad [u] to toggle Mouse KeyBoard on/off - these are mouse buttons, 
                 scroll, and cursor movement keys:
@@ -718,16 +724,17 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     t = Main Time/Clock a  = Macro Clock Repeat-Oneshot [R-C][O-C] w = Macro Clock Countdown [RcT][OcT] 
     p = Power Clock [O-C][R-C]. if using [*Cm] only add the numbers yymmddwhhmm w = weekday 0 = Sunday 6 = Saturday
     (If a Pico 2 used then Sunday=1 Saturday=7 as in TimeLib.h)  
-(l) *xn*number n = 0,1 - 8, 9 number = 1-54. Top row 3 keys cX-Cut, cC-Copy, cV-Paste: Programmable as x1, x2, x3 
-    Layout 1, and x4, x5, x6 for Layout 3 and 4. *x0*0 clear all 8 keys, *xn*0 clear all 6 top-row keys. 54 options 
+(l) *xn*number n = 0,1 - 8, 9 number = 1-81. Top row 3 keys cX-Cut, cC-Copy, cV-Paste: Programmable as x1, x2, x3 
+    Layout 1, and x4, x5, x6 for Layout 3 and 4. *x0*0 clear all 8 keys, *xn*0 clear all 6 top-row keys. 81 options 
     are: Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num 
-    Cap Scroll. Use *x7*n=1-54 for [Del]ete key changes and *x8*n=1-54 for [Ret]urn key changes. For example *x1*3 - 
-    1st top-row key in Layout 1 (M) will change from [Cut] to [Tab]. (Press [*Cm] until *x1* shows then press [345] 
-    once, press [ADD] press [EXE]) To reset use *x1*0 will reset all six x1-x6 to Cut, Copy, Paste. Another example
-    *x4*6 - 1st top-row key in Layouts 2 and 3 [S] and [T] keys, will change from [Cut] to [Esc]. To program all 8 
-    keys at once use *x9*m1m2m3s1s2s3d1r1 = all 8 values 1-6 7,8 with [Del] Key value = d1, and [Ret] Key value = r1.
-    Can also use the serial port and send for example <*x9*0102030405060719> - then the 8 keys will be Del Bks Tab 
-    aTb Ins Esc and [Del] = PrS and [Ret] = Run. To reset keys use the following guide:
+    Cap Scroll Control + Keys A N O S P F X C V Z Y T W R D H. Use *x7*n=1-54 for [Del]ete key changes and *x8*n=1-54
+    for [Ret]urn key changes. For example *x1*3 - 1st top-row key in Layout 1 (M) will change from [Cut] to [Tab]. 
+    (Press [*Cm] until *x1* shows then press [345] once, press [ADD] press [EXE]) To reset use *x1*0 will reset all 
+    six x1-x6 to Cut, Copy, Paste. Another example *x4*6 - 1st top-row key in Layouts 2 and 3 [S] and [T] keys, will
+    change from [Cut] to [Esc]. To program all 8 keys at once use *x9*m1m2m3s1s2s3d1r1 = all 8 values 1-6 7,8 with 
+    [Del] Key value = d1, and [Ret] Key value = r1. Can also use the serial port and send for example 
+    <*x9*0102030405060719> - then the 8 keys will be Del Bks Tab aTb Ins Esc and [Del] = PrS and [Ret] = Run. To 
+    reset keys use the following guide:
     <*x9*0> reset all 8 keys    
     <*x8*0> reset Del       
     <*x7*0> reset Ret      
@@ -800,9 +807,13 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     first time), to the switch backlight off - press on the same place of blank screen to switch the screen on again. 
     For PC's who supply USB power after switchoff this could be used to blank the LCD  screen after pressing one of the
     Power Keys for switch off. If disabled with *bl* pressing the black key will just exit the Power Keys screen.
-    Switch Backlight Off/On via *Cmd *bl*0 = off *bl*1 = on - can use serial monitor and send <*bl*0> for blankscreen and
-    <*bl*1> for full bright screen. For inbetween values use *bl*nn nn=00-99. Unlike pressing the Black Key to switch off,
-    these additional values are not persistant through the dimming period. 
+    Switch Backlight Off/On via *Cmd *bl*0 = off *bl*1 = on - can use serial monitor and send 
+    *bl*0 for full off = full blank screen 
+    *bl*1 for full on = full bright screen. 
+    *bl*nn nn=00-99 for inbetween values 
+    *bl*2 toggles backlight dimmed/normal. 
+    *bl*3 Toggles backlight full-on/full-off. 
+    Unlike pressing the Black Key to switch off, these additional values are not persistant through the dimming period. 
 (v) Key Held Duration: *kr*num with num = 1-9 or 100-900 msec key press wait duration before repeat.
     Key Treshold: Normally 650 change with *ke*nnn nnn = 100-999
 (w) Key Held Enable: *kh* Enable/Disable Volume Mute Processing if [Vo][L1-L4] key is long-pressed
@@ -1007,8 +1018,17 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
      *i1*Xm Set new config all I/O to same m = 0,1,2 for device X=0-7
      *i1*Xpinsmodelist Set new config I/O according to list up to 8 modes 0,1,2 for 8 devices X=0-7    
      Use the list data *ld* option for a list of active GPIO expnader devices attached on the 12c bus
-(Ac) Use *ic* to run i2c devices present scanner for addresses on i2c bus 0 and 1 - Wire and Wire1
-     
+(Ac) *ic* i2c bus scanner 
+     *ic*0,1aabb aa bb hex value change external (use 0) SDA SCL aa,bb = 00-7F - i2c0 not saved
+(Ae) *fx*s,c,a,g,n,0,1 Added Function keys F1 - F24 + Shift, Control, Alt, Gui in any combination. nKeys = F will 
+     then use keys F1-F24 on first two pages F1-F12 and F13-F24, as Function keys F1-F24 or as Shift/Control/Alt/Gui/
+     in any combination acsg for example to press Shift+Alt+Control+F1 send *fx*acs then press nKey F1. 
+     *fx* = disable and set mod=0 i..e no Shift, Control, Alt or Gui active.
+     *fx*0,1 will disable/enable but leaves mod at its current state. 
+     *fx*n will enable and also set mod=0
+     Note that the "nKeysChr": "<*0n*F>" in apprules.json should be changed from the default "<*0n*w>" if you use the
+     Shift+F1-F12 keys in MSWord and the PC App is running. 
+          
 ------------------------------------------------------------------------------------------------------------------------
 Symbols-SpecialChar-Math-Greek-Algebra Keyboard: 
 
