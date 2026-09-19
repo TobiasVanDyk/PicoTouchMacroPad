@@ -664,8 +664,7 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     Examples: (1) *xx*nnn s 000-999 sec (2) *xx*nn h/m/s 00-99 hrs/min/sec (3) *xx*n h/m/s 0-9 hrs/min/sec
     (4) *xx*n=0-9 minutes with xx = rt, rT, ot, oT and n=0-9. Use [*cm],[ADD],[EXE] in Macro Editor to enter the time 
     values, and refer to GetT() in the main source code for furher details.
-(7) Calibration Enable/Disable - Send the starcode *ca* with the Macroeditor to set/clear re-calibration option after 
-    a restart to ON or OFF. 
+(7) Calibration Enable/Disable - not required for this GT911 library
 (8) LCD Orientation 180 degree change - Send the macro *ro* with the built-in keyboard - the USB cable will then be on
     the opposite side. This forces a re-calibration on restart. 
 (9) Key Font Bold/Normal change - Send the macro *fo* with the built-in keyboard to toggle the labels on the buttons 
@@ -785,11 +784,15 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     first time), to the switch backlight off - press on the same place of blank screen to switch the screen on again. 
     For PC's who supply USB power after switchoff this could be used to blank the LCD  screen after pressing one of the
     Power Keys for switch off. If disabled with *bl* pressing the black key will just exit the Power Keys screen.
-    Switch Backlight Off/On via *Cmd *bl*0 = off *bl*1 = on - can use serial monitor and send <*bl*0> for blankscreen and
-    <*bl*1> for full bright screen. For inbetween values use *bl*nn nn=00-99. Unlike pressing the Black Key to switch off,
-    these additional values are not persistant through the dimming period.    
+    Switch Backlight Off/On via *Cmd *bl*0 = off *bl*1 = on - can use serial monitor and send 
+    *bl*0 for full off = full blank screen 
+    *bl*1 for full on = full bright screen. 
+    *bl*nn nn=00-99 for inbetween values 
+    *bl*2 toggles backlight dimmed/normal. 
+    *bl*3 Toggles backlight full-on/full-off. 
+    Unlike pressing the Black Key to switch off, these additional values are not persistant through the dimming period.   
 (v) Key Held Duration: *kr*num with num = 1-9 or 100-900 msec key press wait duration before repeat.
-(w) Key Repeat Time: *ke*num with num = 10-99 msec key press held repeat time.
+(w) Key Response Time: *ke*num with num = 0-255 msec key press delay - default is 20mS.
 (x) *lf* Send SDCard and FlashMemory Filelist to serial port. Can list files in folders with *lf* /sdcardfolder/ or 
     *lf* /sdcardfolder/+/flashfolder/. From the PC App use the two comboboxes in the Config tab to enter the folders or use 
     / for the root. Can select the listed /folder/filename and Delete or View content from the Comms tab. 
@@ -975,7 +978,15 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
      *i1*Xm Set new config all I/O to same m = 0,1,2 for device X=0-7
      *i1*Xpinsmodelist Set new config I/O according to list up to 8 modes 0,1,2 for 8 devices X=0-7    
      Use the list data *ld* option for a list of active GPIO expnader devices attached on the 12c bus
-(Ac) Use *ic* to run i2c devices present scanner for addresses on i2c bus 0 and 1 - Wire and Wire1
+(Ac) *ic* i2c bus scanner  
+(Ad) *fx*s,c,a,g,n,0,1 Added Function keys F1 - F24 + Shift, Control, Alt, Gui in any combination. nKeys = F will 
+     then use keys F1-F24 on first two pages F1-F12 and F13-F24, as Function keys F1-F24 or as Shift/Control/Alt/Gui/
+     in any combination acsg for example to press Shift+Alt+Control+F1 send *fx*acs then press nKey F1. 
+     *fx* = disable and set mod=0 i..e no Shift, Control, Alt or Gui active.
+     *fx*0,1 will disable/enable but leaves mod at its current state. 
+     *fx*n will enable and also set mod=0
+     Note that the "nKeysChr": "<*0n*F>" in apprules.json should be changed from the default "<*0n*w>" if you use the
+     Shift+F1-F12 keys in MSWord and the PC App is running.
               
 ------------------------------------------------------------------------------------------------------------------------
 Symbols-SpecialChar-Math-Greek-Algebra Keyboard: 
