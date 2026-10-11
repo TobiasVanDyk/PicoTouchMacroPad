@@ -36,10 +36,11 @@ If the nKeys or the S1-S24 keys are used to print a large text file from the SDC
 use the *code *cr*0-3 to filter i.e. remove, CR 0D \n and LF 0A \r during sending nKeys text files. To add filter 
 CR using the *Macro Editor: Press Pad[k], then press [*Cm] until *cr* shows then press [012]2x[ADD]EXE].   
 
-As a replacement for the Volume [V+] key choose from a set of 54 options (Del Bks Tab aTb Ins Esc PrS aPr Ret Snp 
-Osk UnD ReD Scr Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap). With the Volume key off, press [Cfg] and then 
-[Key] once for [Del] key options, and twice for [Ret] key options. Press the bottom Pad [o] to select from the other 
-54 options. Press the [Sav] key to save the option chosen.
+As a replacement for the Volume [V+] key choose from a set of 81 options (Del Bks Tab aTb Ins Esc PrS aPr Ret Snp 
+Osk UnD ReD Scr Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr Control + Keys A, N, O, S, P, F, X, C, V, 
+Z, Y, T, W, R, D, H). With the Volume key off, press [Cfg] and then [Key] once for [Del] key options, and twice 
+for [Ret] key options. Press the bottom Pad [o] to select from the other 81 options. Press the [Sav] key to save 
+the option chosen.
 
 When using the Symbols-SpecialChar-Math-Greek-Algebra Keyboard - press Pad [s], watch out for MSWord insisting on
 capitalising the first letter of a sentence - which will change the math symbol to something else. Pressing [Load]
@@ -79,9 +80,11 @@ which contains the /folder/filename of the file that has the custom key labels. 
 label2, label3. Refer to the manual section (K) for more details.
 
 [Cut][Copy][Paste][Delete][Enter] are 8 keys - Layout 1 has one group of 3 (+2) keys and Layouts 3 and 4 another 
-group of 3 (+2) keys - that can be each assigned from 54 options:
-1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  22 - 27  28 - 51  52  53  54 
-Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr
+group of 3 (+2) keys - that can be each assigned from 81 options:
+1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20 21   
+Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi 
+22 - 27  28 - 51  52  53  54  55 - 81
+Ts1 Ts6  K1 - K24 Num Cap Scr Control + Keys A N O S P F X C V Z Y T W R D H
 
 1 Delete 2 Backspace 3 Tab  4 AltTab 5 Insert 6 Esc 7 PScr 8 AltPScr 9 Return 10 Snipping 11 OnScrKeyBrd
 12 UnDo 13 ReDo 14 CtrAltDel 15 Cut 16 Copy 17 Paste 18 TaskMan 19 Run 20 GuiX 21 Copilot 22-27 Tskbar1-6
@@ -89,7 +92,7 @@ Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX C
 Keys K1 to K24 read the content of files K01Link to K24Link (selectable from the SDCard and/or flash memory), 
 which contains a list of 3-letter file names containing macro definitions and/or text strings, such as a01-a99, 
 m01-m24, s01-s24, t01-t24 or any other 3-letter name, to be executed in sequence, with separately defined 
-repetitions and delays. 
+repetitions and delays. The last is a set of Control + Keys A N O S P F X C V Z Y T W R D H 
 
 If K1-K24 are pressed with no KxxLink file on either the SDCard or Flash, and a macro (max 3 bytes), has been 
 defined for the Kxx key (by using *cm*nnKxx with nn file a01-a99 that will be copied to Key Kxx), then the short 
@@ -135,15 +138,15 @@ another linkfile - the name follows after L0n - can continue ad infinitum.
  no/restore original       x=1 L1n: Restore LayerAxD on completion
            
 The 8 keys Cut-Cpy-Pst-Del-Ret-cX-cC-cV, can also be programmed through starcodes x1, x2, x3 Layout 1, x4, x5,
-x6 for Layout 3 and 4, and x7 and x8 for the [Del] and [Ret] keys. They can use any of the 54 actions for x1 - x8.
-Program as *xn*number n=1-8, number = 1-54.
+x6 for Layout 3 and 4, and x7 and x8 for the [Del] and [Ret] keys. They can use any of the 81 actions for x1 - x8.
+Program as *xn*number n=1-8, number = 1-81.
 
-Press [Cfg] once, and then press [Key] once or twice, to select 54 options for either the [Del] or the [Ret] 
+Press [Cfg] once, and then press [Key] once or twice, to select 81 options for either the [Del] or the [Ret] 
 key which are then selected by pressing the red bottom Pad [o] which will cycle through the 54 options for both the 
 [Del]ete key top right and the [Ret]urn key bottom right. Pressing the [Key] key 3x, 4x or 5x times will select the 
 Layer 1 [Cut], second [Cpy], or third [Pst] key respectively which can then be changed by pressing the bottom Pad 
 i.e. option [o]. Pressing the [Key] key, 6x, 7x, or 8x will select this top-row 3 keys in Layouts 3 or 4, which
-can then be changed to one of the 54 options using the bottom Pad key. The status line will show which key is chosen
+can then be changed to one of the 81 options using the bottom Pad key. The status line will show which key is chosen
 and which option is selected. To save the choice press the [Sav] key just below it, else it will reset to the 
 default [Del], [Ret], [Cut,Copy,Paste] keys after the next reboot. If the [Sav] key is not pressed the new 
 choice(s) will be valid for current session only. To reset the keys to their default options, use the *x1*0 code 
@@ -237,8 +240,38 @@ text "s11Link" it will attempt the execute the link list in a file s11link.
 The nKeys minimum to maximum number of pages is 1 to 83, each page with 12 keys per page. Use *0p*nn nn=01-83 to change
 the maximum pages. Use *0x* to toggle nKeys as 3-char numbers n01-n99 followed by 4-char numbers n100-n996 (default).
 Or use 4-char number throughout namely n001-n996. Note that the 2+3-char mode is the more compatible as it uses 
-filenames n01-n99 (assuming n is used as the first char), whilst the 4-char mode will use a different fileset 
+filenames n01-n99 (assuming n is used as the first char), whilst the 4-char mode will use a different file-set 
 n001-n099 for the keys.
+
+nKeys execute the filename inside the file that has the name of the nKey label. If custom labels are off then pressing 
+nKey n01 will execute the filename found in file n01. If custom labels are on then pressing nKey n01 with the custom 
+label Abby will execute the filename found in file Abby. There will be a flag added later to choose whether a custom 
+label nKey should look for file n01 or Abby.
+
+nKeys options are set per nKey character - custom labels for each nKey key - label file (files lbln or LblN with 
+n,N = nKey character - each file has 144 zero-terminated labels) for each of the 62 nKey characters with 144 labels
+(12 pages each with 12 nKeys - change with *0l*0,1), can also set nChar maximum number of pages 1-83 also per nKey 
+character, select nKeys Colour for each nKey character (change with *cn*01-16), and select for each nKey the 
+n01-n99 or n001-n99 mode. The nKeys starcodes only change options for the current nKey for example *0p*83 will 
+set the current nKey maximum pages to 83. Because all the options are saved as files (nKeyArr, nColour, 
+lblX X=nChar), it is easy to copy or rename all the files mentioned, from a pool of files kept on the SDCard or 
+Flash, for instant action and colour changes.
+
+The custom label file the nkeys use are named lblx or LblX for lower and uppercase nKeys respectively. If there is a 
+file lbln on the SDCard, and custom labels are on (*0L*1 or *0l*1) then the nKeys will display the 144 labels in the 
+file lbln instead of n01-n144. If the maximum pages are more than 12 it will use n145 + as the labels after the custom
+labels. Note that on the SDCard nKey=n and nKey=N will both use the labelfile lbln or LblN as the SDCard filesystem is 
+case-insensitive (but case-preserving). On the Flash memory the files lbln and LblN are two different files. 
+
+Because all the options are saved as files (nKeyArr, nColour, lblX X=nChar), it is easy to copy or rename all the 
+files mentioned, from a pool of files kept on the SDCard or Flash, for instant action and colour changes. 
+Instructions and files required, for using the lblx label files are included in the file nKeysLabelTool.zip.
+
+A tool is also provided to convert a JSON file with the 144 labels to the Arduino character string file used by 
+the nKeys.
+
+The normal set of nKeys directory functions (*0d*// and *0d*/foldername, can still be used with custom labels - for 
+example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on.
 -----------------------------------------------------------------------------------------------------------------------
 [n01] [n02] [n03] [n04]       [n13] [n14] [n15] [n16]                 [n985] [n986] [n987] [n988]  [+]Page or nChar
 [n05] [n06] [n07] [n08]       [n17] [n18] [n19] [n20]   ----------->  [n989] [n990] [n991] [n992]  [k]
@@ -341,8 +374,10 @@ Press Config Key (new set of config keys change colour):
       [Cfg][ROf]   - Includes long (T) or short (t) Timer options as well and Countdown and Clock Timers
 
 Select Key Actions [Del] and [Ret] keys:
-1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  22 - 27  28 - 51  52  53  54
-Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr
+1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  
+Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi 
+22 - 27  28 - 51  52  53  54  55 - 81
+Ts1-Ts6  K1 - K24 Num Cap Scr Control + Keys A N O S P F X C V Z Y T W R D H
 -----------------------------------------------------------------------------------------------------------------------
 Mouse Keyboard: When in Layer 2 - press middle pad [u] to toggle Mouse KeyBoard on/off - these are mouse buttons, 
                 scroll, and cursor movement keys:
@@ -682,7 +717,8 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
 (9) Key Font Bold/Normal change - Send the macro *fo* with the built-in keyboard to toggle the labels on the buttons 
     from normal to bold.
 (a) Key Font White/Black change - Send the macro *fc* with the built-in keyboard to toggle the labels on the buttons 
-    from white to black.
+    from white to black. Use *fc*c c=0-F to change to colours Black,Black1,Silver,White,Red,Purple2,Blue,SkyBlue2,
+    Cyan,DCyan,Green,DGreen,Yellow3,Maroon,Orange,Brown1
 (b) Macro Copy - Copy a01-a99 to M,S,T K keys. Can use *cm* if the SrcNum DstNum is set up - see the four examples 
     above. Else compose *cm*nnXmm via [ADD] where: nn = a01-a99 X = Keys M S T K mm = 01-24. Keys K1-K24 are max 3
     byte macros - if Knn pressed will run this definition, if no definition will do KnnLink file. See Example 2 
@@ -713,16 +749,17 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     t = Main Time/Clock a  = Macro Clock Repeat-Oneshot [R-C][O-C] w = Macro Clock Countdown [RcT][OcT] 
     p = Power Clock [O-C][R-C]. if using [*Cm] only add the numbers yymmddwhhmm w = weekday 0 = Sunday 6 = Saturday
     (If a Pico 2 used then Sunday=1 Saturday=7 as in TimeLib.h)  
-(l) *xn*number n = 0,1 - 8, 9 number = 1-54. Top row 3 keys cX-Cut, cC-Copy, cV-Paste: Programmable as x1, x2, x3 
+(l) *xn*number n = 0,1 - 8, 9 number = 1-81. Top row 3 keys cX-Cut, cC-Copy, cV-Paste: Programmable as x1, x2, x3 
     Layout 1, and x4, x5, x6 for Layout 3 and 4. *x0*0 clear all 8 keys, *xn*0 clear all 6 top-row keys. 54 options 
     are: Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num 
-    Cap Scroll. Use *x7*n=1-54 for [Del]ete key changes and *x8*n=1-54 for [Ret]urn key changes. For example *x1*3 - 
-    1st top-row key in Layout 1 (M) will change from [Cut] to [Tab]. (Press [*Cm] until *x1* shows then press [345] 
-    once, press [ADD] press [EXE]) To reset use *x1*0 will reset all six x1-x6 to Cut, Copy, Paste. Another example
-    *x4*6 - 1st top-row key in Layouts 2 and 3 [S] and [T] keys, will change from [Cut] to [Esc]. To program all 8 
-    keys at once use *x9*m1m2m3s1s2s3d1r1 = all 8 values 1-6 7,8 with [Del] Key value = d1, and [Ret] Key value = r1.
-    Can also use the serial port and send for example <*x9*0102030405060719> - then the 8 keys will be Del Bks Tab 
-    aTb Ins Esc and [Del] = PrS and [Ret] = Run. To reset keys use the following guide:
+    Cap Scroll Control + Keys A N O S P F X C V Z Y T W R D H. Use *x7*n=1-54 for [Del]ete key changes and *x8*n=1-54
+    for [Ret]urn key changes. For example *x1*3 - 1st top-row key in Layout 1 (M) will change from [Cut] to [Tab]. 
+    (Press [*Cm] until *x1* shows then press [345] once, press [ADD] press [EXE]) To reset use *x1*0 will reset all 
+    six x1-x6 to Cut, Copy, Paste. Another example *x4*6 - 1st top-row key in Layouts 2 and 3 [S] and [T] keys, will
+    change from [Cut] to [Esc]. To program all 8 keys at once use *x9*m1m2m3s1s2s3d1r1 = all 8 values 1-6 7,8 with 
+    [Del] Key value = d1, and [Ret] Key value = r1. Can also use the serial port and send for example 
+    <*x9*0102030405060719> - then the 8 keys will be Del Bks Tab aTb Ins Esc and [Del] = PrS and [Ret] = Run. To 
+    reset keys use the following guide:
     <*x9*0> reset all 8 keys    
     <*x8*0> reset Del       
     <*x7*0> reset Ret      
@@ -795,9 +832,13 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     first time), to the switch backlight off - press on the same place of blank screen to switch the screen on again. 
     For PC's who supply USB power after switchoff this could be used to blank the LCD  screen after pressing one of the
     Power Keys for switch off. If disabled with *bl* pressing the black key will just exit the Power Keys screen.
-    Switch Backlight Off/On via *Cmd *bl*0 = off *bl*1 = on - can use serial monitor and send <*bl*0> for blankscreen and
-    <*bl*1> for full bright screen. For inbetween values use *bl*nn nn=00-99. Unlike pressing the Black Key to switch off,
-    these additional values are not persistant through the dimming period. 
+    Switch Backlight Off/On via *Cmd *bl*0 = off *bl*1 = on - can use serial monitor and send 
+    *bl*0 for full off = full blank screen 
+    *bl*1 for full on = full bright screen. 
+    *bl*nn nn=00-99 for inbetween values 
+    *bl*2 toggles backlight dimmed/normal. 
+    *bl*3 Toggles backlight full-on/full-off. 
+    Unlike pressing the Black Key to switch off, these additional values are not persistant through the dimming period.  
 (v) Key Held Duration: *kr*num with num = 1-9 or 100-900 msec key press wait duration before repeat.
     Key Treshold: Normally 650 change with *ke*nnn nnn = 100-999
 (w) Key Held Enable: *kh* Enable/Disable Volume Mute Processing if [Vo][L1-L4] key is long-pressed
@@ -976,7 +1017,8 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     *tf*s,r = Save or Read twist config file twistCfg 
     *tm*char = vuzsxdwbVUZSXDWB code definitions or use *tm* twistMacro=0x00 Use symbolic file twist not coded macros.
     Default volume vV - *tm*char = vV uU zZ sS xX dD wW etc in vuzsxdbVUZSXDB coded macro options volume =/-/mute
-    undo/redo zoom +/-/reset scroll +/- X /* x -= backspace/delete Wallaper-Next Photoshop Brush Size = b Hardness = B
+    undo/redo zoom +/-/reset scroll +/- X /*=--+#?<>[]() x repeat last key pressed backspace/delete 
+    minimize-all/Wallaper-Next Photoshop Brush Size = b Hardness = B
     *tm*0 same as *tm* switch to file-based macros for Twist not the coded macros as in *tm*char = vuzsxdwbVUZSXDWB
 (Aa) CircuitPython device control and used as input and/or output for Pico macropad and/or PC App. 
      *cp* CircuitPython filelist *cp*cnn c=command a,d,r,c nn=filelist index=00-99 *cp*cnnfilename a Activate, 
@@ -1010,6 +1052,54 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
 (Ad) *ic* i2c bus scanner 
      *ic*0,1aabb aa bb hex value change external (use 0) SDA SCL aa,bb = 00-7F - i2c1 not saved     
      *ic*1,2 Test RTC Use 2 then use 1 to test.
+     *ic*6,7 APX2101 Vbackup charging enable at 0.1mA 2.9v for RTC. Read VBus and VSys
+     *ic*5 for APX2101 summary 
+     *ic*45 set backup 3.1v = 5
+     *ic*4 check backup voltage. 
+     *ic*30,1 to disable/enable charging RTC battery - disable if normal PC CMOs battery used
+     *ic*3 to enable charging RTC battery - disable if normal PC CMOS battery used
+     *ic*8 to disable charging RTC battery - enable if chargable PC CMOS battery used
+     *ic*9 switch PMIC and i2c bus off - same as powerbutton pressed for 4 seconds
+(Ae) *fx*s,c,a,g,n,0,1 Added Function keys F1 - F24 + Shift, Control, Alt, Gui in any combination. nKeys = F will 
+     then use keys F1-F24 on first two pages F1-F12 and F13-F24, as Function keys F1-F24 or as Shift/Control/Alt/Gui/
+     in any combination acsg for example to press Shift+Alt+Control+F1 send *fx*acs then press nKey F1. 
+     *fx* = disable and set mod=0 i..e no Shift, Control, Alt or Gui active.
+     *fx*0,1 will disable/enable but leaves mod at its current state. 
+     *fx*n will enable and also set mod=0
+     Note that the "nKeysChr": "<*0n*F>" in apprules.json should be changed from the default "<*0n*w>" if you use the
+     Shift+F1-F12 keys in MSWord and the PC App is running.
+     The total number of Function key combinations is then 24x16=384 and if the left and right added 768, and if left 
+     and right combinations are mixed then it is 6,144 unique keys (256x24).
+(Af) *lk* and *lk*0,1 Lock KeyPad *lk* to toggle locked/unlocked or *lk*0,1 unlock/lock - if locked use PCApp or 
+     do HW reset of Keypad
+(Ag) *co*nc *co*n n=0-4 c=0-F Added colour change options for the CapNumSCroll-lock using *co* (Green/Orange)
+     or *co*0 (Green/Cyan) or any colour using in Colours[n] with *c0*0n=0-F, or any other colour using *co*0HHH with
+     HHHH = RGB565 value such as 6666 = darkgreen. Also colour options for background, and colour options for 
+     Operating System W L R and for the Key Font Color (can also use *fc* or *fc*c=0-F). For example <*co*41> change 
+     key label to white and <*co*4> toggle key label between white and silver. Also colour change option for nKeys 
+     *co*2 toggles between default darkcyan and brown-maroon. *co*20 will change nKeys to Black and white labels. 
+     Use *co*nc n=0-4 c=0-F to set CapNumSCroll, Background, nKeys, OSColour, KeyFont, to a custom colour in Colour[c]
+     Colours 0-F map to:
+     Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1      
+     Change Colour Array with:
+     *co*nnCCCC nn = colour number 1 - 16 in Colour array. CCCC is the colour value as four hex number 0-9A-F
+     *co*000011112222....FFFF *co* + 16 four digit hex colour valuse for the 16 colours in Colour array.
+     For example *co*0407FF will change the Colour[3]=White to Cyan. Then press [Cfg][Sav] to save Colour[] to Flash
+     and then *co*43 will change the Keys Font to Green. Reset Colour[3] to white with *co*04FFFF. To set the
+     colour to any colour use *co*407FF which will set the KeyFont to Cyan - it does not have to one of the 16 colours 
+     in the Colour array. In general: *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF. After colour changes made 
+     save with [Cfg]->[Sav]. Colour[] is saved to Flash as Colour file (32 bytes). To reset to default values use *co**
+(Ah) *cn* Added colour change options for the nKeys. Use any colour using in nColours[n] with *cn*0n=0-F, or any 
+     other colour using *cn*0HHH with HHHH = RGB565 value such as 6666 = darkgreen. To change nKeys colour number
+     in nKeyArr use *cn*01-16. To reset to default values use *cn**, *cn* set all nKeys to dark cyan.
+     nColours 0-F map to:
+     DCyan,Black,Gold,Silver,dCream,Red,Blue,DGreen1,Black1,Magenta,Maroon,Orange,SkyBlue2,Purple1,DGreen,Brown1     
+     Change Colour Array with:
+     *cn*nnCCCC nn = colour number 1 - 16 in Colour array. CCCC is the colour value as four hex number 0-9A-F
+     *cn*000011112222....FFFF *cn* + 16 four digit hex colour valuse for the 16 colours in Colour array.
+     In general: *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF. After colour changes made save with [Cfg][Sav]. 
+     nColour[] is saved to Flash as nColour file (32 bytes).  
+(Ai) *0l*0,1 or *0L*0,1 or *0l,L* Enable or disable nKeys custom labels for first 144 nKeys per nKey character    
 ------------------------------------------------------------------------------------------------------------------------
 Symbols-SpecialChar-Math-Greek-Algebra Keyboard: 
 

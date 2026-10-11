@@ -56,7 +56,7 @@
 #define SkyBlue3 0x2BD2
 #define SkyBlue  0x2CD5
 #define Violet   0x915C      // 180,  46, 226 
-
+#define dCream   0x735D 
 
 uint16_t ButtonOutlineColor[4] = {White, White, White, White}; // 4 Layouts 1-4
 const static uint16_t CfgColour     = Black1; // Green2; //Magenta;         // Layout 2 KeyBrd
@@ -133,11 +133,31 @@ BrG, Blue,        // Text Macros T1-T6 + Vol OFF VolMute OFF
 Pk3, Purple1, 
 Pk3, Red };       // [15][8]
 
-uint16_t nKeysColour = DCyan;
-                             
-uint16_t keyColor[12] = {0x0000}; // = {};  // construct = {0}; should init all elements 0x00 required for local vars
+uint16_t nKeysColour = DCyan;     // Save as nKeysClr 4 = Colour[4] = 4 DCyan
+uint16_t colourCNS = Green;       // Save as clrCNS 3 = Colour[3] = 3 Green 
+uint16_t colourOS = White;        // Save as clrOS 1 = Colour[1] = 1 White
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Use colours 0-7 as default for 0 Background 1 KeyFont + OSType 2 nKeys 3 CapsNumScrollLock 4 Indicators 567 cX cC cV
+// Then use colours 8-15 as alternatives for the first 8. Note that you can replace and save all 16 colours with *co* starcommands
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                    0     1     2     3     4    5   6    7       8      9      A 10   B 11   C 12     D 13    E 14   F 15  
+uint16_t Colour[16]               = { Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1 };
+const static uint16_t Colour0[16] = { Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1 };
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool colourSave = false;  // save Colour array if 1 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Use colours 0-7 as default for 0 Background 1 KeyFont + OSType 2 nKeys 3 CapsNumScrollLock 4 Indicators 567 cX cC cV
+// Then use colours 8-15 as alternatives for the first 8. Note that you can replace and save all 16 colours with *co* starcommands
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                     0     1     2    3      4      5   6    7       8      9       A 10   B 11   C 12     D 13    E 14   F 15  
+uint16_t nColour[16]               = { DCyan,Black,Gold,Silver,dCream,Red,Blue,DGreen1,Black1,Magenta,Maroon,Orange,SkyBlue2,Purple1,DGreen,Brown1 };
+const static uint16_t nColour0[16] = { DCyan,Black,Gold,Silver,dCream,Red,Blue,DGreen1,Black1,Magenta,Maroon,Orange,SkyBlue2,Purple1,DGreen,Brown1 };
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool nKeysColourSave = false;  // save nColour array if 1 
 
-uint16_t BackgroundColor[4] = {Black, Black, Black, Black};    // 4 Layouts 1-4
+uint16_t BackgroundColor[4] = {Black, Black, Black, Black};    // 4 Layouts 1-4 Save as BackgroundClr0,1,2,3 0 = Colour[0] = 0 Black
+                          
+uint16_t keyColor[12] = {0x0000}; // = {};  // construct = {0}; should init all elements 0x00 required for local vars
 
 const static uint16_t MouseKeyColour[12] = {Blue, SkyBlue2, Blue, DGreen, SkyBlue2, Blue, SkyBlue2, Blue, Red, SkyBlue2, Red, DGreen }; 
 
@@ -156,7 +176,11 @@ const static uint16_t PowerKeysColor[12]   = {DGreen, Yellow3, Red,  Black1,
                                            
 const static uint16_t MacroTimerColor[12] = {DGreen, Yellow3, Red, Black1, 
                                              DGreen, Black1,  Red, Black1, 
-                                             DGreen, Blue,    Red, Black  };  
+                                             DGreen, Blue,    Red, Black  }; 
+
+                                   
+
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // NumPad Resistor Colour Code // https://eepower.com/resistor-guide/resistor-standards-and-codes/resistor-color-code/#
