@@ -243,8 +243,38 @@ text "s11Link" it will attempt the execute the link list in a file s11link.
 The nKeys minimum to maximum number of pages is 1 to 83, each page with 12 keys per page. Use *0p*nn nn=01-83 to change
 the maximum pages. Use *0x* to toggle nKeys as 3-char numbers n01-n99 followed by 4-char numbers n100-n996 (default).
 Or use 4-char number throughout namely n001-n996. Note that the 2+3-char mode is the more compatible as it uses 
-filenames n01-n99 (assuming n is used as the first char), whilst the 4-char mode will use a different fileset 
+filenames n01-n99 (assuming n is used as the first char), whilst the 4-char mode will use a different file-set 
 n001-n099 for the keys.
+
+nKeys execute the filename inside the file that has the name of the nKey label. If custom labels are off then pressing 
+nKey n01 will execute the filename found in file n01. If custom labels are on then pressing nKey n01 with the custom 
+label Abby will execute the filename found in file Abby. There will be a flag added later to choose whether a custom 
+label nKey should look for file n01 or Abby.
+
+nKeys options are set per nKey character - custom labels for each nKey key - label file (files lbln or LblN with 
+n,N = nKey character - each file has 144 zero-terminated labels) for each of the 62 nKey characters with 144 labels
+(12 pages each with 12 nKeys - change with *0l*0,1), can also set nChar maximum number of pages 1-83 also per nKey 
+character, select nKeys Colour for each nKey character (change with *cn*01-16), and select for each nKey the 
+n01-n99 or n001-n99 mode. The nKeys starcodes only change options for the current nKey for example *0p*83 will 
+set the current nKey maximum pages to 83. Because all the options are saved as files (nKeyArr, nColour, 
+lblX X=nChar), it is easy to copy or rename all the files mentioned, from a pool of files kept on the SDCard or 
+Flash, for instant action and colour changes.
+
+The custom label file the nkeys use are named lblx or LblX for lower and uppercase nKeys respectively. If there is a 
+file lbln on the SDCard, and custom labels are on (*0L*1 or *0l*1) then the nKeys will display the 144 labels in the 
+file lbln instead of n01-n144. If the maximum pages are more than 12 it will use n145 + as the labels after the custom
+labels. Note that on the SDCard nKey=n and nKey=N will both use the labelfile lbln or LblN as the SDCard filesystem is 
+case-insensitive (but case-preserving). On the Flash memory the files lbln and LblN are two different files. 
+
+Because all the options are saved as files (nKeyArr, nColour, lblX X=nChar), it is easy to copy or rename all the 
+files mentioned, from a pool of files kept on the SDCard or Flash, for instant action and colour changes. 
+Instructions and files required, for using the lblx label files are included in the file nKeysLabelTool.zip.
+
+A tool is also provided to convert a JSON file with the 144 labels to the Arduino character string file used by 
+the nKeys.
+
+The normal set of nKeys directory functions (*0d*// and *0d*/foldername, can still be used with custom labels - for 
+example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on.
 -----------------------------------------------------------------------------------------------------------------------
 [n01] [n02] [n03] [n04]       [n13] [n14] [n15] [n16]                 [n985] [n986] [n987] [n988]  [+]Page or nChar
 [n05] [n06] [n07] [n08]       [n17] [n18] [n19] [n20]   ----------->  [n989] [n990] [n991] [n992]  [k]
@@ -691,7 +721,8 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
 (9) Key Font Bold/Normal change - Send the macro *fo* with the built-in keyboard to toggle the labels on the buttons 
     from normal to bold.
 (a) Key Font White/Black change - Send the macro *fc* with the built-in keyboard to toggle the labels on the buttons 
-    from white to black.
+    from white to black. Use *fc*c c=0-F to change to colours Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,
+    Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1
 (b) Macro Copy - Copy a01-a99 to M,S,T K keys. Can use *cm* if the SrcNum DstNum is set up - see the four examples 
     above. Else compose *cm*nnXmm via [ADD] where: nn = a01-a99 X = Keys M S T K mm = 01-24. Keys K1-K24 are max 3
     byte macros - if Knn pressed will run this definition, if no definition will do KnnLink file. See Example 2 
@@ -991,7 +1022,10 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     *tf*s,r = Save or Read twist config file twistCfg 
     *tm*char = vuzsxdwbVUZSXDWB code definitions or use *tm* twistMacro=0x00 Use symbolic file twist not coded macros.
     Default volume vV - *tm*char = vV uU zZ sS xX dD wW etc in vuzsxdbVUZSXDB coded macro options volume =/-/mute
-    undo/redo zoom +/-/reset scroll +/- X /* x -= backspace/delete Wallaper-Next Photoshop Brush Size = b Hardness = B
+    undo/redo zoom +/-/reset macropad-pages+1/scroll +/- X /*=--+#?<>[]() x repeat last key pressed backspace/delete 
+    minimize-all/Wallaper-Next Photoshop Brush Size = b Hardness = B. Note that s = normal scrolling up/down and S is
+    macropad pages + or 1 in nKeys, Math-Symbols, M,ST keys, Layout 2 L1 or L3. Press switch nKeys from e<->s mode,
+    L2 and M,S.T keys A-D brown<->white (SDcard/Flash), Math-Symbols return to L2.
     *tm*0 same as *tm* switch to file-based macros for Twist not the coded macros as in *tm*char = vuzsxdwbVUZSXDWB
 (Aa) CircuitPython device control and used as input and/or output for Pico macropad and/or PC App. 
      *cp* CircuitPython filelist *cp*cnn c=command a,d,r,c nn=filelist index=00-99 *cp*cnnfilename a Activate, 
@@ -1019,7 +1053,7 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
      Use the list data *ld* option for a list of active GPIO expnader devices attached on the 12c bus
 (Ac) *ic* i2c bus scanner 
      *ic*0,1aabb aa bb hex value change external (use 0) SDA SCL aa,bb = 00-7F - i2c0 not saved
-(Ae) *fx*s,c,a,g,n,0,1 Added Function keys F1 - F24 + Shift, Control, Alt, Gui in any combination. nKeys = F will 
+(Ad) *fx*s,c,a,g,n,0,1 Added Function keys F1 - F24 + Shift, Control, Alt, Gui in any combination. nKeys = F will 
      then use keys F1-F24 on first two pages F1-F12 and F13-F24, as Function keys F1-F24 or as Shift/Control/Alt/Gui/
      in any combination acsg for example to press Shift+Alt+Control+F1 send *fx*acs then press nKey F1. 
      *fx* = disable and set mod=0 i..e no Shift, Control, Alt or Gui active.
@@ -1027,7 +1061,26 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
      *fx*n will enable and also set mod=0
      Note that the "nKeysChr": "<*0n*F>" in apprules.json should be changed from the default "<*0n*w>" if you use the
      Shift+F1-F12 keys in MSWord and the PC App is running. 
-          
+(Ae) *lk* and *lk*0,1 Lock KeyPad *lk* to toggle locked/unlocked or *lk*0,1 unlock/lock - if locked use PCApp or 
+     do HW reset of Keypad   
+(Af) *co*nc *co*n n=0-4 c=0-F Added colour change options for the CapNumSCroll-lock using *co* (Green/Orange)
+     or *co*0 (Green/Cyan) or any colour using in Colours[n] with *c0*0n=0-F, or any other colour using *co*0HHH with
+     HHHH = RGB565 value such as 6666 = darkgreen. Also colour options for background, and colour options for 
+     Operating System W L R and for the Key Font Color (can also use *fc* or *fc*c=0-F). For example <*co*41> change 
+     key label to white and <*co*4> toggle key label between white and silver. Also colour change option for nKeys 
+     *co*2 toggles between default darkcyan and brown-maroon. *co*20 will change nKeys to Black and white labels. 
+     Use *co*nc n=0-4 c=0-F to set CapNumSCroll, Background, nKeys, OSColour, KeyFont, to a custom colour in Colour[c]
+     Colours 0-F map to:
+     Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1      
+     Change Colour Array with:
+     *co*nnCCCC nn = colour number 1 - 16 in Colour array. CCCC is the colour value as four hex number 0-9A-F
+     *co*000011112222....FFFF *co* + 16 four digit hex colour valuse for the 16 colours in Colour array.
+     For example *co*0407FF will change the Colour[3]=White to Cyan. Then press [Cfg][Sav] to save Colour[] to Flash
+     and then *co*43 will change the Keys Font to Green. Reset Colour[3] to white with *co*04FFFF. To set the
+     colour to any colour use *co*407FF which will set the KeyFont to Cyan - it does not have to one of the 16 colours 
+     in the Colour array. In general: *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF. After colour changes made 
+     save with [Cfg]->[Sav]. Colour[] is saved to Flash as Colour file (32 bytes). To reset to default values use *co**
+                 
 ------------------------------------------------------------------------------------------------------------------------
 Symbols-SpecialChar-Math-Greek-Algebra Keyboard: 
 
