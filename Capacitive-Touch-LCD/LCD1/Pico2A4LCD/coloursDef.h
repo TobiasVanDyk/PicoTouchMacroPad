@@ -161,14 +161,12 @@ uint16_t keyColor[12] = {0x0000}; // = {};  // construct = {0}; should init all 
 
 const static uint16_t MouseKeyColour[12] = {Blue, SkyBlue2, Blue, DGreen, SkyBlue2, Blue, SkyBlue2, Blue, Red, SkyBlue2, Red, DGreen }; 
 
-uint16_t padColor[20]   = { Blue, dCyan,  Purple1, SkyBlue2, Blue, Blue, DGreen1, SkyBlue2, DCyan,    Red,  
-                            Blue, Black1, Purple1, SkyBlue2, Blue, Blue, Black1,  Purple1,  SkyBlue2, Blue };
+uint16_t padColor[12]   = { Blue, dCyan, Blue, Blue, Blue, Red, Blue, Purple1, Blue, Blue, SkyBlue2, Blue };
                            
-uint16_t padColorL2[5]   = { Blue, DGreen1, SkyBlue2, DCyan, Red };
+uint16_t padColorL2[3]   = { Blue, Blue, Red };
                              
 
-uint16_t padOutline[20] = {White,  White, White,   White, White,  White,  White,   White,   White, White, 
-                           White,  White, White,   White, White,  White,  White,   White,   White, White};
+uint16_t padOutline[12] = { White,  White, White,   White, White,  White,  White,   White,   White, White, White, White };
 
 const static uint16_t PowerKeysColor[12]   = {DGreen, Yellow3, Red,  Black1, 
                                               DGreen, Black1,  Red,  Black1,  
