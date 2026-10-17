@@ -4486,7 +4486,8 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
         for (n=0; n<8; n++)                  Serial.print(mcpAddr[n]-32);          Serial.println();   
         for (n=0; n<8; n++) { for (i=0; i<16; i++)                                 Serial.print(mcpPins[n][i]);                                              Serial.println(); }
         Serial.println(mcpDir);              Serial.println(mcpStr);               Serial.println(mcp23018);           Serial.println(twistStar);            Serial.println(twC);   
-        Serial.println(Fxx);                 Serial.println(FxxMod);               Serial.println("EOC");           
+        Serial.println(Fxx);                 Serial.println(FxxMod);               Serial.println(nDir);               Serial.println(nKeysArr[3][getnKeysNum(nChar)]);   
+        Serial.println("EOC");           
         status("Text Data sent to PC"); StarOk = true; break; } }  
         case 73: ///////////////////// KeyBrdByte[1]==n3&&KeyBrdByte[2]==f *nf*xmmm x = nChar mmm = nKeyNumber Send content of nkeyfile to PC App
       { if (nKeys34 && d999<100) { NameStr3[0] = k4; NameStr3[1] = k6; NameStr3[2] = k7; NameStr3[3] = 0x00; }         
@@ -6321,4 +6322,4 @@ void showKeyData(byte Option)
          SerPr2;  }                  
  }
 
-/************* EOF line 6324 *****************/
+/************* EOF line 6325 *****************/
