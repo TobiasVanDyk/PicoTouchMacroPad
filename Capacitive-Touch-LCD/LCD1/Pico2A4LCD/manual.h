@@ -276,7 +276,10 @@ A tool is also provided to convert a JSON file with the 144 labels to the Arduin
 the nKeys.
 
 The normal set of nKeys directory functions (*0d*// and *0d*/foldername, can still be used with custom labels - for 
-example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on.
+example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on. If an nKey reports
+that is cannot find its file it is usually either the wrong storage (Flash or SDCard). or the nKeys is using a specific 
+folder. Press the [Data] button in the PC App Config tab and look at the nKeus current directory - set to the default 
+with *0d*
 
 nKeys Layout:
 -----------------------------------------------------------------------------------------------------------------------

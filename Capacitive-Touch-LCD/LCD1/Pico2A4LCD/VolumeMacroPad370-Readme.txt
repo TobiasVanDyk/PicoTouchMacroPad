@@ -26,7 +26,7 @@ Using library Adafruit_BusIO at version 1.17.4 in folder: C:\Users\Tobias\Docume
 Using library RTC_NXP_Arduino at version 1.2.1 in folder: C:\Users\Tobias\Documents\Arduino\libraries\RTC_NXP_Arduino 
 Using library I2C_device_Arduino at version 1.2.0 in folder: C:\Users\Tobias\Documents\Arduino\libraries\I2C_device_Arduino 
 "C:\\Users\\Tobias\\AppData\\Local\\Arduino15\\packages\\rp2040\\tools\\pqt-gcc\\5.0.0-9576866/bin/arm-none-eabi-size" -A "I:\\Data\\Win10\\Arduino/VolumeMacroPad370.ino.elf"
-Sketch uses 300680 bytes (3%) of program storage space. Maximum is 8380416 bytes.
+Sketch uses 300856 bytes (3%) of program storage space. Maximum is 8380416 bytes.
 Global variables use 75660 bytes (14%) of dynamic memory, leaving 448628 bytes for local variables. Maximum is 524288 bytes.
 C:\Users\Tobias\AppData\Local\Arduino15\packages\rp2040\tools\pqt-python3\1.0.1-base-3a57aed-1/python3 -I C:\Users\Tobias\AppData\Local\Arduino15\packages\rp2040\hardware\rp2040\6.3.0/tools/uf2conv.py --serial COM20 --family RP2040 --deploy I:\Data\Win10\Arduino/VolumeMacroPad370.ino.uf2 
 Resetting COM20
@@ -52,8 +52,9 @@ Wire1 i2c1 Internal Devices on GP34/35
 
 
 New changes: 
-1. 3 Pad replacement for previous 5 Pads. Access previous nKeys show mode and mouse Mmode from Symbol mode Pads [n] and [m]. Access KeyBrd Editor from macropad with [Cfg][Opt][o] and in 
-   PC App press [K] in Laout L2. PC App adjustments for 5 pad -> 3 Pad completed.
+1. 3 Pad replacement for previous 5 Pads. Access previous nKeys show mode and mouse Mmode from Symbol mode Pads [n] and [m]. Access previous nKeys show mode and mouse Mmode from Symbol 
+   mode Pads [n] and [m]. Access KeyBrd Editor from macropad with [Cfg][Opt][o] and in PC App press [K] in Laout L2. PC App adjustments for 5 pad -> 3 Pad completed. PC App nKeys tab 
+   updated - macropad firmware updated - fixes for PC App Select tab - [Opt] key etc. Additional info sent to PC App must match PC App 79 with new macropad uf2.
 2. Expanded nKeys options: Set max label pages with *0L*nn nn =01-84 - on 1st start = 0 which gives only one custom labels page - use *0L*12 to set t0 12 pages recommended value.
    Now custom labels for each nKey key - label file (files lbln or LblN with n,N = nKey character - each file has 144 zero-terminated labels) for each of the 62 nKey 
    characters with 144 labels (12 pages each with 12 nKeys - change with *0l*0,1,2) - option 2 is custom labels but use nChar+numbers for the filename. Can also set nChar maximum number of 
