@@ -19,7 +19,7 @@ Using library SparkFun_Qwiic_Twist at version 1.0.4 in folder: C:\Users\Tobias\D
 Using library Adafruit_MCP23017_Arduino_Library at version 2.3.2 in folder: C:\Users\Tobias\Documents\Arduino\libraries\Adafruit_MCP23017_Arduino_Library 
 Using library Adafruit_BusIO at version 1.17.4 in folder: C:\Users\Tobias\Documents\Arduino\libraries\Adafruit_BusIO 
 "C:\\Users\\Tobias\\AppData\\Local\\Arduino15\\packages\\rp2040\\tools\\pqt-gcc\\5.0.0-9576866/bin/arm-none-eabi-size" -A "I:\\Data\\Win10\\Arduino/VolumeMacroPad339.ino.elf"
-Sketch uses 276332 bytes (13%) of program storage space. Maximum is 2088960 bytes.
+Sketch uses 276356 bytes (13%) of program storage space. Maximum is 2088960 bytes.
 Global variables use 72988 bytes (13%) of dynamic memory, leaving 451300 bytes for local variables. Maximum is 524288 bytes.
 Resetting COM19
 Converting to uf2, output size: 636928, start address: 0x2000
@@ -48,7 +48,8 @@ NB: Use 4MB Flash option with 2MB Sketch 2MB FS
 New changes: 
 1. 3 Pad replacement for previous 5 Pads. Access previous nKeys show mode and mouse Mmode from Symbol mode Pads [n] and [m]. Access previous nKeys show mode and mouse Mmode from Symbol 
    mode Pads [n] and [m]. Access KeyBrd Editor from macropad with [Cfg][Opt][o] and in PC App press [K] in Laout L2. PC App adjustments for 5 pad -> 3 Pad completed. PC App nKeys tab 
-   updated - macropad firmware updated - fixes for PC App Select tab - [Opt] key etc. Additional info sent to PC App must match PC App 79 with new macropad uf2.
+   updated. Macropad firmware updated - fixes for PC App Select tab - [Opt] key - SDBank Select use yellow S for letter switch and yellow nKeys for upper/lowercase switch. Additional 
+   info sent to PC App must match PC App 79 with new macropad uf2.
 2. Expanded nKeys options: Set max label pages with *0L*nn nn =01-84 - on 1st start = 0 which gives only one custom labels page - use *0L*12 to set t0 12 pages recommended value.
    Now custom labels for each nKey key - label file (files lbln or LblN with n,N = nKey character - each file has 144 zero-terminated labels) for each of the 62 nKey 
    characters with 144 labels (12 pages each with 12 nKeys - change with *0l*0,1,2) - option 2 is custom labels but use nChar+numbers for the filename. Can also set nChar maximum number of 
