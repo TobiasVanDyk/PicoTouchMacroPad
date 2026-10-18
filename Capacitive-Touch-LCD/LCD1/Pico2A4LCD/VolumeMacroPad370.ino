@@ -2379,17 +2379,17 @@ void DoPadsLayout2 (int Button)
                                                  NumKeysChange(); ConfigButtons(1); return; } } 
                     if (Kbrd) { Kbrd = !Kbrd; ConfigKeyCount = 0; if (!Kbrd) SaveKbrdHistory(); if (Kbrd) VarNum = OptNum = 0; MKBrdSave = false; SendBytesEnd(2); PadKeysState(!Kbrd); return; }                                                                                                            
                     Math = !Math; PadKeysState(!Math); return; } // Symbols key then nKeys=Show mode and [o] key = [m] Mouse key
-  if (Button==13) { if (Math || MouseK) { NumKeys = nKeysShow = true; Math = MouseK = false; PadKeysState(!NumKeys); return; } // Press nKeys [n] button in Symbols mode sets nKeysShow also press Twist in S mode
-                    if (nKeysShow) { NumKeys = nKeysShow = false; PadKeysState(!NumKeys); return; }                            // Clears nKeysShow
-                    if (OptNum==9) { SDCardArr[2] = !SDCardArr[2];                                                   // Pad [n] nKeys
+  if (Button==13) { if (OptNum==9) { SDCardArr[2] = !SDCardArr[2];                                                   // Pad [n] nKeys
                                      if (SDCardArr[2]) { SDCardArr[1] = SDCardStatus[11] = SD2[SDNum]; } 
                                                   else { SDCardArr[1] = SDCardStatus[11] = SD1[SDNum]; } 
-                                     if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard Disabled"); 
-                                     SDNumChange = true; optionsindicators(0); return; }    
+                                     if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard 2 Disabled"); 
+                                     SDNumChange = true; optionsindicators(0); return; }   
+                    if (Math || MouseK) { NumKeys = nKeysShow = true; Math = MouseK = false; PadKeysState(!NumKeys); return; } // Press nKeys [n] button in Symbols mode sets nKeysShow also press Twist in S mode
+                    if (nKeysShow) { NumKeys = nKeysShow = false; PadKeysState(!NumKeys); return; }                            // Clears nKeysShow                                     
                     if (Kbrd && KeyBrdByteNum>0) { KeyBrdByteNum--;                      // not required (Kbrd && KBrdActive && KeyBrdByteNum>0 && KeyBrdX!=3)
                                                    if ( Fx || DelType[KeyBrdByteNum]==3 ) { KBDispPos-=3; KBDisp[KBDispPos] = KBDisp[KBDispPos+1] = KBDisp[KBDispPos+2] = ' ';  } 
                                                                                      else { KBDispPos--;  KBDisp[KBDispPos] = ' ';  }
-                                                  status((char *)KBDisp); Fx = false; return; } else if (Kbrd) return;                                                   
+                                                   status((char *)KBDisp); Fx = false; return; } else if (Kbrd) return;                                                   
                     NumKeys = !NumKeys; if (NumKeys) VarNum = OptNum = 0; PadKeysState(!NumKeys); return; }   
   if (Button==14) { if (Math)     { MouseK = true; Math = false; PadKeysState(MouseK); return; } 
                     if (MouseK)   { MouseK = false; PadKeysState(MouseK);  return; } 
@@ -2414,7 +2414,7 @@ void DoPadsLayout2 (int Button)
                                    if (OptNum==9) { SDNumChange = true; SDNum++; if (SDNum>21) SDNum=0; SDCardArr[0] = SDNum; 
                                                     if (SDCardArr[2]) { SDCardArr[1] = SDCardStatus[11] = SD2[SDNum]; } 
                                                                  else { SDCardArr[1] = SDCardStatus[11] = SD1[SDNum]; } 
-                                                    if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard Disabled"); optionsindicators(0); }     
+                                                    if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard 1 Disabled"); optionsindicators(0); }     
                                    if (OptNum==10) { DoFileList(0); } // Else will SDCard list folder content with folder name in NameStr3
                                    if (OptNum>10)  { strcpy(NameStr3, " OFF"); strcpy(NameStr2, "LabelX"); }
                                    if (OptNum==11) { Config1[72] = MLabel = !MLabel; m = 1; NameStr2[5] = 'M'; if (MLabel) strcpy(NameStr3, " ON"); }
@@ -2520,8 +2520,8 @@ void buttonpress(int Button)
   // Handle 1st then return - as if button = 0-11
   // Pad Keys switch off all other KeyBrds 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (Button==14||Button==1); else if (VarNum>0) VarNum=0;  // Reset [Key] key to not-pressed
-  if (Button==14||Button==0); else if (OptNum>0) OptNum=0;  // Reset [Opt] key to not-pressed
+  if (Button==14||Button==1); else if (VarNum>0) VarNum=0;              // Reset [Key] key to not-pressed
+  if (Button==14||Button==13||Button==0); else if (OptNum>0) OptNum=0;  // Reset [Opt] key to not-pressed
 
   if ((Button>11)&&(Layout==2)) DoPadsLayout2(Button); // Button>11 and Layout==2  
    

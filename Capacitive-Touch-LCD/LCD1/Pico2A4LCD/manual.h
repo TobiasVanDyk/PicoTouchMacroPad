@@ -211,7 +211,7 @@ SDCard Filenames accessed by S keys [S1]-[S24] and selectable by [Cfg][Opt] or w
  SDNum 1-3    S0001.txt-S0024.txt A1.txt-A6,txt - C1.txt-C6.txt 01-24  *sd*n=1-3 Can be edited in sdcard.h 
  SDNum 4-9    U-Z + 01-24 = U01-U24 - Z01-Z24                          *sd*n=4-9 or *sd*U-X or *sd*u-g 
  SDnum 10-12  MST mst 01-24 = M01-M24 S01-S24 T01-T24                  *sd*m,s,t *sd*M,S,T  
- SDNum 13-19  A-G a-g 01-24 = A01-A24 - G01-D24                        *sd*A-G   *sd*a-g )
+ SDNum 13-19  A-G a-g 01-24 = A01-A24 - G01-D24                        *sd*A-G   *sd*a-g 
  SDNum 20-21  K,k  K=K01Link-K24Link k = K01-K24                       *sd*K,k
  
 3-Char filenames *sd*4-9 (UVWXYZ U01-U24) *sd*mst (MST M01-M24) *sd*abcdef (A01-A24) can be used in CnnLink files
