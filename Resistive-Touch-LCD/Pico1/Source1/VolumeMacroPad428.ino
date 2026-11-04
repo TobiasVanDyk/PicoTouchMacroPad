@@ -12,7 +12,7 @@
 // shares a similar layout approach to what is used here - their design dates back to early 2021. 
 // https://learn.adafruit.com/touch-deck-diy-tft-customized-control-pad?view=all
 //
-// Adapted by Tobias van Dyk August 2022 - September 2026 for Pico 1 RP2040 and ILI9488 480x320 LCD
+// Adapted by Tobias van Dyk August 2022 - November 2026 for Pico 1 RP2040 and ILI9488 480x320 LCD
 // This use the Waveshare 3.5inch Touch Display Module for Raspberry Pi Pico 1 and 2 with included SDCard module:
 // https://www.waveshare.com/pico-restouch-lcd-3.5.htm
 //
@@ -148,7 +148,8 @@ char twistStatus[16][28] = {"Twist Files Macros",  "Twist Coded Macros X",  "Twi
                             "Twist Config saved",  "Twist Config read" ,    "Twist Options d-Z Ready",   "Twist Options Off",        "Twist Option:  ",     
                             "TwistStar:  " };  
 int LastButton = 0, LastLayout = 0;                 // Used for Twist option x to simulate repeated keypresses such as [*Cm] held in, Text keys such as [S1] or [Del]ete key
-char twistX[5]  = { "*/=-" };                       // Characters used in option X Twist turned + or - 
+char twistX[15]  = { "/*=--+#?<>[]()" };            // Character pairs used in option X Twist turned + or -  /* */ or =- -=
+int twistXPos = 0;                                  //   
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 volatile bool Change = false;          // Indicators changed at any time
@@ -223,26 +224,29 @@ byte EndMarker2   = 0x03;         // Or use backtick/grave ` Change with *2e*cha
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 0    KeySkip 1   CheckSerial 1  KeyHeldEnable  0           BLOnOff 1    Rotate180 0              KeyFontBold 0      ResetOnceEnable 0
-// 7      nKeys 1        nChar  n      nKeysPage  8  nKeysCharSet[10] c         CRLF 0                    crlf1 0x0D             crlf2 0x0A
-// 23     iList 0        MuteOn 0           VolOn 1          LayerAxD 0        Media 0                   XFiles 0           Brightness 0           
-// 30    BsDNum 0        RetNum 8         LayerAD 0     KeyFontColour 0   SaveLayout 2                 OptionOS 0            KeyRepeat 6 
-// 37   NormVal 0        DimVal 3         nKeys34 1          nDir[20] c        nDirZ always=0  nKeysLnkChar[10] 10               nDirX 0,1,2,3
-// 72    MLabel 0        SLabel 0          TLabel 0      DelayTimeVal 0      VolOn1  0                  VolOn2  1               VolOn3 1          ToneOn 0  
-// 80   MathSet 0        MouseZ 0  MediaConfig[0] 0      StartMarker  0x02 EndMarker 0x03               MacroUL 0            nKeysL134 0          KeyRepeat2 20 
-// 88  TwistSDA 26     TwistSCL 27            Fxx 0            FxxMod 0
+// 0      KeySkip 1   CheckSerial 1   KeyHeldEnable 0           BLOnOff 1       Rotate180 0        KeyFontBold 0   ResetOnceEnable 0
+// 7        nKeys 1        nChar  n       nKeysPage 8  nKeysCharSet[10] c            CRLF 0           crlf1 0x0D          crlf2 0x0A
+// 23       iList 0        MuteOn 0           VolOn 1          LayerAxD 0           Media 0             XFiles 0        Brightness 0           
+// 30      BsDNum 0        RetNum 8         LayerAD 0    KeyFontColour  1      SaveLayout 2           OptionOS 0         KeyRepeat 6 
+// 37     NormVal 0        DimVal 3         nKeys34 1          nDir[20] c    nDirZ always=0  nKeysLnkChar[10] 10       nDirX 0,1,2,3
+// 72      MLabel 0        SLabel 0          TLabel 0      DelayTimeVal 0         VolOn1  0            VolOn2  1            VolOn3 1       ToneOn 0  
+// 80     MathSet 0        MouseZ 0  MediaConfig[0] 0   StartMarker  0x02    EndMarker 0x03            MacroUL 0         nKeysL134 0  KeyRepeat2 20 
+// 88   TwistSDA 26     TwistSCL 27             Fxx 0            FxxMod 0
+// 92    nKeysClr 2       clrCNS  3          clrOS  1   BackgroundClr0  0  BackgroundClr1 0     BackgroundClr2 0    BackgroundClr3 0 
+// 99 nLabelPage 12     nDirClear 1      clrSensor  3
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Last entries KeyRepeat2 TwistSDA TwistSCL Fxx FxxMod Config1[87,88,89, 90, 91] 
 // Can use strcpy((char *)&Config1[40], nDir); and inverse, to access char string array nDirZ=0=EOS 
 // Note only nDir only saved if 20 bytes max in size excluding last 0x00 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-cSt byte Config1Size = 96;       //   0   1   2   3   4   5   6   7  8  9  10  11  12  13  14  15  16  17  18  19 20 21   22   23 24 25 26 27 28 29  30  31 
+cSt byte Config1Size = 128;       //   0   1   2   3   4   5   6   7  8  9  10  11  12  13  14  15  16  17  18  19 20 21   22   23 24 25 26 27 28 29  30  31 
 byte Config1[Config1Size]          = {1,  1,  0,  1,  0,  0,  0,  1,'n',8,'n','o','p','q','r','s','t','m','a','k',0, 0x0D,0x0A,0, 1, 0, 0, 0, 0, 0,  0,  8, 
-                                      0,  0,  2,  0,  6,  0,  3,  1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0,   0,   0, 0, 0, 0, 0, 0,'n','o','p',
-                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   0,  65, 26, 27, 0, 0, 0, 0, 0, 0 };
+                                      0,  1,  2,  0,  6,  0,  3,  1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0,   0,   0, 0, 0, 0, 0, 0,'n','o','p',
+                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   0,  65, 26, 27, 0, 0, 2, 3, 1, 0,
+                                      0,  0,  0,  12,  1,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };
 cSt byte Config1Reset[Config1Size] = {1,1,0,1,0,0,0,1,'n',8,'n','o','p','q','r','s','t','m','a','k',0,0x0D,0x0A,0, 1, 0, 0, 0, 0, 0,  0,  8, 
-                                      0,0,2,0,6,0,3,1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 'n','o','p',
-                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   0,  65, 26, 27, 0, 0, 0, 0, 0, 0  };                                    
+                                      0,1,2,0,6,0,3,1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0, 0,  0,  0, 0, 0, 0, 0, 0, 'n','o','p',
+                                     'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   0,  65, 26, 27, 0, 0, 2, 3, 1, 0,  
+                                      0,  0,  0,  12,  1,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };                                    
 bool WriteConfig1Change = false; // Do save if true
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 static const unsigned long int tHr  = 60*60*1000; // hour
@@ -306,6 +310,7 @@ char rTArr[]         = "Repeat Time                ";
 bool CapsLock = false;                 // Green "C"
 bool NumLock = false;                  // Green "N"
 bool ScrollLock = false;               // Green "S" 
+bool KeyLock = false;                  // Lock KeyPad use *lk* to toggle locked/unlocked - if locked use PCApp or do HW resrt of Keypad
 bool MacroUL = false;                  // Upper/Lower case Macrokeys M S T N filenames (Only matters on Flash not SDCard)
 byte ConfigKeyCount = 0;               // Start with Layout 2 Cfg key not pressed 
 bool MuteOn = false;                   // Disable VolMute with Layout 1 2 3 4 select Default is L1-L4
@@ -335,15 +340,15 @@ byte OptNum = 0;                       // [Opt] 0 = not pressed 1 = toggle KeyHe
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 // [Del] [Ret] Available in Layout 1,2,3,4    [Cut][Cpy][Pst] Available in Layout 1   [cX][cC][cV] Available in Layout 3,4
 const static char VarStatus[9][31] = {"", /* 
- 0123456789012345678901234567890123456   0123456789012345678901234567890123456    0123456789012345678901234567890123456  */                                                                                          
-"[ Delete ] use Pad (o)",               "[ Return ] use Pad (o)",                                                   // Layout 1,2,3,4
-"[ Cut ] L1 Key1 use Pad (o)",          "[ Copy ] L1 Key2 use Pad (o)",          "[ Paste ] L1 Key3 use Pad (o)",   // Layout 1 
-"[ cX ] L2 L3 Key1 use Pad (o)",        "[ cC ] L2 L3 Key2 use Pad (o)",         "[ cV ] L2 L3 Key3 use Pad (o)" }; // Layout 3,4
-const static char OptStatus[13][38] = {"",                                                                          // OptStatus[1]-[9] used
-"Select nKeys Character use Pad (o)",   "VolMute long-press OnOff use Pad (o)",  "L1 - L4 Startup Select use Pad (o)", 
-"[ M ] Keys MacroBank 1-5 use Pad (o)", "[ S ] Keys MacroBank 1-5 use Pad (o)",  "[ T ] Keys MacroBank 1-5 use Pad (o)",
-"Macro U/L Case Filenames use Pad (o)", "SDCard FileSet use Pad (o) + Pad (n)",     "File List SDCard + Flash use Pad (o)",
-"[ M ] Custom Label press Pad (o)",     "[ S ] Custom Label press Pad (o)",      "[ T ] Custom Label press Pad (o)"   };
+ 0123456789012345678901234567890123456   0123456789012345678901234567890123456   0123456789012345678901234567890123456   0123456789012345678901234567890123456*/                                                                                          
+"[ Delete ] use Pad (o)",               "[ Return ] use Pad (o)",                                                                                              // Layout 1,2,3,4
+"[ Cut ] L1 Key1 use Pad (o)",          "[ Copy ] L1 Key2 use Pad (o)",          "[ Paste ] L1 Key3 use Pad (o)",                                              // Layout 1 
+"[ cX ] L2 L3 Key1 use Pad (o)",        "[ cC ] L2 L3 Key2 use Pad (o)",         "[ cV ] L2 L3 Key3 use Pad (o)" };                                            // Layout 3,4
+const static char OptStatus[14][38] = { "",                                                                                                                    // OptStatus[1]-[9] used OptStatus[0] = ""
+"Keyboard Editor On/Off use Pad (o)",   "Select nKeys Character use Pad (o)",    "VolMute long-press OnOff use Pad (o)", "L1 - L4 Startup Select use Pad (o)", 
+"[ M ] Keys MacroBank 1-5 use Pad (o)", "[ S ] Keys MacroBank 1-5 use Pad (o)",  "[ T ] Keys MacroBank 1-5 use Pad (o)", "Macro U/L Case Filenames use Pad (o)", 
+"SDCard FileSet use Pad (o) + Pad (n)", "File List SDCard + Flash use Pad (o)",  "[ M ] Custom Label press Pad (o)",     "[ S ] Custom Label press Pad (o)",      
+"[ T ] Custom Label press Pad (o)"   };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Use [Cfg][Sav] with serial monitor to read 5 number current calibration data (last line printed)
@@ -378,13 +383,13 @@ uint16_t t_x = 0, t_y = 0;      // Touch coordinates
 #define KEY_Y 50            // 30 is the topmost with no cut-off
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Layout 5 small Config Buttons s k m n o (SpecialCharMath MacroKeybrd Mouse nKeysNumpad OptionCapsNum)            
+// Layout 3 small Config Buttons s k m n o (SpecialCharMath nKeysNumpad OptionCapsNum)            
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define PAD_W 42          //  Key width  PAD_X is middle 
-#define PAD_H 44          //  Key height
-#define PAD_SPACING_Y 53  //  Strange but true
-#define PAD_X 456         //  config buttons right side
-#define PAD_Y 34          //  config buttons top
+#define PAD_W 46          //  Key width  PAD_X is middle 
+#define PAD_H 80          //  Key height
+#define PAD_SPACING_Y 90  //  Strange but true
+#define PAD_X 454         //  config buttons right side
+#define PAD_Y 50          //  config buttons top
 ////////////////////////////////////////////////////////////////////////////
 // Indicators status Caps-Num-Scroll C N S
 ////////////////////////////////////////////////////////////////////////////
@@ -449,6 +454,7 @@ char keyLabel[12][6] = {""};               //  Size = 144 at 5 characters max n0
 // Need fast access to this - cannot read from SDCard every time
 char LabelArr[3][24][6];      // Size 144*3=432 LabelArr[0] M LabelArr[1] S LabelArr[2] T custom keys
 bool MLabel, SLabel, TLabel;  // if>0 then custom labels for 24 M,S.T keys
+char nLabelArr[12][12][6];    // Size 144*6=862 nKeys custom keys
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //  If Cfg Key pressed new options (new Labels and new Colours)      
 /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -485,20 +491,34 @@ const int NumKeysPageMax = 8;        // Change Config1[9] as well - normally 8 =
 char nChar = 'n';                    // Current nKeys first char (on keys and filename) can be 0-9, a-z, A-Z change with *0n*char 
 char nDir[80] = "/";                 // Default is nKeys in root folder /nKeysfile, if dirname must start AND end with "/" for strcat filename 
 byte nDirX = 0;                      // 0 = Not changed 1 = Default "/"  2 = /dirname/  3 = /nChar/ 
-char nDirXMsg[4][30] = {"Use /0-20-char dir-name or //", "nKeys default dir /", "nKeys special dir /x/", "nKeys dir changed" };
+char nDirXMsg[4][30] = {"/foldername 0-20 char", "nKeys default dir /", "nKeys x folder /x/", "nKeys folder changed" };
+bool nDirClear = true;               // Clears the nDir at every startup
 bool NumKeys = false;                // Numeric Keyboard
-bool nKeysShow = false;              // Pressing Pad[s] toggles thsi, if on pressing nKey displays its content not execute it - not saved
-bool nKeysL134 = true;               // nChar replaces L in L1, L3, L4
+bool nKeysShow = false;              // Pressing Pad[s] toggles this, if on pressing nKey displays its content not execute it - not saved
 bool nKeys34 = true;                 // nKeys count n00-n99,n100-n996 if true (default), else n000-n996 use different n01-n99 files n001-n099
+byte nKeysL = false;                 // nKeysL custom nKeys Labels on/off
 char nKeysCharSet[10] = {'n','o','p','q','r','s','t','m','a','k'};  // preferred list of 10 nKeys first char
 char nKeysAllChar[63] = {"abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"};  // List of all NKeys first char
 char nKeysLnkChar[10] = {'n','o','p','q','u','v','w','x','y','z'};  // DoLinkString do these as nKeys not macros Xnn = 00-99 exclude rR dD lL  
 int  nCharNum = 0;                   // Current position into nKeysCharSet[nCharNum] when pressing Option (o) Pad
-int  nCharAll = 0;                   // Current position into nKeysAllChar[nCharAll] when [s] active and pressing Pads (+)(-)
+int  nCharAll = 0;                   // Current position 0-61 into nKeysAllChar[nCharAll] when [s] active and pressing Pads (+)(-) +-1 different from n = getnKeysNum(nChar)
 char nKeysCurr[] = {"x is current nKeys char"}; 
+bool nKeysL134 = false;              // nChar replaces L in L1, L3, L4
 byte CRLF = 0;                       // Filter CR 0D \n and LF 0A \r in large text files. 1=Filter CR=0x0D 2=Filter LF=0x0A 3=Filter both CR and LF
 byte crlf1 = 0x0D, crlf2 = 0x0A;     // Two Nkeys text filter chars default = 0x0D 0x0A 
-
+bool nKeysArrSave = false;           // save nKeysArr size 62 x 4 = 248 bytes array if 1 
+byte nLabelPage = 11;                // Maximum custom label nKey pages = nLabelPage + 1 = 12 keys per page - 5 char+0 labels = 864 byte labelfile lblX size change with *0L*nn nn=01-84
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Flash nKey files:  26+10+26 = 62 different files accessed through nKeysArr - files n01 and N01 are two different files and two different actions through nKeysArr[nChar->0-61]
+// SDCard nKey files:    26+10 = 26 different files accessed through nKeysArr - files n01 and N01 are the same file (name is case-preserving) - but as indexed through nChar = a-z or A-Z will be treated differently
+// Note: Can have a pool of these 248 byte nKeysArr files on SDCard and copy from SDCard to Flash, or rename on SDCard, for new nKeys actions
+/////////////////////////a///////////////////k///m/n/////////s/t///////////z//0/////////////////9//A/////////////////////////////K/////M//N//////////////S//T/////////////////Z///////////////////////////////////////                 
+byte nKeysArr[4][62] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 4,4,4,4,4,4,4,4,4,4, 14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14,14, // a-z 0-9 A-Z nColor 0=DCyan
+                         12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,                                                                           // Number of pages 1-83 each 12 keys
+                         24,24,24,24,24,24,24,24,24,24,
+                         83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83,83, 
+                         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,       // nKeys34 0,1 n01 or n001
+                         0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1,0,0,0,0,0,0,0,1,1,1, 0,0,0,0,0,0,0,0,0,0,  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0   };   // custom nKeys Labels on/off 2,1/0 2 nChar+Num as file                     
 char NumkeysX[12][6] =  { 0 };
 const static char NumkeysLabel[NumKeysPageMax][12][6] = 
 {"BsD", "7",  "8",   "9",   "Ret",  "4",  "5",  "6",  "0",  "1",  "2",  "3",
@@ -573,34 +593,34 @@ byte Fxx = 0;      // F keys option *fx*s,a,c such *fx*a *fx*sc ^fx*acs *fx* = d
 byte FxxMod = 0;   // Modifier byte Shift Control Alt Gui L+R in here for F1-F24 keys
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool CmKey = false;                  // Check if *codes are from pressing [*Cm] key or entered directly
-const static int StarCodesMax = 138; // StarCodes Count 16+16+16+16+16+16+16+16+10 StarNum = 0-137
+const static int StarCodesMax = 144; // StarCodes Count 16+16+16+16+16+16+16+16+16 StarNum = 0-143
 const static char StarCode[StarCodesMax][3] =    
-{ "ad", "ae", "am", "ap", "as", "at", "bb", "bl", "br", "ca", "cf", "cm", "cp", "cr", "ct", "cx", 
-  "c1", "c2", "db", "de", "df", "dt", "e0", "e1", "e2", "e3", "e4", "e5", "e6", "fa", "fc", "fm", 
-  "fo", "fs", "ft", "fx", "i1", "ic", "im", "is", "it", "ix", "kb", "ke", "kh", "kr", "ks", "ld", 
-  "lf", "lm", "ls", "lt", "lx", "m0", "m1", "m2", "ma", "mb", "mc", "md", "mm", "ms", "mt", "mT", 
-  "mw", "mW", "mZ", "nd", "nf", "nn", "np", "nt", "nT", "os", "ot", "oT", "pc", "po", "p+", "p-", 
-  "pp", "ps", "r0", "r1", "r2", "r3", "rm", "rn", "ro", "rt", "rT", "sa", "sd", "se", "sf", "sF", 
-  "sm", "ss", "st", "sx", "ta", "tb", "tc", "tf", "tm", "tp", "tt", "tw", "ua", "ul", "up", "vx",
-  "v+", "v-", "vm", "wa", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", "x9", "0R", "09", 
-  "0d", "0n", "0p", "0s", "0t", "0x", "1s", "1e", "2s", "2e"  };
+{ "ad", "ae", "am", "ap", "as", "at", "bb", "bl", "br", "ca", "cf", "cm", "cn", "co", "cp", "cr", 
+  "ct", "cx", "c1", "c2", "db", "de", "df", "dt", "e0", "e1", "e2", "e3", "e4", "e5", "e6", "fa", 
+  "fc", "fm", "fo", "fs", "ft", "fx", "i1", "ic", "im", "is", "it", "ix", "kb", "ke", "kh", "kr", 
+  "ks", "ld", "lf", "lk", "lm", "ls", "lt", "lx", "m0", "m1", "m2", "ma", "mb", "mc", "md", "mm", 
+  "ms", "mt", "mT", "mw", "mW", "mZ", "nd", "nf", "nn", "np", "nt", "nT", "os", "ot", "oT", "pc", 
+  "po", "p+", "p-", "pp", "ps", "r0", "r1", "r2", "r3", "rm", "rn", "ro", "rt", "rT", "sa", "sd", 
+  "se", "sf", "sF", "sm", "ss", "st", "sx", "ta", "tb", "tc", "tf", "tm", "tp", "tt", "tw", "ua", 
+  "ul", "up", "vx", "v+", "v-", "vm", "wa", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", "x8", 
+  "x9", "0R", "09", "0c", "0d", "0l", "0L", "0n", "0p", "0s", "0t", "0x", "1s", "1e", "2s", "2e"  };
 
 const static byte StarCodeType[StarCodesMax] =    
-{ 57,   59,   1,    86,   1,    1,    2,    36,   5,    6,    56,   7,    93,   50,   8,    51,   
-  63,   64,   3,    9,    17,   60,   10,   10,   10,   10,   10,   10,   10,   11,   12,   11,   
-  13,   11,   11,   96,   94,   95,   44,   44,   44,   44,   14,   39,   92,   38,   15,   16,   
-  42,   55,   55,   55,   58,   67,   18,   19,   62,   66,   20,   65,   71,   66,   20,   20,   
-  68,   69,   70,   76,   73,   74,   75,   21,   21,   22,   23,   23,   72,   25,   88,   88,   
-  88,   88,   37,   26,   40,   41,   77,   49,   27,   24,   24,   28,   29,   30,   78,   79,   
-  28,   28,   28,   81,   31,   4,    91,   90,   89,   31,   31,   31,   33,   32,   43,   61,   
-  87,   87,   87,   80,   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,   34,   45,  
-  53,   46,   47,   48,   54,   52,   82,   83,   84,   85    };
-  
+{ 57,   59,   1,    86,   1,    1,    2,    36,   5,    6,    56,   7,    99,   98,   93,   50,   
+  8,    51,   63,   64,   3,    9,    17,   60,   10,   10,   10,   10,   10,   10,   10,   11,   
+  12,   11,   13,   11,   11,   96,   94,   95,   44,   44,   44,   44,   14,   39,   92,   38,   
+  15,   16,   42,   97,   55,   55,   55,   58,   67,   18,   19,   62,   66,   20,   65,   71,   
+  66,   20,   20,   68,   69,   70,   76,   73,   74,   75,   21,   21,   22,   23,   23,   72,  
+  25,   88,   88,   88,   88,   37,   26,   40,   41,   77,   49,   27,   24,   24,   28,   29,   
+  30,   78,   79,   28,   28,   28,   81,   31,   4,    91,   90,   89,   31,   31,   31,   33,   
+  32,   43,   61,   87,   87,   87,   80,   35,   35,   35,   35,   35,   35,   35,   35,   35,   
+  35,   34,   45,   101,  53,   100,  100,  46,   47,   48,   54,   52,   82,   83,   84,   85    };
+    
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 5 Small Config Buttons between 1 st and 3rd row Red Blue Green SkyBlue Gold - if MacroUL=1 then o->O m s t -> M S T
+// 3 Small Config Buttons between 1 st and 3rd row Blue Green - if MacroUL=1 then o->O m s t -> M S T
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-char padLabel[20][2]      = {"a", "m", "s", "t", "d", "s", "k", "m", "n", "o", "a", "m", "s", "t", "d", "a", "m", "s", "t", "d"}; 
-char padNKeysLabel[3][5][2] = {"s", "k", "m", "n",   "o", "+", "k", "s", "n", "-",   "+", "k", "S", "n", "-"} ; 
+char padLabel[12][2]      = {"d", "m", "a", "s", "n", "o", "d", "s", "a", "d", "t", "a"}; 
+char padNKeysLabel[3][3][2] = {"s", "n", "o", "+", "n", "-", "+", "n", "-"}; 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // NumPad Resistor Colour Code // https://eepower.com/resistor-guide/resistor-standards-and-codes/resistor-color-code/#
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -705,7 +725,7 @@ int  AppL134 = 0;                // App Switch on whick Layout M S T = 1 3 4
 
 bool PadKeys = false;            // 5 Small Config Buttons on RH side Red Blue Green
 bool KeyFontBold = false;        // Button Font Bold/Normal labels
-bool KeyFontColour = false;      // FontColour is White/Black
+int  KeyFontColour = 3;          // FontColour is White/Black or 3/0 in Colour[16]
 int  KeyFont = White;            // Colour White or Black
 bool macroA = false;             // If 1 m s t macro also saved a as 0 + 24 + 48 - change macroA with *Code not yet implemented
 int  Option1 = 0;                // Source Macros number 0-23 and 0-99
@@ -818,12 +838,12 @@ char fname[40] = "file";     // Drag and Drop files in PC App use this as basis 
 char fpath[85] = "";         // Holds fdir + fname + fnum=1-9999
 char fdir[40]  = "/";        // Drag and Drop files in PC App use this as basis folder
 
-const int NumButtons = 17;             // Total number of buttons = 12 keys (3 rows x 4 columns) + 5 pads on right
-TFT_eSPI_Button key[NumButtons];       // Create 12 keys + 5 config buttons for keypad
+const int NumButtons = 15;             // Total number of buttons = 12 keys (3 rows x 4 columns) + 3 pads on right
+TFT_eSPI_Button key[NumButtons];       // Create 12 keys + 3 config buttons for keypad
 bool pressed = false;                  // Detect touch
 
 bool sSens = false;                    // PC sensor value sent from HWInfo
-char sSArr[2][21]  = { "CPU    C Fan     rpm", "Sys    C Fan     rpm" };  
+char sSArr[2][22]  = { "CPU    C Fan      rpm", "Sys    C Fan      rpm" };  
 
 bool mPlay = false;                    // PC Playing Music
 static const int mPlaySize = 96;       // Must check this
@@ -879,7 +899,8 @@ bool SaveTime4Data = false;                // Only save when this is set by ente
 // Setup
 ///////////////////////////////////////
 void setup() 
-{ SPI1.setSCK(pinSdClk);
+{ int i, n;
+  SPI1.setSCK(pinSdClk);
   SPI1.setTX(pinSdMosi);
   SPI1.setRX(pinSdMiso);
   // SPI1.setCS(pinSdCs); // USB device not recognized if included
@@ -954,13 +975,17 @@ void setup()
   
   InitMCP23xx(1);  
 
-  NumKeysChange();                              // NumkeysX = Layout 0  
+  KeyBrd123 = Numkeys123 = 0;                   // Set all 0
+  n = getnKeysNum(nChar);                       // nKeys label - pages - mode set
+  nKeysPage = nKeysArr[1][n];                   // Current nKeys max number of pages
+  nKeys34 = nKeysArr[2][n];                     // Current nChar n01-n99 or n001-n099 mode
+  if (nKeysArr[3][n]>0) nKeysLabel(0);          // Load custom nKeys labels if enabled = 1 or 2  
+                   else NumKeysChange();        // NumkeysX = Layout 0     
   LastMillis = millis();                        // Initial start time
   NewData = KBrdActive = Kbrd = false;          // Can skip this
   KeyBrdByteNum = KBDispPos = 0;                // Toggle On/Off with yellow pad in Kbrd mode
-  KeyBrdX = 2;                                  // Start on KeyBrd Page 3 - *Cm Page - also change void SendBytesEnd
-  KeyBrdDirect = PadKeys = false;               // 5 Small Pads RH side Config Page = Red SkyBlue Yellow Grey Green 
-  KeyBrd123 = Numkeys123 = 0;                   // Can skip this
+  KeyBrdX = 2;                                  // Start on KeyBrd Page 3 - *Cm Page - also change SendBytesEnd()
+  KeyBrdDirect = PadKeys = false;               // 3 Small Pads RH side Config Page  
   optionsindicators(0);
 }
 
@@ -1001,12 +1026,14 @@ void loop()
           if (!Kbrd) status("");                                // Clear the status line if KeyBrd not active
           OptNum = VarNum = 0;                                  // [Key] and [Opt] Keys reset to unpressed state
           BackLightOn = false;   }                              // Until keypress  
+
+  if (wiggleTime>0) { if ((wiggleCheck - wiggleLast) >= wigglePeriod/4) { wiggleLast = wiggleCheck; MouseWiggler(wiggle); wiggle++; if (wiggle>4) wiggle = 1; }  }   
   
+  if (KeyLock) { pressed = false; goto LockedKeyPad; }                    // Lock KeyPad use *lk* to toggle locked/unlocked - if locked use PCApp or do HW resrt of Keypad
+    
   for (int i=0; i<twC; i++) { if (Twist[i]) CheckTwist(i); }    // if (Twist[0]) CheckTwist(0); if (Twist[1]) CheckTwist(1); if (Twist[2]) CheckTwist(2); // if 3 Twists only
         
-  if (mcpN>0) if ((mcpNow - mcpLast) >= mcpTime) { mcpLast = mcpNow; mcpCheck(); }
-
-  if (wiggleTime>0) { if ((wiggleCheck - wiggleLast) >= wigglePeriod/4) { wiggleLast = wiggleCheck; MouseWiggler(wiggle); wiggle++; if (wiggle>4) wiggle = 1; }  }                                      
+  if (mcpN>0) if ((mcpNow - mcpLast) >= mcpTime) { mcpLast = mcpNow; mcpCheck(); }                                   
            
   if (KeyOn) { if (KeyOnVal[5]==10) DoAltEsc(); else delay(KeyOnValDelay[KeyOnVal[5]]);  KeyOnVal[3] = LayerAD; KeyOnVal[4] = Layout; Layout = KeyOnVal[2]; 
                LayerAD = KeyOnVal[1]; if (KeyOnVal[0]<12) buttonpress(XLateKeyOn[KeyOnVal[0]]); KeyOn = false; LayerAD = KeyOnVal[3]; Layout = KeyOnVal[4]; }
@@ -1030,7 +1057,8 @@ void loop()
   if (KeyHeld==7&&KeyHeldEnable) { Layout = KeyHeldLayout;                    // Swop Keys [L1-L4] to Key [Vo] if key held in > 600 millisecond
                     if (!MuteOn) { if (Layout==1) Layout=4; else Layout--; }  // RepTimePeriod = 600 Try 500-700 After this key repeat is active 
                     MuteOn = !MuteOn; ConfigMedia(); ConfigButtons(1);  }            
-                    
+
+  LockedKeyPad:                  // Lock KeyPad use *lk* to toggle locked/unlocked - if locked use PCApp or do HW reset of Keypad
   if (CheckSerial) RecSerial();  // Switch off serial check with *se* toggle -  CheckSerial default is off
   // if (NewData) showRecData();
   if (NewData) if (!LayerAxD) DoNewData();     // First char 0-6 store file, t, a, p clock alarm timer, 7-9 non-ASCII data, PCData, Foobar, Time  
@@ -1196,24 +1224,32 @@ void GetTimeData(datetime_t *a, bool hm, int h, int m)
   }
 }
 
-/////////////////////////////////////////////////////////////////////////////
-void WriteSensorData()                   // PC sensor value sent from HWInfo
-                                         // A-D can be white or brown
-/////////////////////////////////////////////////////////////////////////////
-// CPU Data <S0    REG_SZ    36>
-//           012345678901234567
-// CPU  Fan <S3    REG_SZ    978 >
-//           01234567890123456789
-///////////////////////////////////////////////////////////////////////////// 
-{ // char sSArr[2][21]  = { "CPU    C Fan     rpm", "Sys    C Fan     rpm" };
-  //                         01234567890123456789    01234567890123456789
-  //                   Option    0        3
-  int i;                 
-  byte Option = RecBytes[1] - 48;
+/////////////////////////////////////////////////////////////////////////////////////
+void WriteSensorData()  // PC sensor value sent from HWInfo CPU degrees + fan speed
+                        // A-D can be white or brown
+/////////////////////////////////////////////////////////////////////////////////////
+// CPU Data <s0    REG_SZ    36 >  CPU temperature degrees Celcius 0-999 Celcius
+//           0123456789012345678   = RecBytes and NumBytes
+// CPU  Fan <s3    REG_SZ    1978>
+//           01234567890123456789 = RecBytes and NumBytes
+//
+// char sSArr[2][32]  = { "CPU    C Fan      rpm", "Sys    C Fan      rpm" };
+//                         012345678901234567890    012345678901234567890
+//                   Option    0        3
+///////////////////////////////////////////////////////////////////////////////////// 
+{ int i;                 
+  byte Option = RecBytes[1] - 48; // Options 1,2,4,5 = 12v, 5v and system temperature and fan rpm
+
+  if (RecBytes[6]!='R'&&RecBytes[7]!='E'&&RecBytes[8]!='G') { for (i=2;  i<NumBytes;  i++) sSArr[0][i-2] = RecBytes[i]; sSArr[0][i-2]=0x00; status(sSArr[0]); sSens = false; return; }
   
-  if (Option==0) { for (i=4;  i<6;  i++) sSArr[0][i] = RecBytes[i+12]; }
+  if (Option==0) { for (i=4;  i<6;  i++) sSArr[0][i] = RecBytes[i+12];   // 10-999 Celcius
+                   if (NumBytes>18) sSArr[0][6] = RecBytes[18];       }  // temperature > 99
   if (Option==3) { for (i=13; i<16; i++) sSArr[0][i] = RecBytes[i+3];  
-                   if (NumBytes>20) sSArr[0][16] = RecBytes[19];       }
+                   if (NumBytes>19) sSArr[0][16] = RecBytes[19];      }  // rpm > 999
+  if (Option==4) { for (i=4;  i<6;  i++) sSArr[1][i] = RecBytes[i+12];   // 10-999 Celcius
+                   if (NumBytes>18) sSArr[1][6] = RecBytes[18];       }  // temperature > 99
+  if (Option==5) { for (i=13; i<16; i++) sSArr[1][i] = RecBytes[i+3];  
+                   if (NumBytes>19) sSArr[1][16] = RecBytes[19];      }  // rpm > 999                 
                    
   status(sSArr[0]);  
   sSens = false;
@@ -1270,6 +1306,33 @@ void DoMSTLabel(byte Option, byte mst)  // Pointer to LabelArrM,S.T [24][6] Size
   if (Option==1) { if (a==0 && !MLabel) return; if (a==1 && !SLabel) return; if (a==2 && !TLabel) return;
                    for (n=4; n<7; n++)  strcpy(keyLabel[n], LabelArr[a][n-4+LayerAD*6]);    // 0+0,1+0.2+0 0+6
                    for (n=8; n<11; n++) strcpy(keyLabel[n], LabelArr[a][n-5+LayerAD*6]); }  // 3+0,4+0,5+0 3+6   
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void nKeysLabel(byte Option)  // Pointer to nLabelArr [12][12] Size 12x12x6 = 864
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+{ char LabelFile[12] = "lbln";  // On sdcard lbln lblN Lbln LblN all same file but can test 'l' or 'L' and 'n' or 'N' 
+  int a, b, c;
+  size_t n;
+  File f1;
+
+  a = Numkeys123;                         // Current nKeys page 0-11 
+  b = getnKeysNum(nChar);                 // Position of nChar in nCharAll[] 255 = not found 
+  if (b==255 || a>nLabelPage) return;     // Current labels page limit - default is nLabelPage+1 = 12 
+    
+  if (Option==0)
+  { memset(nLabelArr, 0, sizeof(nLabelArr));  // Set all bytes = 0 - clear previous labels incase no llblx file exist
+    LabelFile[3] = nChar;                     // Could be n or N
+    if (b>35) LabelFile[0] = 'L';             // a-z,0-9 lblx and A-Z LblX - SDCard same file Flash different files
+    // Serial.print(LabelFile); SerPr2;  
+    if (LayerAxD) f1 = SDFS.open(LabelFile, "r"); else f1 = LittleFS.open(LabelFile, "r");   // On Flash LblN lbln two files
+    
+    if (f1) { n = f1.size();
+              if (n > sizeof(nLabelArr)) n = sizeof(nLabelArr); // clamp to 864 bytes      
+              f1.readBytes((char *)nLabelArr, n);               // 144 (5 char max), new label names for nKeys page 1-12
+              f1.close();  } else { return; }  }                // Option==0 
+  
+  if (Option==1)  { for (n=0; n<12; n++) { strncpy(keyLabel[n], nLabelArr[a][n], 5); keyLabel[n][5] = '\0';  }  }  
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1493,6 +1556,22 @@ void showRecData()
     Serial.println(RecStr);
     NumBytes = i; 
     //NewData = false;
+}
+
+const char* lookup = "0123456789";
+///////////////////////////////////////////////////////////
+void byteToString(byte value, char* outputBuffer) // Gemini
+///////////////////////////////////////////////////////////
+{ if (value < 10) {
+    // Single-digit numbers (0-9)
+    outputBuffer[0] = lookup[value];
+    outputBuffer[1] = '\0';            // Close string at index 1
+  } else {
+    // Two-digit numbers (10-99)
+    outputBuffer[0] = lookup[value / 10]; // Tens place
+    outputBuffer[1] = lookup[value % 10]; // Ones place
+    outputBuffer[2] = '\0';                // Close string at index 2
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1722,8 +1801,8 @@ void DoLinkStr(int NameStrLen) // Read Flash or SDCard filenames and execute in 
                                if (a==1||a==2) LayerAxD = a-1;    if (b==0) LayerAxDSave = LayerAxD;               // L01 Flash L02 SSDCard
                                for (k=0; k<3; k++) { NameStr1[k] = inputString[i+j+k]; } LinkOk = true; return; }  // L00Xnn XnnLink next Link File 
 
-         if (nkey) { do { nChar = c; Numkeys123 = d/12; m = d%12; strcpy(NKeysX[m], NameStr); DoNKeys(m); LinkDelay = 1; LinkRepeat--; }  
-                     while (LinkRepeat>=0) ; } // Skip 1 cycle                                            
+         if (nkey) { do { nChar = c; Numkeys123 = d/12; m = d%12; strcpy(NKeysX[m], NameStr); DoNKeys(m); LinkDelay = 1; LinkRepeat--; }  // If >3 chars label ignore nKeys custom label - use nChar+number label
+                     while (LinkRepeat>=0) ; }                                                                                            // Skip 1 cycle                                            
                                                            
          // SerPr2; Serial.print(j); SerPr1; Serial.print(LinkDelay); SerPr1; Serial.print(LinkRepeat); SerPr1; Serial.println(NameStr);  
             
@@ -1860,26 +1939,6 @@ bool DoCodeOption(byte c)
   usb_hid.keyboardRelease(HIDKbrd);                                      delay(dt25);
 
   return true;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-void PadKeysState(int Pbutton, bool Restore)  // Pads are now Pbuttons 1 to 5
-///////////////////////////////////////////////////////////////////////////////
-{ if (Restore) { status(" ") ;                                                   }                            
-          else { if (Pbutton==1) { Kbrd = MouseK  = NumKeys = false; } // MATH
-                 if (Pbutton==2) { Math = NumKeys = MouseK  = false; } // KBRD
-                 if (Pbutton==3) { Math = Kbrd    = NumKeys = false; } // MOUSE                  
-                 if (Pbutton==4) { Math = Kbrd    = MouseK  = false; } // NUMKEYS Used in MacroEditor to toggle KeyboardDirect On/Off
-                 if (Pbutton==5) { ;}  }                               // Used for Capslock Numlock toggle or [Opt] [Key] keys
-  
-  ConfigButtons(1);  // This does not clear the Src Dst if Kbrd was used without cancelling it ConfigButtons(0) cause screen flicker 
-  if (MouseK || NumKeys || Math) SendBytesEnd(0); // This clears Src Dst
-  status(" ") ;      // Not sure if required here
-
-  if (Kbrd)    status("NXT-Page  ADD-Char  EXE-Macro-or-Function"); 
-  if (MouseK)  status("Mouse Buttons-LMR-BF  Scroll-UD  Cursor-UD-LR"); 
-  if (NumKeys) if (Fxx && nChar=='F') status("Function Keys F1 - F24 Page (+)(-)"); else status("Pad (+)(-) Page-nChr Up-Dwn (e)(s) Execute-Show");
-  if (Math)    status("Load-SymbolSet0-9  Page1-Page4  Send-Symbol"); 
 }
 
 /////////////////////////////////////////////////
@@ -2062,41 +2121,48 @@ bool MacroKeys(byte c, byte Option)
   return MacroKeysOK;
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void DoNKeys(int Button)      
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Note that nKeys has the filename of which the contents will be executed with the three exceptions:
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Note that nKeys is associated with filenames nChar+numbers with four exceptions:
 // (1) Filename starts with *: Executed as a *Code. Two ** codes will be ignored i.e. not valid nKey
 // (2) File name is a Linkfile i.e. XnnLink: Executed as a normal link file i.e. valid nKey
 // (3) Option Fxx is enabled (*fx*s,c,a,g), then nKeys=F1-F24 will behave as function keys F1-F24 + Shift,Control,Alt,Gui in any combination
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// (4) Custom labels: The label is used as the filename not the nChar+Numbers - label = Abby for nKey n01 - filename inside file Abby will be executed.
+// nKeys are symbolic links i.e. its associated filename contains another filename that will be executed with one exception:
+// (1) The filename is in the 10 MacroChar list - then the nKeys file is executed as a normal macrofile.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The 996 n01-n996 keys (n changeable to 0-9, aA-zZ) are default white label on Cyan background
 // nKeysShow is set to 0 in DoLink and maybe also in DimLCD timeout in main()
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 { char *ChrPtr;
-  int k, n, s, NameStrLen = 0, StrLen = 0, nStrLen = 0;
+  int c, k, n, s, NameStrLen = 0, StrLen = 0, nStrLen = 0;
   uint8_t keycode[6] = { 0 };   // simultaneous keys pressed in here
   uint8_t a, b, m; 
   byte *BPtr; 
   bool isLink = false;
   bool isMacro = false;  
   bool DoneM = false; 
+  bool cLBL = false; // Custom labels off
   File f;
   
   for (n=0; n<6; n++) keycode[n] = 0x00;
-  int c = Button+(Numkeys123)*12;   // c = 0,1,2, 996 used in MacroKeys(c, 3)
+  c = Button+(Numkeys123)*12;      // c = 0,1,2, 996 used in MacroKeys(c, 3)
   BPtr = MacroBuff; 
   MacroBuffSize = 0;
   MacroBuff[0] = 0x00;
+  m = getnKeysNum(nChar); if (nKeysArr[3][m]==1 && Numkeys123<=nLabelPage) cLBL = true;  // cLbl = false if 2 or 0, true if 1
+  if (nKeysArr[3][m]==2 && Numkeys123<12) NumKeysChange();                               // Fill NKeysX
 
   if (nChar=='F' && Fxx>0 && c<24) { if (c<12) keycode[0]=0x3A + c; else keycode[0]=0x68 + (c-12); usb_hid.keyboardReport(HIDKbrd, FxxMod, keycode); delay(dt25); usb_hid.keyboardRelease(HIDKbrd); return; }
 
-  if (Button==20) { nStrLen = MacroBuffSize; goto NotnKey; }      // nFile already has indirected i.e. 2nd filename
-  if (Button==30) { goto FromTimers1to8; }                        // Timers1-8 is caller 
+  if (Button==20) { nStrLen = MacroBuffSize; goto NotnKey; }        // nFile already has indirected i.e. 2nd filename
+  if (Button==30) { goto FromTimers1to8; }                          // Timers1-8 is caller 
 
-  strcpy(NameStr3, nDir); if (nDir[2]=='/') NameStr3[1] = nChar;  // Default is "/" and "//" use /nChar as folder name such as /n/nKeysfiles 
-  strcat(NameStr3, NKeysX[Button]);                               // nDir = /dirname/ except if default just one / - maximum size 250 char
-  
+  strcpy(NameStr3, nDir); if (nDir[2]=='/') NameStr3[1] = nChar;    // Default is "/" and "//" use /nChar as folder name such as /n/nKeysfiles
+  if (cLBL) strcat(NameStr3, nLabelArr[Numkeys123][Button]); 
+       else strcat(NameStr3, NKeysX[Button]);                       // nDir = /dirname/ except if default just one / - maximum size 250 char
+   
   ///////////////////////////////////////////////////////////////////// Test if 1sr char is m,s,t,a,k or M,S,T,A,K then handle as macro/text file
   // For example with Source m01 construct GUIx in the KeyBrd Editor and press [EXE] then [Up] key to save. A file m01 will be saved 
   // with a length of 3 - press [Lst] to list the contents which is E3 1B 00. Exit the KeyBrd and then press [Cfg][ and then press [Opt]
@@ -2108,8 +2174,8 @@ void DoNKeys(int Button)
   // Note that when nKeys = m01-m24 it will not execute the macros associated with the normal M1-M24 keys - it will look for a file /nDir/m01-m24
   // and execute the contents of that file either as a macro or a short text file
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-  if (!nKeysShow) { a = NKeysX[Button][0];  strcpy(MSTAName, NameStr3);  // Note this handles m-keys > m99 if via DoMSTA then <99
-                    for (n=0; n<10; n++) if (a==MacroChar[n]) { isMacro = true; if (MacroKeys(c, 3)) return; } }  
+  if (!nKeysShow && !cLBL) { a = NKeysX[Button][0];  strcpy(MSTAName, NameStr3);  // Note this handles m-keys > m99 if via DoMSTA then <99
+                             for (n=0; n<10; n++) if (a==MacroChar[n]) { isMacro = true; if (MacroKeys(c, 3)) return; } }
 
   ///////////////
   FromTimers1to8:
@@ -2134,10 +2200,10 @@ void DoNKeys(int Button)
       if (SendBytesStarCodes()) return; else status("*Code incorrect"); return; }   
   if ((nFile[0]==0x2A)&&(nFile[1]==0x2A)) { return; } // Cannot handle an nFile filename that starts with *
   
-  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////// File is a linkefile  
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// File is a linkfile  
   
-  if ((nFile[3]=='L'&&nFile[6]=='k')||(nFile[nStrLen-4]=='L'&&nFile[nStrLen-1]=='k'))  // First or Last part of filename is Lxxk or Link
-     { n = 0;                                                                                                   
+  if ((nFile[3]=='L'&&nFile[6]=='k')||(nFile[nStrLen-4]=='L'&&nFile[nStrLen-1]=='k') && !cLBL)  // First or Last part of filename is Lxxk or Link
+     { n = 0;                                                                                                                   
        LayerAxDSave = LayerAxD;
        strcpy(NameStr1, nFile); 
          
@@ -2275,41 +2341,74 @@ void DoMacroButtons(int Button, byte c, byte Option)   // Called from 24 nuttons
   
 }
 
+///////////////////////////////
+byte getnKeysNum(char nKey)
+///////////////////////////////
+{
+    if (nKey >= 'a' && nKey <= 'z') return nKey - 'a';       // 0 - 25
+    if (nKey >= '0' && nKey <= '9') return nKey - '0' + 26;  // 26 - 35
+    if (nKey >= 'A' && nKey <= 'Z') return nKey - 'A' + 36;  // 36 - 61
+    return 255; // Invalid character
+}
+
+///////////////////////////////////////////////////////////////////////////////
+void PadKeysState(bool Restore)  // Pads are now Pbuttons 1 to 5
+///////////////////////////////////////////////////////////////////////////////
+{ if (Restore) { status(" ") ;                                                   }                            
+          else { if (Math)    { NumKeys = Kbrd = MouseK = false; }    // MATH                
+                 if (NumKeys) { Math    = Kbrd = MouseK = false; }    // NUMKEYS 
+                 if (MouseK)  { NumKeys = Kbrd = Math   = false; }    // MOUSE
+                 if (Kbrd)    { NumKeys = Math = MouseK = false; } }  // KBRD                                 
+  
+  ConfigButtons(1);  // This does not clear the Src Dst if Kbrd was used without cancelling it ConfigButtons(0) cause screen flicker 
+  if (MouseK || NumKeys || Math) SendBytesEnd(0); // This clears Src Dst and KeyBrd[] but not MacroBuff[]
+  status(" ") ;      // Not sure if required here
+
+  if (Kbrd)    status("NXT-Page  ADD-Char  EXE-Macro-or-Function (o)"); 
+  if (MouseK)  status("Mouse Buttons-LMR-BF  Scroll-UD  Cursor-UD-LR"); 
+  if (NumKeys) if (Fxx && nChar=='F') status("Function Keys F1 - F24 Page (+)(-)"); else status("(+)(-) Up-Dwn Page-nChr  Blue-Red Execute-Show"); 
+  if (Math)    status("Load-SymbolSet0-9  Page1-Page4  Send-Symbol"); 
+}
+
 ////////////////////////////////
 void DoPadsLayout2 (int Button)
 ////////////////////////////////
-{ uint8_t keycode[6] = { 0 };     // simultaneous keys pressed in here
+{ uint8_t keycode[6] = { 0 };             // simultaneous keys pressed in here
   uint8_t i, n, m, y;
   char Bank123X[] = "Bank X  ";           // X=m,s,t Bank 1-5
   char MST[] = "MST";                     // 0-2 -> MST  
+  char PageN[9] = " Page ";               // nKeys Page number - if LabelsOn=2 use nPage else Page
+  char PageNum[3];                        // Number 0-99
   char SDCardStatus[] = "SDCard Set X";   // X=1-3 4-9=U-Z MST mst = 10-12 Kk = 20,21
   bool sdCard = false;                    // For Src-Dest Orange-White Flash-SDCard combinations  
   
-  if (OptNum==1 && Button!=16) OptNum=0; // Switch off Pad[o] nKeys char select if Pad[n] nKeys is pressed
+  if (OptNum==1 && Button!=14) OptNum=0; // Switch off Pad[o] nKeys char select if Pad[n] nKeys is pressed
   PadKeys = true;        
-  if (Button==12) { if (NumKeys) { if (nKeys)  { if (nKeysShow)  { nChar = nKeysAllChar[nCharAll]; nCharAll++; if (nCharAll>61) nCharAll=0;  // Pad [s] Symbols/Math
-                                                                   NumKeysChange(); WriteConfig1Change = true; return; }
-                                                 if (!nKeysShow) { if (Numkeys123<nKeysPage-1) Numkeys123++; else Numkeys123 = 0; 
-                                                                   NumKeysChange(); ConfigButtons(1); return; }  }           
+  if (Button==12) { if (NumKeys) { if (nKeys)  { if (nKeysShow)  { nChar = nKeysAllChar[nCharAll]; nCharAll++; if (nCharAll>61) nCharAll=0;    // [+] nKeys nCharAll = m+1 but [-] is m-1 
+                                                                   m = getnKeysNum(nChar); if (nKeysArr[3][m]>0) nKeysLabel(0);                // 1,2 custom labels on 0 custom labels off          
+                                                                   nKeysColour = nColour[nKeysArr[0][m]]; NumKeysChange(); WriteConfig1Change = true; return; }
+                                                 if (!nKeysShow) { if (Numkeys123<nKeysPage-1) Numkeys123++; else Numkeys123 = 0; m = nKeysArr[3][getnKeysNum(nChar)];  
+                                                                   if (m==0 || (m>0 && Numkeys123>nLabelPage)) NumKeysChange(); ConfigButtons(1); if (m==2) PageN[0] = 'n';
+                                                                   byteToString(Numkeys123+1, PageNum); strcat(PageN, PageNum); status(PageN); return; }  }           
                                    if (!nKeys) { if (Numkeys123<NumKeysPageMax-1) Numkeys123++; else Numkeys123 = 0; // NumKeys max 8 pages nKeys max 83 pages 
-                                                 NumKeysChange(); ConfigButtons(1); return; } }
-                                   if (Kbrd)   { SaveKbrdHistory(); if (KeyBrdByteNum>0) { MKBrdSave = true; ConfigButtons(5); } return; }                                              
-                    Math = !Math; PadKeysState(Button-11, !Math); return; } 
-  if (Button==13) { Kbrd = !Kbrd; if (!Kbrd) SaveKbrdHistory(); if (Kbrd) VarNum = OptNum = 0; 
-                    MKBrdSave = false; SendBytesEnd(2); PadKeysState(Button-11, !Kbrd); return;   }                  // Button==13 clears MacroBuff as well
-  if (Button==14) { if (NumKeys && nKeys) { nKeysShow = !nKeysShow;  ConfigButtons(5); return; }                     // Pad [m] Mouse keys
-                    if (Kbrd && KeyBrdByteNum>0) { KeyBrdByteNum--; KBDispPos--; KBDisp[KBDispPos] = ' ';            // not required (Kbrd && KBrdActive && KeyBrdByteNum>0 && KeyBrdX!=3)
-                                                   if ( Fx || DelType[KeyBrdByteNum]==3 ) { KBDispPos-=2; KBDisp[KBDispPos] = KBDisp[KBDispPos+1] = ' ';  }
-                                                   status((char *)KBDisp); Fx = false; return; } else if (Kbrd) return;
-                    MouseK = !MouseK; PadKeysState(Button-11, !MouseK); return; }
-  if (Button==15) { if (OptNum==8) { SDCardArr[2] = !SDCardArr[2];                                            // Pad [n] nKeys
-                                     if (SDCardArr[2]) { SDCardArr[1] = SDCardStatus[11] = SD2[SDNum]; }      // Lowercase
-                                                  else { SDCardArr[1] = SDCardStatus[11] = SD1[SDNum]; }      // Uppercase
-                                     if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard Disabled"); 
-                                     SDNumChange = true; optionsindicators(0); return; }
-                    if (Kbrd) { if (HistoryNum>0) WriteMacroEditorHistory(); return; } 
-                    NumKeys = !NumKeys; if (NumKeys) VarNum = OptNum = 0; PadKeysState(Button-11, !NumKeys); return; }   
-  if (Button==16) { if (VarNum>0) { if (VarNum<9) SaveVar = true; else return;  // press [Sav] to save                      // Pad [o] Option Pad
+                                                 NumKeysChange(); ConfigButtons(1); return; } } 
+                    if (Kbrd) { Kbrd = !Kbrd; ConfigKeyCount = 0; if (!Kbrd) SaveKbrdHistory(); if (Kbrd) VarNum = OptNum = 0; MKBrdSave = false; SendBytesEnd(2); PadKeysState(!Kbrd); return; }                                                                                                            
+                    Math = !Math; PadKeysState(!Math); return; } // Symbols key then nKeys=Show mode and [o] key = [m] Mouse key
+  if (Button==13) { if (OptNum==9) { SDCardArr[2] = !SDCardArr[2];                                                   // Pad [n] nKeys
+                                     if (SDCardArr[2]) { SDCardArr[1] = SDCardStatus[11] = SD2[SDNum]; } 
+                                                  else { SDCardArr[1] = SDCardStatus[11] = SD1[SDNum]; } 
+                                     if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard 2 Disabled"); 
+                                     SDNumChange = true; optionsindicators(0); return; }   
+                    if (Math || MouseK) { NumKeys = nKeysShow = true; Math = MouseK = false; PadKeysState(!NumKeys); return; } // Press nKeys [n] button in Symbols mode sets nKeysShow also press Twist in S mode
+                    if (nKeysShow) { NumKeys = nKeysShow = false; PadKeysState(!NumKeys); return; }                            // Clears nKeysShow                                     
+                    if (Kbrd && KeyBrdByteNum>0) { KeyBrdByteNum--;                      // not required (Kbrd && KBrdActive && KeyBrdByteNum>0 && KeyBrdX!=3)
+                                                   if ( Fx || DelType[KeyBrdByteNum]==3 ) { KBDispPos-=3; KBDisp[KBDispPos] = KBDisp[KBDispPos+1] = KBDisp[KBDispPos+2] = ' ';  } 
+                                                                                     else { KBDispPos--;  KBDisp[KBDispPos] = ' ';  }
+                                                   status((char *)KBDisp); Fx = false; return; } else if (Kbrd) return;                                                   
+                    NumKeys = !NumKeys; if (NumKeys) VarNum = OptNum = 0; PadKeysState(!NumKeys); return; }   
+  if (Button==14) { if (Math)     { MouseK = true; Math = false; PadKeysState(MouseK); return; } 
+                    if (MouseK)   { MouseK = false; PadKeysState(MouseK);  return; } 
+                    if (VarNum>0) { if (VarNum<9) SaveVar = true; else return;  // press [Sav] to save                      // Pad [o] Option Pad
                                     if (VarNum==1) { BsDNum++; if (BsDNum>=BSDMax) BsDNum=0; status(BsDName[BsDNum]); }     // [Del]ete Key etc
                                     if (VarNum==2) { RetNum++; if (RetNum>=BSDMax) RetNum=0; status(BsDName[RetNum]); }     // [Ret]urn Key etc
                                     if (VarNum>2&&VarNum<6) { XFiles = true; y=VarNum-3; XNum[y]++; SaveX1X6 = true;        // 3,4,5
@@ -2317,40 +2416,43 @@ void DoPadsLayout2 (int Button)
                                     if (VarNum>5&&VarNum<9) { XFiles = true; y=VarNum-3; XNum[y]++; SaveX1X6 = true;        // 6,7,8
                                                               if (XNum[y]>=BSDMax) XNum[y]=0; status(BsDName[XNum[y]]); }   // Layout3+4 Keys1-3                                             
                                     ConfigButtons(1); return; }  
-                   if (OptNum>0) { if (OptNum==1) { nKeysCurr[0] = nChar = nKeysCharSet[nCharNum]; nCharNum++; if (nCharNum>9) nCharNum=0;  // nKeyChar <- 10-list                
-                                                    NumKeysChange(); WriteConfig1Change = true; status(nKeysCurr); return; }   
-                                   if (OptNum==2) { KeyHeldEnable = !KeyHeldEnable; Config1[2] = KeyHeldEnable; WriteConfig1(0); ConfigButtons(1); }
-                                   if (OptNum==3) { SaveLayout++; if (SaveLayout>4) SaveLayout = 1; status(StartUpLayout[SaveLayout]); } 
-                                   if (OptNum==4||OptNum==5||OptNum==6) { Bank123[OptNum-4]++; if (Bank123[OptNum-4]>5) Bank123[OptNum-4]=1;
-                                                                          Bank123X[5] = MST[OptNum-4]; Bank123X[7] = Bank123[OptNum-4]+48; Bank123Change = true; status (Bank123X); }
-                                   if (OptNum==7) { MacroUL = !MacroUL; SwitchMacroUL(1); ConfigButtons(1); return; }
-                                   if (OptNum==8) { SDNumChange = true; SDNum++; if (SDNum>21) SDNum=0; SDCardArr[0] = SDNum; 
+                   if (OptNum>0) { if (OptNum==1) { Kbrd = !Kbrd; OptNum = 0; if (Kbrd) { NumKeys = MouseK = Math = false; PadKeysState(true); } return; }
+                                   if (OptNum==2) { nKeysCurr[0] = nChar = nKeysCharSet[nCharNum]; nCharNum++; if (nCharNum>9) nCharNum=0;  m = getnKeysNum(nChar); // nKeyChar <- 10-list                
+                                                    nKeys34 = nKeysArr[2][m]; nKeysPage = nKeysArr[1][m]; if (Numkeys123>nKeysPage) Numkeys123 = nKeysPage-1; 
+                                                    nKeysColour = nColour[nKeysArr[0][m]]; if (nKeysArr[3][m]>0) nKeysLabel(0); else NumKeysChange(); 
+                                                    WriteConfig1Change = true; status(nKeysCurr); return; }   
+                                   if (OptNum==3) { KeyHeldEnable = !KeyHeldEnable; Config1[2] = KeyHeldEnable; WriteConfig1(0); ConfigButtons(1); }
+                                   if (OptNum==4) { SaveLayout++; if (SaveLayout>4) SaveLayout = 1; status(StartUpLayout[SaveLayout]); } 
+                                   if (OptNum==5||OptNum==6||OptNum==7) { Bank123[OptNum-5]++; if (Bank123[OptNum-5]>5) Bank123[OptNum-5]=1;
+                                                                          Bank123X[5] = MST[OptNum-5]; Bank123X[7] = Bank123[OptNum-5]+48; Bank123Change = true; status(Bank123X); }
+                                   if (OptNum==8) { MacroUL = !MacroUL; SwitchMacroUL(1); ConfigButtons(1); return; }
+                                   if (OptNum==9) { SDNumChange = true; SDNum++; if (SDNum>21) SDNum=0; SDCardArr[0] = SDNum; 
                                                     if (SDCardArr[2]) { SDCardArr[1] = SDCardStatus[11] = SD2[SDNum]; } 
                                                                  else { SDCardArr[1] = SDCardStatus[11] = SD1[SDNum]; } 
-                                                    if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard Disabled"); optionsindicators(0); }     
-                                   if (OptNum==9) { DoFileList(0); } // Else will SDCard list folder content with folder name in NameStr3
-                                   if (OptNum>9)   { strcpy(NameStr3, " OFF"); strcpy(NameStr2, "LabelX"); }
-                                   if (OptNum==10) { Config1[72] = MLabel = !MLabel; m = 1; NameStr2[5] = 'M'; if (MLabel) strcpy(NameStr3, " ON"); }
-                                   if (OptNum==11) { Config1[73] = SLabel = !SLabel; m = 3; NameStr2[5] = 'S'; if (SLabel) strcpy(NameStr3, " ON"); }
-                                   if (OptNum==12) { Config1[74] = TLabel = !TLabel; m = 4; NameStr2[5] = 'T'; if (TLabel) strcpy(NameStr3, " ON"); }
-                                   if (OptNum>9)   { DoMSTLabel(0, m); WriteConfig1(0); strcat(NameStr2, NameStr3); status(NameStr2); }                                                                 
-                                   return; }    // Option>0                      
-                  if (Kbrd) {SrcDst++; if (SrcDst>3) SrcDst=0; 
-                                       if (SrcDst==0) LayerAxD = false; if (SrcDst==3) LayerAxD = true;  // All White or all Orange                                     
-                                       optionsindicators(0); return; }                                   // SrcDst 0 W->W 1 W->O 2 O->W 3 O->O Copy                                    
-                  if (NumKeys) { if (nKeys)  { if (nKeysShow)  { nChar = nKeysAllChar[nCharAll]; if (nCharAll>0) nCharAll--; else nCharAll = 61;  
-                                                                 NumKeysChange(); WriteConfig1Change = true; return; }  
-                                               if (!nKeysShow) { if (Numkeys123>0) Numkeys123--; else Numkeys123 = nKeysPage-1; }  } 
-                                 if (!nKeys) { if (Numkeys123>0) Numkeys123--; else Numkeys123 = NumKeysPageMax-1; }   // NumKeys max 8 pages nKeys max 83 pages        
-                                 NumKeysChange(); ConfigButtons(1); return; }
-                  // if (Media) {ToneOn = !ToneOn; ConfigButtons(1); return;}
+                                                    if (SDNum>0) { SDCardSelectFiles(0); status(SDCardStatus); } else status("SDCard 1 Disabled"); optionsindicators(0); }     
+                                   if (OptNum==10) { DoFileList(0); } // Else will SDCard list folder content with folder name in NameStr3
+                                   if (OptNum>10)  { strcpy(NameStr3, " OFF"); strcpy(NameStr2, "LabelX"); }
+                                   if (OptNum==11) { Config1[72] = MLabel = !MLabel; m = 1; NameStr2[5] = 'M'; if (MLabel) strcpy(NameStr3, " ON"); }
+                                   if (OptNum==12) { Config1[73] = SLabel = !SLabel; m = 3; NameStr2[5] = 'S'; if (SLabel) strcpy(NameStr3, " ON"); }
+                                   if (OptNum==13) { Config1[74] = TLabel = !TLabel; m = 4; NameStr2[5] = 'T'; if (TLabel) strcpy(NameStr3, " ON"); }
+                                   if (OptNum>10)  { DoMSTLabel(0, m); WriteConfig1(0); strcat(NameStr2, NameStr3); status(NameStr2); }                                                                 
+                                   return; }    // Option>0
+                  if (NumKeys) { if (nKeys)  { if (nKeysShow)  { nChar = nKeysAllChar[nCharAll]; if (nCharAll>0) nCharAll--; else nCharAll = 61; // [-] nKeys nCharAll = m-1 but [+] is m+1 
+                                                                 m = getnKeysNum(nChar); if (nKeysArr[3][m]>0) nKeysLabel(0);  
+                                                                 nKeysColour = nColour[nKeysArr[0][m]]; NumKeysChange(); WriteConfig1Change = true; return; }  
+                                               if (!nKeysShow) { if (Numkeys123>0) Numkeys123--; else Numkeys123 = nKeysPage-1; m = nKeysArr[3][getnKeysNum(nChar)]; 
+                                                                 if (m==0 || (m>0 && Numkeys123>nLabelPage)) NumKeysChange(); ConfigButtons(1); if (m==2) PageN[0] = 'n';
+                                                                 byteToString(Numkeys123+1, PageNum); strcat(PageN, PageNum); status(PageN); return; }  } 
+                                 if (!nKeys) { if (Numkeys123>0) Numkeys123--; else Numkeys123 = NumKeysPageMax-1; }   // NumKeys max 8 pages nKeys max 83 pages                    
+                                 NumKeysChange(); ConfigButtons(1); return; }   
+                  if (Kbrd)    { SrcDst++; if (SrcDst>3) SrcDst=0; if (SrcDst==0) LayerAxD = false; if (SrcDst==3) LayerAxD = true; optionsindicators(0); return; }  // All White or all Orange                               
                   /////////////////////////////////////////////////// Toggle Caplock Numlock in 4 coombinations
                   PadCapsNumN++; if (PadCapsNumN>3) PadCapsNumN = 0;          
                   for (n=0; n<6; n++) keycode[n] = 0x00; // set last+1 = NULL      
                   keycode[0] = PadCapsNum[0][PadCapsNumN]; keycode[1] = PadCapsNum[1][PadCapsNumN]; 
                   usb_hid.keyboardReport(HIDKbrd, 0, keycode); delay(dt50);
                   usb_hid.keyboardRelease(HIDKbrd);            delay(dt25);
-                  return; }   // Button=16 = Pad[o]    
+                  return; }   // Button=14 = Pad[o]    
 }  
 
 ///////////////////////////////////////////
@@ -2427,23 +2529,22 @@ void buttonpress(int Button)
                                     if (BLOnOff)  { digitalWrite(LCDBackLight, byte(BLOnOffToggle)); BLOnOffToggle = !BLOnOffToggle; return;} } }
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////  
-  // 5 Config Pads Blue Gray Purple Gray Red button > 11
+  // 3 Config Pads Blue Purple Red button > 11
   // Handle 1st then return - as if button = 0-11
   // Pad Keys switch off all other KeyBrds 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (Button==16||Button==1)             ; else if (VarNum>0) VarNum=0;  // Reset [Key] key to not-pressed
-  if (Button==16||Button==15||Button==0) ; else if (OptNum>0) OptNum=0;  // Reset [Opt] key to not-pressed
+  if (Button==14||Button==1); else if (VarNum>0) VarNum=0;              // Reset [Key] key to not-pressed
+  if (Button==14||Button==13||Button==0); else if (OptNum>0) OptNum=0;  // Reset [Opt] key to not-pressed
 
   if ((Button>11)&&(Layout==2)) DoPadsLayout2(Button); // Button>11 and Layout==2  
    
-  if ((Button>11)&&(Layout!=2))   // 5 Navigation Pads Blue Gray Purple Purple Blue button > 11                                                    
-     { if (Button==16) { if (LayerAD<3) LayerAD++; else LayerAD = 0;}                  
-       if (Button==12) { if (LayerAD>0) LayerAD--; else LayerAD = 3;} 
-       if (Button==16||Button==12) {PadKeys = true; LayerADLetter[0] = 65 + LayerAD; optionsindicators(0); ConfigMacroButtons(); return; }
-       if ((Button==13&&Layout==1)||(Button==14&&Layout==3)||(Button==15&&Layout==4))              // If own Padkey pressed in own Layout
-          { LayerAxD = !LayerAxD; if (LayerAxD) status("SDCard Used"); else status ("Flash Used"); optionsindicators(0); return; } 
-       Kbrd = MouseK  = NumKeys = Math = false; Layout = Button-11-(Button==13); PadKeys = true; status(" "); 
-       ConfigButtons(1); optionsindicators(0); return;   // pad MST = button 13,14,15 = Layout 0,2,4 
+  if ((Button>11)&&(Layout!=2))   // 3 Navigation Pads Blue Purple Blue button > 11                                                    
+     { if (Button==14) { if (LayerAD>0) LayerAD--; else LayerAD = 3;}                  
+       if (Button==12) { if (LayerAD<3) LayerAD++; else LayerAD = 0;} 
+       if (Button==14||Button==12) { PadKeys = true; LayerADLetter[0] = 65 + LayerAD; optionsindicators(0); ConfigMacroButtons(); return; }
+       if ((Button==13&&Layout!=2)) { LayerAxD = !LayerAxD; if (LayerAxD) status("SDCard Used"); else status("Flash Used"); optionsindicators(0); return; }
+       Kbrd = MouseK  = NumKeys = Math = false; Layout = Button-11-(Button==14); PadKeys = true; status(" "); 
+       ConfigButtons(1); optionsindicators(0); return;   // pad MST = button 14 = Layoutcmd       
      } // Button>11 and Layout!=2  
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
@@ -2573,9 +2674,9 @@ void buttonpress(int Button)
                                 usb_hid.keyboardReport(HIDKbrd, 0, keycode); delay(dt25);
                                 usb_hid.keyboardRelease(HIDKbrd);         }  break;          }                   
       
-      // 0 not pressed   1 Upper/Lower case Macro filenames   2 KeyHeldEnable   3 L1-L4 StartUpSelect 
-      // 4,5,6 MST Bank123 Select   7 Select nKeys char  8 SDCard File Set   9 List Files   
-      if (ConfigKeyCount==1) {OptNum++; if (OptNum>12) OptNum=1; status(OptStatus[OptNum]); break; } 
+      // 0 not pressed   1 KeyBrd Editor 2 Upper/Lower case Macro filenames   3 KeyHeldEnable   4 L1-L4 StartUpSelect 
+      // 5,6.7 MST Bank123 Select   8 Select nKeys char  9 SDCard File Set   10 List Files   
+      if (ConfigKeyCount==1) {OptNum++; if (OptNum>13) OptNum=1; status(OptStatus[OptNum]); break; } 
 
       if (Media) {usb_hid.sendReport16(HIDCons, StopMed); delay(dt50);
                   usb_hid.sendReport16(HIDCons, 0); break; }  
@@ -3021,7 +3122,8 @@ void ConfigButtons(uint8_t rowcount) {  // rowcount=0 all 4 rows rowcount=2 last
   if (MouseK) {for (m=0; m<12; m++) {strcpy(keyLabel[m], MouseKeysLabel[m]); keyColor[m] = MouseKeyColour[m]; }; goto KeyBrdsDone; }                              
                  
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  if (NumKeys) { if (nKeys)  { for (m=0; m<12; m++) {strcpy(keyLabel[m], NKeysX[m]);}
+  if (NumKeys) { if (nKeys)  { m = nKeysArr[3][getnKeysNum(nChar)];
+                               if (m>0 && Numkeys123<12) nKeysLabel(1); else for (m=0; m<12; m++) strcpy(keyLabel[m], NKeysX[m]);
                                for (m=0; m<12; m++) {keyColor[m] = nKeysColour;} }
                  if (!nKeys) { if (!Resistor) { for (m=0; m<12; m++) {strcpy(keyLabel[m], NumkeysX[m]);}
                                                 for (m=0; m<12; m++) {keyColor[m] = Black1;} }
@@ -3045,24 +3147,20 @@ void ConfigButtons(uint8_t rowcount) {  // rowcount=0 all 4 rows rowcount=2 last
    //////////
    DoPadKeys:
    //////////
-   /////////////////////////////////////////////////////      0 1 2 3 4   5 6 7 8 9    5 6 7   8    9    5 6 7 8 9
-   // 5 Small Config Buttons between 1 st and 3rd row  // Pad             s k m n 0    + k e/s char -    c k > d o
+   /////////////////////////////////////////////////////      0 1 2 3 4   5 6 7 8 9    5 6 7   8    9
+   // 3 Small Config Buttons between 1 st and 3rd row  // Pad             s k m n 0    + k e/s char -  
    ////////////////////////////////////////////////////       
-   b = Layout - 1;                     // reset b to 0 - 3 
- 
-   padLabel[8][0] = nChar;
-   if (NumKeys) { padLabel[5][0] = '+'; padLabel[9][0] = '-'; padColor[5] = Red; 
-                  if (nKeysShow) { padColor[8] = DGreen; padLabel[7][0] = 's'; padColor[7] = Red;  } 
-                            else { padColor[8] = dCyan;  padLabel[7][0] = 'e'; padColor[7] = Blue; } }
-           else { if (MathSet==0) padLabel[5][0] = 's'; else padLabel[5][0] = MathSet+48; 
-                  if (Kbrd) { padLabel[7][0] = '<'; 
-                              if (MKBrdSave) padLabel[8][0] = 'r'; else padLabel[8][0] = 'h'; 
-                              for (n=5; n<10; n++) padColor[n] = DGreen; }
-                       else { padLabel[7][0] = 'm'; padLabel[9][0] = 'o'; 
-                              for (n=0; n<5; n++) padColor[n+5] = padColorL2[n]; } }
+   b = Layout - 1;                     // reset b to 0 - 3  
+   
+   if (Layout==2) { padLabel[4][0] = nChar; padColor[3] = padColor[4] = padColor[5] = Blue;
+                    if (Kbrd)         { padLabel[3][0] = 'K'; padLabel[4][0] = '<'; padLabel[5][0] = 'o'; padColor[3] = padColor[4] = padColor[5] = DGreen; } 
+                    else if (NumKeys) { padLabel[3][0] = '+'; padLabel[5][0] = '-'; padColor[3] = padColor[4] = padColor[5] = Blue; if (nKeysShow) { padColor[4] = Red; } }                                                                 
+                         else if (Math || MouseK) { padLabel[5][0] = 'm'; padColor[5] = Blue; if (MathSet==0) padLabel[3][0] = 'S'; else padLabel[3][0] = MathSet+48; } 
+                               else { padLabel[5][0] = 'o'; padLabel[3][0] = 'S'; padColor[5] = Red; }  }
+
          
-   for (row = 0; row < 5; row++) 
-       {p = row+b*5; key[row+12].initButton(&tft, PAD_X, PAD_Y + row * PAD_SPACING_Y, 
+   for (row = 0; row < 3; row++) 
+       {p = row+b*3; key[row+12].initButton(&tft, PAD_X, PAD_Y + row * PAD_SPACING_Y, 
                                                   PAD_W, PAD_H, White, padColor[p], KeyFont, padLabel[p], KEY_TEXTSIZE);
         key[row+12].drawButton();  }             
              
@@ -3332,13 +3430,31 @@ void ConfigMedia()
   if (VolOn  && MuteOn  && Media  && ToneOn)   { MediaCfg = MediaConfig[0] = 6; return; }       // *e6* = Volume + Mute + Media + Tone keys   
 }
 
+/////////////////////////
+void SetColours()
+/////////////////////////
+{ byte n;
+  KeyFontColour = Config1[33]; KeyFont = Colour[KeyFontColour];                            // Key Label Color from Colour Array 0-F
+  nKeysColour = nColour[nKeysArr[0][getnKeysNum(nChar)]];                                  // Get nKeys colour for current nKey  
+  Colour[Config1[92]] = nKeysColour;                                                       // 92 nKeysClr = 2  Set Colour[nKeys] = current nColour[nKeys]       
+  if (Config1[93]!=0)  colourCNS =    Colour[Config1[93]]; else colourCNS = Colour[3];     // 93 clrCNS   = 3               
+  if (Config1[94]!=0)  colourOS =     Colour[Config1[94]]; else colourOS = Colour[1];      // 94 clrOS    = 1 
+  if (Config1[101]!=0) colourSensor = Colour[Config1[101]]; else colourSensor = Colour[3]; // 101 clrSensor = 3 - if balck use default
+  for (int n=0; n<4; n++) BackgroundColor[n] = Colour[Config1[95+n]];                      // 95-98 BackgroundClr0,1,2,3 = 0     
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void ReadConfig1()
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 { int n;
   File f1 = LittleFS.open("Config1", "r");
   int FSz = f1.size(); // Check for valid Config1
-  if (FSz!=Config1Size) { for (int n=0; n<Config1Size; n++) Config1[n] = Config1Reset[n]; WriteConfig1(0); return; }
+  if (FSz!=Config1Size) { if (f1) f1.close();
+                          for (n=0; n<Config1Size; n++) Config1[n] = Config1Reset[n]; 
+                          CheckSerial = Config1[1] = 1;
+                          KeyFont = White; KeyFontColour = Config1[33] = 1; 
+                          for (n=0; n<4; n++) { Config1[95 + n] = 0; BackgroundColor[n] = Black; }                         
+                          WriteConfig1(0); return; }
   f1.read(Config1, Config1Size); 
   f1.close();
   
@@ -3367,7 +3483,6 @@ void ReadConfig1()
   BsDNum =   Config1[30];  // 0 = DeleteBackspace  
   RetNum =   Config1[31];  // 8 = ReturnKey
   LayerAD =  Config1[32];  
-  KeyFontColour = Config1[33]; if (KeyFontColour) KeyFont = Black; else KeyFont = White;  // Button Font Bold/Normal labels
   SaveLayout =    Config1[34]; 
   OptionOS =      Config1[35]; 
   KeyRepeat =     Config1[36]; if (KeyRepeat<2) KeyRepeat=6; RepTimePeriod = KeyRepeat*100;  // Unusable Macropad if too short
@@ -3394,8 +3509,12 @@ void ReadConfig1()
   TwistSDA =       Config1[88];                                        // i2c 0,1 SDA depends on LCD used  
   TwistSCL =       Config1[89];                                        // i2c 0,1 SCL depends on LCD used 
   Fxx =            Config1[90];                                        // nKeys = F now function keys F1 - F24 + modifiers *fx*sacg  
-  FxxMod =         Config1[91];                                        // nKeys = F modifiers *fx*sacg byte    
-  if (TwistSDA==TwistSCL) { status("i2c SDA/SCL invalid"); TwistSDA = 26; TwistSCL = 27; }   // Or 4 and 5 - default value depends on LCD used 
+  FxxMod =         Config1[91];                                        // nKeys = F modifiers *fx*sacg byte     
+  nLabelPage =     Config1[99];                                        // nKeys custom labels max pages 0-83 - default = 12   
+  nDirClear =      Config1[100];                                       // Clears the nDir at every startup
+  if (nDirClear) { nDir[0] = '/'; nDir[1] = 0x00; }                    // Set to default dir = /     
+  if (TwistSDA==TwistSCL) { status("i2c SDA/SCL invalid"); TwistSDA = 26; TwistSCL = 27; }   // Or 4 and 5 - default value depends on LCD used   
+  SetColours();                                                        // Custom colours                                                       // Custom colours 
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3432,10 +3551,10 @@ void WriteConfig1(bool Option)
                   Config1[36] = KeyRepeat;
                   Config1[37] = NormVal; 
                   Config1[38] = DimVal; 
-                  Config1[39] = nKeys34;                  
+                  Config1[39] = nKeys34;                 
                   if (strlen(nDir)<21) strcpy((char *)&Config1[40], nDir);  // 40-59 60=nDirZ=0                                                       
                   for (n=1; n<11; n++) Config1[60+n] = nKeysLnkChar[n-1];   // Config1[61-70] 
-                  nDirX       = Config1[71]; 
+                  nDirX       = Config1[71];                                    
                   Config1[72] = MLabel; Config1[73] = SLabel; Config1[74] = TLabel;  
                   Config1[75] = DelayTimeVal; 
                   Config1[76] = Vol1; Config1[77] = Vol3; Config1[78] = Vol4; // If = 1 then enable Volume Up/Dwn in Layouts 1, 3, 4 
@@ -3445,21 +3564,24 @@ void WriteConfig1(bool Option)
                   Config1[82] = MediaConfig[0];                               // 0-6 Media keys Volume Mute Tonecontrol combinations
                   Config1[83] = StartMarker;                                  // Serial Comms start was < now 0x02       
                   Config1[84] = EndMarker;                                    // Serial Comms end was > now 0x03   
-                  Config1[85] = MacroUL;                                      // Upper or lower case filenames for macros on Flash only  
+                  Config1[85] = MacroUL;                                      // Upper or lower case filenames for macros on Flash only    
                   Config1[86] = nKeysL134;                                    // nChar replaces L in L1, L3, L4 
-                  Config1[87] = (byte)(KeyRepeat2/10);                        // x 10 = threshold see touch.h 
+                  Config1[87] = (byte)(KeyRepeat2/10);                        // x 10 = threshold see touch.h  
                   Config1[88] = TwistSDA;                                     // i2c 0,1 SDA depends on LCD used  
-                  Config1[89] = TwistSCL;                                     // i2c 0,1 SCL depends on LCD used   
+                  Config1[89] = TwistSCL;                                     // i2c 0,1 SCL depends on LCD used  
                   Config1[90] = Fxx;                                          // nKeys = F now function keys F1 - F24 + modifiers *fx*sacg  
-                  Config1[91] = FxxMod;                                       // nKeys = F modifiers *fx*sacg byte                                                                                                                             
+                  Config1[91] = FxxMod;                                       // nKeys = F modifiers *fx*sacg byte  
+                  Config1[99] = nLabelPage;                                   // nKeys custom labels max pages 0-83 - default = 12 
+                  Config1[100] = nDirClear;                                   // Clears the nDir at every startup                                                                                                           
                 }
-  
-  if (AppState>0) return;
+                
+  if (colourSave) { saveColour(); colourSave=false; }                         // Config1[92,93,94,95-98,101]] only assigned new values during Starcode function 98 *co*,n,c default is 2,3,1,0,0,0,0 and 3
+  if (AppState>0) return;                                                     // No writes during rapid PC APP appswitch operations
   
   File f1 = LittleFS.open("Config1", "w"); 
   if (Option==2) f1.write(Config1Reset, Config1Size);   // Reset all to default - could be Rotate180 problem
             else f1.write(Config1,      Config1Size);   // Write current Config1 values if Option = 0 or 1
-  f1.close(); 
+  f1.close();  
 }
 
 ///////////////////////////////////////////////////////////////
@@ -3473,22 +3595,23 @@ void InitCfg(bool Option)    // Only 1 on cold start or reboot
   
   // WriteConfig1(0); delay(10); // Use only once then comment out when there are changes to Config1 structure or size 
   
-  if (Option) {
-
-      if (!SDFS.exists("Math0"))                SaveMath(0);                                            // Save default Symbols values
+  if (Option)  { 
+      if (LittleFS.exists("Colour"))            readColour();                          // Set custom Colours before read Config1
+      if (LittleFS.exists("nColour"))           readNColour();                         // Set custom nColours before read Config1
+      if (LittleFS.exists("nKeysArr"))          readNArr();                            // Read custom nKeys colours, max pages, label number type, custom labels  
       
-
-      if (LittleFS.exists("Config1"))           ReadConfig1(); else WriteConfig1(2);   // Read Config1 else write default values
+      if (LittleFS.exists("Config1"))           ReadConfig1(); else WriteConfig1(2);   // Read Config1 128 bytes else write default values
       if (StartMarker==0x00 && EndMarker==0x00) { StartMarker=0x3C; EndMarker=0x3E; }  // Mainly for 1st run can remove later
-      if (MacroUL) SwitchMacroUL(0);    
+      if (MacroUL) SwitchMacroUL(0);                                                   // Upper/Lower case filenames
       
       if (LittleFS.exists("SDCardArr"))         ReadSDCardArr();
       if (LittleFS.exists("MouseCfg"))          ReadMouse();
-      if (LittleFS.exists("iList"))             ReadInstructionList();                                  // iList -> MacroInstructionList
-      if (LittleFS.exists("DoCal"))             DoCal    = true; else DoCal = false;                    // 1 -> Run calibration on start
-      if (LittleFS.exists("x1x6"))              Readx1x6();                                             // always read if exists
-      if (LittleFS.exists("Bank123File"))       ReadBank123();                                          // always read if exists
-  }    
+      if (LittleFS.exists("iList"))             ReadInstructionList();                 // iList -> MacroInstructionList
+      if (LittleFS.exists("DoCal"))             DoCal    = true; else DoCal = false;   // 1 -> Run calibration on start
+      
+      if (LittleFS.exists("x1x6"))              Readx1x6();                            // always read if exists
+      if (LittleFS.exists("Bank123File"))       ReadBank123();                         // always read if exists      
+  }   
   
   for (n=0; n<24; n++) {DoMSTName(n, 3); BPtr = Str1to12[n]; MacroS1S12[n] = 4;                   // DoFileBytes read eof LayerAxD 0 FlashMem 1 SDCard
                         MacroSizeS1S12[n] = DoFileBytes(0, MSTName, BPtr, ByteSize, LayerAxD); }  // 0 = read 1 = write
@@ -3698,13 +3821,17 @@ void GetSysInfo(int Action)
   int uHeap = rp2040.getUsedHeap();
   int tHeap = rp2040.getTotalHeap();
   int fCPU  = rp2040.f_cpu();
+  bool DoneWrite = false;    
   
   if (Action>0) { if (Action==4) { Savex1x6(); SaveX1X6 = false; Config1[28] = XFiles; WriteConfig1(1); WriteConfig1Change = false; }
                   if (SaveLayout>0) SaveLayoutConfig(); return; }  // SaveLayoutConfig sets WriteConfig1Change = true;
 
-  if (WriteConfig1Change && AppState==0) { WriteConfig1(1); SaveTime4Data = SaveOptionOS = MediaChange = SaveVar = LayerADChange = SDNumChange = WriteConfig1Change = false; }
+  if (WriteConfig1Change && AppState==0) { WriteConfig1(1); DoneWrite = true; SaveTime4Data = SaveOptionOS = MediaChange = SaveVar = LayerADChange = SDNumChange = WriteConfig1Change = false; }
   if (SDNumChange) { SaveSDCardArr(); SDNumChange = false; }  
   if (Bank123Change) { File f = LittleFS.open("Bank123File", "w"); if (f) {f.write(Bank123, 3); f.close(); } Bank123Change = false; }
+  if (colourSave) { saveColour(); colourSave = false; }
+  if (nKeysColourSave) { saveNColour(); nKeysColourSave = false; }
+  if (nKeysArrSave) { saveNArr(); nKeysArrSave = false; } 
   if (LayerADChange) { if ( LayerAxD!=Config1[26] || LayerAD!=Config1[32] ) WriteConfig1(1); LayerADChange = false; }
   if (SaveVar) { WriteConfig1(1); SaveVar = false; }  
   if (MediaChange) { if (VolOn!=Config1[25] || MuteOn!=Config1[24] || Media!=Config1[27] || ToneOn!=Config1[79]) { WriteConfig1(1); MediaChange = false; } }  
@@ -3713,7 +3840,7 @@ void GetSysInfo(int Action)
   if (SaveTwist) { for (i=0; i<twX; i++) { saveTwist(i);  } SaveTwist = false; }
   if (SaveMCP) { saveMCP(); SaveMCP = false; } 
 
-  Serial.println("Version: VolumeMacroPad424 Tobias van Dyk April 2026 License GPL3");
+  Serial.println("Version: VolumeMacroPad428 Tobias van Dyk November 2026 License GPL3");
   Serial.println("Hardware: Waveshare Pico 1 or 2 RP2040 ILI9488 Resistive TouchLCD 3.5inch"); 
   Serial.printf("CPU MHz (Pico 1 or RP20240): %d\n\r", fCPU);
   Serial.printf("FreeHeap: %d\n\r", fHeap);
@@ -3722,14 +3849,11 @@ void GetSysInfo(int Action)
   Serial.printf("Core temperature: %2.1fC\n\r", analogReadTemp());  
   SerPr2; 
   
-  Serial.println("Flash Files (Number Name Size):");
-  ListFiles(0);
-  SerPr2;
-  Serial.println("SDCard Files (Number Name Size):");
-  ListSDFiles(0, 0);
- 
-  DisplayClocks(false);
-  // showKeyData(0);   // If included slows Save - use *ld*0,1,2 for data list 
+  if (DoneWrite) { Serial.println("Flash Files (Number Name Size):");
+                   ListFiles(0); SerPr2;  
+                   Serial.println("SDCard Files (Number Name Size):");
+                   ListSDFiles(0, 0);  
+                   DisplayClocks(0); } 
 }
 
 ////////////////////
@@ -3810,11 +3934,13 @@ bool WriteTimers(unsigned long PVal, byte Option, byte b)
 void status(const char *msg) 
 /////////////////////////////////////////////////
 {  // tft.setCursor(STATUS_X, STATUS_Y);
-  if (LayerAxD) tft.setTextColor(Orange, Black); else tft.setTextColor(SkyBlue1, Black); 
-  if (Kbrd) tft.setTextColor(Yellow, Black);
-  if (Math) tft.setTextColor(White, Black);
-  if (PowerKeys) tft.setTextColor(Orange, Black);
-  if (sSens||mPlay||tTimeDate) tft.setTextColor(Green, Black);
+  uint16_t colourBack = BackgroundColor[Layout-1];
+  
+  if (LayerAxD) tft.setTextColor(Orange, colourBack); else tft.setTextColor(SkyBlue1, colourBack); 
+  if (Kbrd) tft.setTextColor(Yellow, colourBack);
+  if (Math) tft.setTextColor(White, colourBack);
+  if (PowerKeys) tft.setTextColor(Orange, colourBack);
+  if (sSens||mPlay||tTimeDate) tft.setTextColor(colourSensor, colourBack);
   
   tft.setTextPadding(480);  tft.setFreeFont(&FreeSansBold9pt7b);
   tft.setTextDatum(1);
@@ -3823,6 +3949,7 @@ void status(const char *msg)
   
   if (KeyFontBold) tft.setFreeFont(&FreeSansBold12pt7b);  else tft.setFreeFont(&FreeSans12pt7b);                            
 }
+
 ////////////////////////////////////
 void FillKeysStr(int SelectLayout)
 ////////////////////////////////////
@@ -3915,20 +4042,22 @@ bool DoBank123(byte b, byte k2)
   status("Action Bank 1-5 changed");
   return true;
 }
+
 /////////////////////////////////////////////
 void SwitchMacroUL(bool Option)
 /////////////////////////////////////////////
 // Only change Pad keys MST O or mst o here
-{char Lcase[] = "amstdskmnoamstdamstd" ;
- char Ucase[] = "aMSTdskmnOaMSTdaMSTd" ;
+{char Lcase[] = "dmasnodsadta" ;
+ char Ucase[] = "dMasnOdSadTa" ;
  char MacroULStatus[30] = "Macro Filenames Case: ";
  byte n;
    
- for (n=0; n<20; n++) { if (MacroUL) padLabel[n][0]=Ucase[n]; else padLabel[n][0]=Lcase[n]; }
+ for (n=0; n<12; n++) { if (MacroUL) padLabel[n][0]=Ucase[n]; else padLabel[n][0]=Lcase[n]; }
  
  if (Option) { Config1[85] = MacroUL; WriteConfig1Change = 1; if (MacroUL)  { strcat(MacroULStatus, "Upper"); status(MacroULStatus); } 
                                                               if (!MacroUL) { strcat(MacroULStatus, "Lower"); status(MacroULStatus); }  }             
 }
+
 //////////////////////////
 // Find entered StarCode
 //////////////////////////
@@ -4084,10 +4213,10 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
            {FillKeysStr(1); status("[M1-M24] filled"); StarOk = true; break; }
         if (k2==0x61)              // *fa* = Fill M S T keys with predefined coded strings
            {FillKeysStr(0); status("[All 1-24] filled");  StarOk = true; break; }  }
-        case 12: //////////////////// KeyBrdByte[1]==0x66&&KeyBrdByte[2]==0x63)  *fc* = Key Label Font Colour Black White
-      { KeyFontColour = !KeyFontColour; Config1[33] = KeyFontColour; WriteConfig1Change = true; // or use WriteConfig1(0); 
-        if (KeyFontColour) { status("Key Font Colour Black"); KeyFont = Black; } else { status("Key Font Colour White"); KeyFont = White; } 
-        ConfigButtons(1); SendBytesEnd(1); StarOk = true; break; }
+        case 12: //////////////////// KeyBrdByte[1]==0x66&&KeyBrdByte[2]==0x63)  *fc* = Key Label Font Colour Black White *fc*c c=Colour[c] 0-F
+      { if (knum==4) { if (KeyFont==White) { KeyFont = Black; KeyFontColour = 0; } else { KeyFont = White; KeyFontColour = 1; } } 
+        if (knum==5) { a = HexCharToByte(k4); if (a<16) { KeyFontColour = a; KeyFont = Colour[KeyFontColour]; } else break; }  
+        Config1[33] = KeyFontColour; WriteConfig1Change = true; status("Key Font Colour Change"); ConfigButtons(1); SendBytesEnd(1); StarOk = true; break; }
         case 13: //////////////////// KeyBrdByte[1]==0x66&&KeyBrdByte[2]==0x6F *fo* = Key Label Bold Normal Font
       { KeyFontBold = !KeyFontBold; Config1[5] = KeyFontBold; WriteConfig1(0);
         if (KeyFontBold) { status("Key Font Bold ON");  tft.setFreeFont(&FreeSansBold12pt7b); }
@@ -4285,18 +4414,19 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
        { nKeys = !nKeys; Config1[7] = nKeys; WriteConfig1(0); 
          if (nKeys) status("n-Keys n01-n996 On"); else status ("NumPad pages 1-8 On"); Numkeys123 = 0; NumKeysChange(); StarOk = true; break; }
          case 46: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x6e *0n*char = 1-9 or aA - zZ Select nKeys Char 
-       { if (knum==4) { nKeysL134  = !nKeysL134; if (nKeysL134) status("L1 L3 L4 L=nChar"); else status("L1 L3 L4"); if (AppState==0) WriteConfig1Change = true; StarOk = true; break; }
-         if (knum>5) break; // Single digits or char only after *0n* or use *0n* for nKeysL134 on/off replaces L in L1,L3,L4
-         if (knum==5) { if (AppState==0) status("nKeys character changed"); Config1[8] = nChar = KeyBrdByte[4]; 
-         if (AppState==0) WriteConfig1(1); NumKeysChange(); StarOk = true; break; } }
+       { if (knum==4) { nKeysL134  = !nKeysL134; if (nKeysL134) status("n1 n3 n4 n=nChar"); else status("L1 L3 L4"); if (AppState==0) WriteConfig1Change = true; StarOk = true; break; }         
+         if (knum==5) { Config1[8] = nChar = KeyBrdByte[4]; m = getnKeysNum(nChar); nKeysColour = nColour[nKeysArr[0][m]]; nKeysPage = nKeysArr[1][m]; nKeys34 = nKeysArr[2][m];
+                        if (Numkeys123>nKeysPage) Numkeys123 = nKeysPage-1; if (nKeysArr[3][m]>0) nKeysLabel(0); else NumKeysChange();  // If new nKeys max pages is > old nKeys max pages
+                        if (AppState==0) { status("nKeys character changed"); WriteConfig1Change = true; } StarOk = true; break; } }
          case 47: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x70 *0p*pages = 1-83 Select pages number 
        { if (knum>6) break; // 1-83 only after *0p* 
          if (knum==5) { Config1[9] = nKeysPage = b;   if (b==0||b>9) { status("Use 1-9 Pages"); break; } }
          if (knum==6) { Config1[9] = nKeysPage = c99; if (nKeysPage==0||nKeysPage>83) { status("Use 1-83 Pages"); break; } }
-         status("1-83 Pages nKeys changed"); WriteConfig1(1); StarOk = true; break; }
-         case 48: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x73 *0s*10char = set of 10 char to choose from 
-       { if (knum>5) { status("nKeys shortlist characters changed");
-                       for (n=0; n<knum-4; n++) nKeysCharSet[n] = KeyBrdByte[4+n]; WriteConfig1(1); StarOk = true; break; } }                     
+         m = getnKeysNum(nChar); status("1-83 pages for nKey changed"); nKeysArr[1][m] = nKeysPage; nKeysArrSave = true; WriteConfig1Change = true; StarOk = true; break; }
+         case 48: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x73 *0s*10char = set of 10 char to choose from *0s* toggle nKeysShow *0s*0,1 clears or sets nKeysShow         
+       { if (knum==4) { nKeysShow = !nKeysShow; }
+         if (knum<6)  { nKeysShow = b; NumKeys = true; if (nKeysShow) status("nKeysShow ON"); else status("nKeysShow OFF"); StarOk = true; break; } 
+         if (knum>5)  { status("nKeys shortlist characters changed"); for (n=0; n<knum-4; n++) nKeysCharSet[n] = KeyBrdByte[4+n]; WriteConfig1Change = true;  } }                     
          case 49: ////////////////////// KeyBrdByte[1]==0x72&&KeyBrdByte[2]==0x6E *rn*newname=oldname  
        { if (knum<7) { status("Use *rn*oldname=newname name is file or /folder"); StarOk = true; break; }
          n = 0; while (n<=knum-4) { KeyBrdByte[n] = KeyBrdByte[n+4]; n++; } knum = knum - 4;        
@@ -4310,9 +4440,12 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
        { if (knum==6) { crlf1 = Config1[21] = KeyBrdByte[4]; crlf2 = Config1[22] = k5;   status("Text filter changed"); StarOk = true; }
          if (knum==5 && b==0) { crlf1 = Config1[21] = 0x0D;  crlf2 = Config1[22] = 0x0A; status("Text filter CR LF");   StarOk = true; } 
          if (StarOk) WriteConfig1(1); break; }
+         case 101: ////////////////////// KeyBrdByte[1]=='0'&&KeyBrdByte[2]=='c' nDirClear toggle clear nDir at start         
+       { nDirClear = !nDirClear; Config1[100] = nDirClear; 
+         if (nDirClear) status("nDir clear at start"); else status("Saved nDir used at start"); WriteConfig1Change = true; StarOk = true; break; }
          case 52: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x79 *0x* nKeys34 = nKeys count n00-n99,n100-n999 if true else n000-n999         
-       { nKeys34 = !nKeys34; Config1[39] = nKeys34; WriteConfig1(0); 
-         if (nKeys34) status("nKeys n01-n99 n100-n999"); else status ("nKeys n001-n999"); NumKeysChange(); StarOk = true; break; }  
+       { nKeys34 = !nKeys34; nKeysArr[2][getnKeysNum(nChar)] = nKeys34; Config1[39] = nKeys34; 
+         if (nKeys34) status("nKey n01-n99 n100-n999"); else status("nKey n001-n999"); NumKeysChange(); nKeysArrSave = true; WriteConfig1Change = true; StarOk = true; break; } 
          case 53: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x64 *0d*/20-char-max or default mode *0d* note that *0d*/ gives nDir=// *0d* gives nDir=/
        { nDirX=0; if (knum>4) { for (n=0; n<knum-4; n++) nDir[n] = KeyBrdByte[4+n];                       
                                      if (k5=='/') { nDir[1]=nChar; nDir[2]='/'; nDir[3]=0x00; nDirX=2; }  // 2: /nChar/
@@ -4346,13 +4479,13 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
         if (knum==6) { if (k5=='s') LayerAxD = true; else if (k5=='f') LayerAxD = false; else break;  }
         optionsindicators(0); ConfigButtons(1); LayerADChange = true; StarOk = true; break; } 
         case 58: ///////////////////// KeyBrdByte[1]==0x6c&&KeyBrdByte[2]==0x79 *lx*lxs l=1-4 x=a,b,c,d s=s,f (SDCard or Flash) switch layouts A-D brown and white
-      { if (knum==4) { Layout = 2; }             // Layout = 1-4 LayerAD = 0,1,2,3 = a,b,c,d toggle brown/white keep same A-D A=65 a=97
-        if (knum>4)  { if (b>0&&b<5) { Layout = b; if (knum==5) { ConfigButtons(1); StarOk = true; break; } } 
-                       if (k4=='s')  { Layout = 2; buttonpress(12); StarOk = true; break; } 
-                       if (k4=='k')  { Layout = 2; buttonpress(13); StarOk = true; break; }                                                                                 
-                       if (k4=='m')  { Layout = 2; buttonpress(14); StarOk = true; break; } 
-                       if (k4=='n')  { Layout = 2; buttonpress(15); StarOk = true; break; } 
-                       if (k4=='o')  { Layout = 2; buttonpress(16); StarOk = true; break; }  break; }
+      { if (knum==4) { Layout = 2; Kbrd = MouseK  = NumKeys = Math = nKeysShow = false;}                              // Layout = 1-4 LayerAD = 0,1,2,3 = a,b,c,d toggle brown/white keep same A-D A=65 a=97
+        if (knum>4)  { if (b>0&&b<5) { if (knum==5) Layout = b; Kbrd = MouseK  = NumKeys = Math= nKeysShow = false; }                       // L1 - L4
+                       if (k4=='s')  { Layout = 2; NumKeys = false; buttonpress(12); }                                                      // Symbols
+                       if (k4=='k')  { Layout = 2; if (!Kbrd) { buttonpress(5); buttonpress(0); buttonpress(14); } else buttonpress(12); }  // KeyBrd                                                                               
+                       if (k4=='m')  { Layout = 2; if (!MouseK) { buttonpress(12); buttonpress(14); } else buttonpress(14); }               // Mouse
+                       if (k4=='n')  { Layout = 2; Math = false; buttonpress(13); }                                                         // nKeys
+                       if (k4=='o')  { Layout = 2; buttonpress(14); }  ConfigButtons(1); StarOk = true; break; }                            // Option
         if (knum>5)  { n = LayerAD; LayerAD = k5 - 97; if (LayerAD<4) LayerADLetter[0] = 65 + LayerAD; else { LayerAD = n; break; } }
         if (knum==7) { if (k6=='s') LayerAxD = true; else if (k6=='f') LayerAxD = false; else break;  }
         optionsindicators(0); ConfigButtons(1); LayerADChange = true; StarOk = true; break; } 
@@ -4407,7 +4540,8 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
         for (n=0; n<8; n++)                  Serial.print(mcpAddr[n]-32);          Serial.println();   
         for (n=0; n<8; n++) { for (i=0; i<16; i++)                                 Serial.print(mcpPins[n][i]);        Serial.println(); }
         Serial.println(mcpDir);              Serial.println(mcpStr);               Serial.println(mcp23018);           Serial.println(twistStar);            Serial.println(twC);   
-        Serial.println(Fxx);                 Serial.println(FxxMod);               Serial.println("EOC"); 
+        Serial.println(Fxx);                 Serial.println(FxxMod);               Serial.println(nDir);               Serial.println(nKeysArr[3][getnKeysNum(nChar)]);   
+        Serial.println("EOC"); 
         status("Text Data sent to PC"); StarOk = true; break; } } 
         case 73: ///////////////////// KeyBrdByte[1]==n3&&KeyBrdByte[2]==f *nf*xmmm x = nChar mmm = nKeyNumber Send content of nkeyfile to PC App
       { if (nKeys34 && d999<100) { NameStr3[0] = k4; NameStr3[1] = k6; NameStr3[2] = k7; NameStr3[3] = 0x00; }         
@@ -4417,13 +4551,13 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
         Serial.print(nFile); status(nFile); StarOk = true; break; }      
         case 74: ///////////////////// KeyBrdByte[1]==n3&&KeyBrdByte[2]==n *nn*nnn send content of 12 nKeys on page nnn to PC App
       { Numkeys123 = c999; NumKeysChange(); status("nKeys List not coded"); StarOk = true; break; }          
-        case 75: ///////////////////// KeyBrdByte[1]==n3&&KeyBrdByte[2]==p *np*nnn switch LCD to nKeys page on command from App switch off with a second *np*nnn
-      { if (knum==4) { NumKeys = false; PadKeysState(4, !NumKeys); StarOk = true; break; }
-        Numkeys123 = c999; NumKeysChange(); NumKeys = true; PadKeysState(4, !NumKeys); StarOk = true; break; }      
-        case 76: ///////////////////// KeyBrdByte[1]=='n'&&KeyBrdByte[2]=='d' *nd*nnd send raw keys 1-17 -> 0-16 to LCD d = delay*1000 mS (optional)
+        case 75: ///////////////////// KeyBrdByte[1]==n3&&KeyBrdByte[2]==p *np*nnn switch LCD to nKeys page on command from App switch off with a second *np*nnn 
+      { if (knum==4) { NumKeys = !NumKeys; PadKeysState(!NumKeys); StarOk = true; break; }
+        Numkeys123 = c999; NumKeysChange(); NumKeys = true; PadKeysState(!NumKeys); StarOk = true; break; }  // Tested with <*np*002> switch to nKeys 3rd page    
+        case 76: ///////////////////// KeyBrdByte[1]=='n'&&KeyBrdByte[2]=='d' *nd*nnd send raw keys 1-15 -> 0-14 to LCD d = delay*1000 mS (optional)
       { if (c99==0) { LastMillis = millis(); Change = StarOk = true; break; }  // This is a wakeup *nd*00 or *nd*000 but triggers false Key M5 S5 T5 pressed if sent from PC App
         if (knum==7) { if (k6=='*') { DoAltEsc(); delay(dt100); } else { e = (k6-48)*1000; delay(e); } 
-        if (c99<18) buttonpress(c99-1); StarOk = true; break; } }
+        if (c99<16) buttonpress(c99-1); StarOk = true; break; } }  
          case 77: ////////////////////// KeyBrdByte[1]==0x72&&KeyBrdByte[2]==0x6D *rm*filename - will use currentLayerAxD to determine if file on SDcard or Flash  
        { if (knum<5) { status("Use *rm*filename file or //folder"); StarOk = true; break; }
          n = 0; while (n<=knum-4) { KeyBrdByte[n] = KeyBrdByte[n+4]; n++; } if (LayerAxD) SrcDst = 3; else SrcDst = 0; KeyBrdByteNum = knum - 4;   // LayerAxD = sdcard = true     
@@ -4596,7 +4730,56 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
                                                                     else if (KeyBrdByte[n+4]=='g') { NewFxxMod |= 0x08; BadChar = false; } } // Gui L 
                                                if (BadChar) { status("Wrong *fx* syntax"); StarOk = false; break; }
                                                NewFxx = 1;  }                                        
-          Fxx = NewFxx; FxxMod = NewFxxMod; WriteConfig1Change = true; strcat(FxxStr, Fxx01[Fxx]); status(FxxStr); StarOk = true; break; }                    
+          Fxx = NewFxx; FxxMod = NewFxxMod; WriteConfig1Change = true; strcat(FxxStr, Fxx01[Fxx]); status(FxxStr); StarOk = true; break; }   
+         case 97: ////////////////////// KeyBrdByte[1]=='l'&&KeyBrdByte[2]=='k' *lk*0,1   // Lock KeyPad use *lk* to toggle locked/unlocked - if locked use PCApp or do HW reset of Keypad    
+       { if (knum==4) KeyLock = !KeyLock; 
+         if (knum==5) KeyLock = b; 
+         if (KeyLock) status("KeyLock ON"); else status("KeyLock OFF"); StarOk = (knum<6); break; }    
+         case 98: ////////////////////// KeyBrdByte[1]=='c'&&KeyBrdByte[2]=='o' *co* Toggle CapsNumScrollLock Bright Green or Orange (or Cyan with *co*0 ) *co*nc n=MacroPadObject c=Colour 0-9A-F in Colours Array    
+       { WriteConfig1Change = true; colourSave = true; bool nKeysChange = false;  // For example <*co*43> change key label to white <*co*4> toggle key label between white and yellow
+         if (knum==4) { if (colourCNS!=Orange) { Config1[93]=11; colourCNS = Orange; } else { Config1[93]=3; colourCNS = Green; } }                 // Toggle between Green and Orange        
+         if (knum==5) { if (k4=='*') { for (n=0; n<16; n++) Colour[n] = Colour0[n]; for (n=0; n<4; n++) { BackgroundColor[n] = Black; Config1[95+n]=0; } 
+                        nKeysColour = DCyan; colourCNS = Green; colourOS = White; KeyFont = White; Config1[94] = Config1[33] = 1; Config1[92] = 2; Config1[93] = 3;
+                        ConfigButtons(0); SendBytesEnd(1); indicators(); status("Colour defaults set"); WriteConfig1(0); StarOk = true; break; } 
+                        if (b==0) { if (colourCNS!=Green) { Config1[93] = 3; colourCNS = Green; } else { Config1[93] = 4; colourCNS = Cyan; }  }    // Toggle between Cyan and Green 
+                        if (b==1) { if (Config1[95]==0) { BackgroundColor[0]=Colour[Config1[95] + 8]; } else { Config1[95] = 0; BackgroundColor[0] = Colour[0]; } 
+                                    for (n=1; n<4; n++) { Config1[95+n] = Config1[95]; BackgroundColor[n] = BackgroundColor[0]; } }
+                        if (b==2) { if (Config1[92]==2) { Config1[92] = 10; nKeysColour = Colour[10]; } else { Config1[92] = 2;  nKeysColour = Colour[2];  } nKeysChange = true; }                           
+                        if (b==3) { if (Config1[94]==1) { colourOS = Colour[Config1[94] + 8]; } else { Config1[94] = 1; colourOS = Colour[1]; } } 
+                        if (b==4) { if (Config1[33]==1) { KeyFontColour = Config1[33] = 9; KeyFont = Colour[KeyFontColour]; } else { KeyFontColour = Config1[33] = 1; KeyFont = Colour[KeyFontColour]; } } 
+                        if (b==5) { if (Config1[101]==3) { colourSensor = Cyan; Config1[101] = 4; } else { Config1[101] = 3; colourSensor = Green; } } }
+         if (knum==6) { m = HexCharToByte(k5); // Use to set to a custom colour in Colour[]
+                        if (b==0) { colourCNS = Colour[m]; Config1[93] = m; }   
+                        if (b==1) { BackgroundColor[0] = Colour[m]; Config1[95] = m; for (n=1; n<4; n++) { Config1[95+n] = Config1[95]; BackgroundColor[n] = BackgroundColor[0]; } }
+                        if (b==2) { nKeysColour = Colour[m]; Config1[92] = m; nKeysChange = true; }  // Set current nKeys colour to Colour[m]                            
+                        if (b==3) { colourOS = Colour[m]; Config1[94] = m; }  
+                        if (b==4) { KeyFont = Colour[m]; KeyFontColour = Config1[33] = m; } 
+                        if (b==5) { colourSensor = Colour[m]; Config1[101] = m; } }
+         if (knum==9) { m = (HexCharToByte(KeyBrdByte[5])<<12) | (HexCharToByte(KeyBrdByte[6])<<8) | (HexCharToByte(KeyBrdByte[7])<<4) | HexCharToByte(KeyBrdByte[8]);
+                        if (b==0) { colourCNS = m; } else if (b==2) { nKeysColour = m; nKeysChange = true; } else if (b==3) { colourOS = m; } else if (b==4) { KeyFont = m; } else if (b==5) { colourSensor = m; } // *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF
+                        if (b==1) { for (n=0; n<4; n++) { m = HexCharToByte(KeyBrdByte[n+5]); BackgroundColor[n] = Colour[m]; Config1[95+n] = m; } } }                         // *co*b0123 b=1 0-F BackgroundColor[]
+         if (knum==10) { if (c99>0 && c99<17) { Colour[c99-1] = (HexCharToByte(KeyBrdByte[6])<<12) | (HexCharToByte(KeyBrdByte[7])<<8) | (HexCharToByte(KeyBrdByte[8])<<4) | HexCharToByte(KeyBrdByte[9]); } }     // *co*nncccc nn=01-16
+         if (knum==68) { for (n=0; n<16; n++) { m=4+(n*4); Colour[n]=(HexCharToByte(KeyBrdByte[m])<<12)|(HexCharToByte(KeyBrdByte[m+1])<<8)|(HexCharToByte(KeyBrdByte[m+2])<<4)|HexCharToByte(KeyBrdByte[m+3]); } }                         
+         if (nKeysChange) { m = getnKeysNum(nChar); nColour[nKeysArr[0][m]] = nKeysColour; nKeysPage = nKeysArr[1][m]; if (Numkeys123>nKeysPage) Numkeys123 = nKeysPage-1; 
+                            nKeys34 = nKeysArr[2][m]; nKeysColourSave = true; } 
+         ConfigButtons(0); SendBytesEnd(1); indicators(); status("Object colour changed"); StarOk = true; break; }  
+         case 99: ////////////////////// KeyBrdByte[1]=='c'&&KeyBrdByte[2]=='n' *cn* All DCyan *cn** defaults Change nKeys Colour set of 16 colours to choose from  *cn*nn nn = 01-16  
+       { WriteConfig1Change = true; nKeysColourSave = true; 
+         if (knum==4) { for (n=0; n<16; n++) nColour[n] = dCyan; ConfigButtons(0); SendBytesEnd(1); indicators(); status("All nKeys 16 Colour Option Dark Cyan"); StarOk = true; break; }            // *cn* All DCyan                   
+         if (knum==5) { if (k4=='*') { for (n=0; n<16; n++) nColour[n] = nColour0[n]; ConfigButtons(0); SendBytesEnd(1); indicators(); status("nKeyscolour defaults set"); StarOk = true; } break; } // *cn** defaults
+         if (knum==6) { if (c99>0 && c99<17) { m = getnKeysNum(nChar); nKeysArr[0][m] = c99-1; nKeysColour = nColour[nKeysArr[0][m]]; nKeysArrSave = true;                                           // *cn*nn nn = 01-16 
+                        ConfigButtons(0); SendBytesEnd(1); indicators(); status("nKeyscolour number changed"); StarOk = true; } break; }                 
+         if (knum==10) { if (c99>0 && c99<17) { nColour[c99-1] = (HexCharToByte(KeyBrdByte[6])<<12) | (HexCharToByte(KeyBrdByte[7])<<8) | (HexCharToByte(KeyBrdByte[8])<<4) | HexCharToByte(KeyBrdByte[9]); } }  // *cn*nncccc nn=01-16
+         if (knum==68) { for (n=0; n<16; n++) { m=4+(n*4); nColour[n]=(HexCharToByte(KeyBrdByte[m])<<12)|(HexCharToByte(KeyBrdByte[m+1])<<8)|(HexCharToByte(KeyBrdByte[m+2])<<4)|HexCharToByte(KeyBrdByte[m+3]); } }                         
+         ConfigButtons(0); SendBytesEnd(1); indicators(); status("nKeys colour changed"); nKeysColourSave = true; StarOk = true; break; } 
+         case 100: ////////////////////// KeyBrdByte[1]=='0' && KeyBrdByte[2]=='l' *0l* Use custom labels if *0l*1,2 else number label *0l*0 or toggle with *0l* *0L*            
+       { if (knum==6) { nLabelPage = c99-1; if (c99==0||c99>84) { status("Use 1-84 pages"); break; }     // *0L*nn nn = 01-84 custom labels max pages  
+                        status("1-84 pages nKey labels changed"); WriteConfig1Change = true; StarOk = true; break; } 
+         n = getnKeysNum(nChar); m = nKeysArr[3][n]; 
+         if (knum==4) { if (m>0) m = 0; else m=1; }                                                      // *0L* toggle labels option on/off - no 2 option here
+         if (knum==5) { m = b; }                                                                         // *0L*n change labels option = 0, 1, or 2         
+         nKeysArr[3][n] = m; if (m>0) { status("nKey Labels ON"); nKeysLabel(0); } else { status("nKey Labels OFF"); NumKeysChange(); } 
+         nKeysArrSave = true; WriteConfig1Change = true; StarOk = true; break; }                           
       } return StarOk;                
 }
                        
@@ -4632,9 +4815,12 @@ void runI2CScanner() // Google Gemini
   SerPr2;
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-void DoTwistMacro(int t)
-//////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+void DoTwistMacro(int t) 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// vuzsxdwbVUZSXDWB mute/volume+- undo/redo reset/zoom+- macropad-pages+-/scroll+- print/*=--+#?<>[]() 
+//                  backspace/delete minimize/Wallpaper Photoshop Brush size b +/- Hardness B +/- 0x00
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
 { uint8_t keycode[6] = { 0 };     // simultaneous keys pressed in here 
   char Action = ' ';
   int n = 0;
@@ -4653,62 +4839,70 @@ void DoTwistMacro(int t)
                      VolOk = SendBytesStarCodes();
                      break;
            case 'U':
-           case 'u': if (twistVal[t]>0) Action = KeyY; else Action = KeyZ; 
+           case 'u': if (twistVal[t]>0) Action = KeyY; else Action = KeyZ;              // Undo/Redo
                      keycode[0] = CtrL; keycode[1] = Action; keycode[2] = 0x00; 
                      usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
                      usb_hid.keyboardRelease(HIDKbrd);                   delay(dt50);
                      break;
            case 'D': 
-           case 'd': if (twistVal[t]>0) Action = DelK; else Action = BckS;  
+           case 'd': if (twistVal[t]>0) Action = DelK; else Action = BckS;              // Backspace/Delete
                      keycode[0] = Action; keycode[1] = keycode[2] = 0x00; 
                      usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
                      usb_hid.keyboardRelease(HIDKbrd);                   delay(dt50);
                      break;  
-           case 'S': 
-           case 's': if (pressTwist[t]) { for (int n=0; n<6; n++) KeyBrdByte[n] = ScrollX[n]; KeyBrdByteNum = 6; }
-                     else { for (int n=0; n<5; n++) KeyBrdByte[n] = ScrollM[n]; KeyBrdByteNum = 5; if (twistVal[t]>0) KeyBrdByte[4] = 'U'; if (twistVal[t]<0) KeyBrdByte[4] = 'D'; }  
+           case 'S': if (Layout!=2) { if (pressTwist[t]) { LayerAxD = !LayerAxD; optionsindicators(0); break; }
+                                      if (twistVal[t]>0)  { if (LayerAD<3) LayerAD++; else LayerAD = 0; }  else { if (LayerAD>0) LayerAD--; else LayerAD = 3; } 
+                                      ConfigButtons(1); optionsindicators(0); break; }
+                     if (NumKeys && nKeys && Layout==2) { if (pressTwist[t]) { nKeysShow = !nKeysShow; ConfigButtons(1); break; }
+                                                          if (twistVal[t]>0) { if (Numkeys123<nKeysPage-1) Numkeys123++; else Numkeys123 = 0; } 
+                                                                        else { if (Numkeys123>0) Numkeys123--; else Numkeys123 = nKeysPage-1; } 
+                                                          NumKeysChange(); ConfigButtons(1); break;  }  
+                     if (Math && Layout==2) { if (pressTwist[t]) { Math = !Math; ConfigButtons(1); break; }
+                                              if (twistVal[t]>0) { if (MathX<3) MathX++; else MathX=0; }
+                                                            else { if (MathX>0) MathX--; else MathX=3; }
+                                              Math123=0; ConfigButtons(1); break; }        // May need PadKeysState(!Math);
+                     if (Layout==2) { if (pressTwist[t]) { LayerAxD = !LayerAxD; optionsindicators(0); break; }  // Or enter/leave nKeys NumKeys=!NumKeys; if (NumKeys) VarNum=OptNum=0; PadKeysState(!NumKeys);
+                                      if (twistVal[t]>0) { Layout++; if (Layout>4) Layout=1; } else { Layout--; if (Layout<1) Layout=4; } 
+                                      ConfigButtons(1); optionsindicators(0); break; } 
+                     break;                                                                                                     
+           case 's': if (pressTwist[t]) { for (int n=0; n<6; n++) KeyBrdByte[n] = ScrollX[n]; KeyBrdByteNum = 6; }        // Scroll Up/Down
+                     else { for (int n=0; n<5; n++) KeyBrdByte[n] = ScrollM[n]; KeyBrdByteNum = 5; if (twistVal[t]>0) KeyBrdByte[4] = 'U'; if (twistVal[t]<0) KeyBrdByte[4] = 'D'; } 
                      SendBytesStarCodes(); break;
-           case 'Z': 
-           case 'z': if (pressTwist[t]) Action = Key0; else { if (twistVal[t]>0) Action = KEqu; else Action = KMin; } 
+           case 'Z':  
+           case 'z': if (pressTwist[t]) Action = Key0; else { if (twistVal[t]>0) Action = KEqu; else Action = KMin; }     // + and - Zoom
                      keycode[0] = CtrL; keycode[1] = Action; keycode[2] = 0x00; 
                      usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
                      usb_hid.keyboardRelease(HIDKbrd);                   delay(dt50);
                      break;  
            case 'B': if (pressTwist[t]) twistMacro[t] = (twistMacro[t] == 'b') ? 'B' : 'b';                 // b Brush size B Brush hardness
-                     if (twistVal[t]>0) Action = 0x30; if (twistVal[t]<0) Action = 0x2F;                 // Shift + [ ] brush hardness
+                     if (twistVal[t]>0) Action = 0x30; if (twistVal[t]<0) Action = 0x2F;                    // Shift + [ ] brush hardness
                      keycode[0] = ShfL; keycode[1] = Action; keycode[2] = 0x00; 
                      usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
                      usb_hid.keyboardRelease(HIDKbrd);                   delay(dt50); break;
            case 'b': if (pressTwist[t]) twistMacro[t] = (twistMacro[t] == 'b') ? 'B' : 'b';                 // b Brush size B Brush hardness
-                     if (twistVal[t]>0) Action = ']'; if (twistVal[t]<0) Action = '[';                   // [ ] brush size
+                     if (twistVal[t]>0) Action = ']'; if (twistVal[t]<0) Action = '[';                      // [ ] brush size
                      usb_hid.keyboardPress(HIDKbrd, Action);             delay(dt50); 
                      usb_hid.keyboardRelease(HIDKbrd);                   delay(dt50);
                      break;                                                 
-           case 'X': if (twistVal[t]>0) Action = twistX[0]; else Action = twistX[1]; 
+           case 'X': if (pressTwist[t]) { twistXPos = twistXPos+2; if (twistXPos>12) twistXPos=0; break; }  // break after press else ghost char printed
+                     if (twistVal[t]>0) Action = twistX[twistXPos+0]; else Action = twistX[twistXPos+1];    // twistX[15] ""                    
                      usb_hid.keyboardPress(HIDKbrd, Action);             delay(dt50);
                      usb_hid.keyboardRelease(HIDKbrd);                   delay(dt50); 
                      break;           
            case 'x': if (LastButton >= 0 && LastButton < NumButtons) { Layout = LastLayout; buttonpress(LastButton); }  // Repeat last touchscreen key
-                     break; 
-           case 'Y': if (pressTwist[t]) { keycode[0] = KeyD; keycode[1] = 0x00; keycode[2] = 0x00; 
-                                       tud_hid_keyboard_report(HIDKbrd, ModGuiL, keycode); delay(dt50); 
-                                       tud_task();   // call before releasing the keys
-                                       keycode[0] = 0x00;
-                                       tud_hid_keyboard_report(HIDKbrd, 0x00, keycode); }
-                     break;                      
-           case 'y': if (pressTwist[t]) { keycode[0] = GuiL; keycode[1] = KeyD; keycode[2] = 0x00; 
-                                       usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
-                                       usb_hid.keyboardRelease(HIDKbrd);                   delay(1000); }
-                     break;  
-           case 'W':                                        
-           case 'w': if (twistVal[t]>0) { keycode[0] = ShfL; keycode[1] = F10; keycode[2] = 0x00; 
-                                       usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
-                                       usb_hid.keyboardRelease(HIDKbrd);                   delay(dt200);
-                                       usb_hid.keyboardPress(HIDKbrd, 'n');                delay(dt50);
-                                       usb_hid.keyboardRelease(HIDKbrd);                   delay(1000); }                
+                     break;
+           case 'W': if (pressTwist[t]) { keycode[0] = GuiL; keycode[1] = KeyD; keycode[2] = 0x00;                      // Press Gui D minimize all windows
+                                          usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
+                                          usb_hid.keyboardRelease(HIDKbrd);                   delay(1000); }
+                     break;                                       
+           case 'w': if (twistVal[t]>0) { keycode[0] = ShfL; keycode[1] = F10; keycode[2] = 0x00;                       // Shift F10 n = Windows next wallpaper
+                                          usb_hid.keyboardReport(HIDKbrd, 0, keycode);        delay(dt50); 
+                                          usb_hid.keyboardRelease(HIDKbrd);                   delay(dt200);
+                                          usb_hid.keyboardPress(HIDKbrd, 'n');                delay(dt50);
+                                          usb_hid.keyboardRelease(HIDKbrd);                   delay(1000); }                
                      break;                                                 
            default:  break;
-         }  return; 
+        }  return;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -4820,6 +5014,63 @@ void readTwist(int t)
     file.read((uint8_t *)twistOption, sizeof(twistOption));     
     twistMacro[t] = twistOption[twistcurrOption[t]];    
   }
+  file.close();
+}
+
+///////////////////////////////////////////////
+// Read and Save 16 Colour Array 32 bytes size
+///////////////////////////////////////////////
+void saveColour() 
+{
+  File file = LittleFS.open("Colour", "w");
+  if (!file) return;      
+  file.write((uint8_t *)Colour, sizeof(Colour));
+  file.close();  
+}
+ 
+void readColour() 
+{ 
+  File file = LittleFS.open("Colour", "r");
+  if (file.size()!=sizeof(Colour)) { file.close(); saveColour(); return; }  
+  if (file.available()) { file.read((uint8_t *)Colour, sizeof(Colour)); }
+  file.close();
+}
+
+///////////////////////////////////////////////
+// Read and Save 16 nColour Array 32 bytes size
+///////////////////////////////////////////////
+void saveNColour() 
+{
+  File file = LittleFS.open("nColour", "w");
+  if (!file) return;      
+  file.write((uint8_t *)nColour, sizeof(nColour));
+  file.close();  
+}
+ 
+void readNColour() 
+{ 
+  File file = LittleFS.open("nColour", "r");
+  if (file.size()!=sizeof(nColour)) { file.close(); saveNColour(); return; }  
+  if (file.available()) { file.read((uint8_t *)nColour, sizeof(nColour)); }
+  file.close();
+}
+
+////////////////////////////////////////////////////
+// Read and Save nKeysArr 248 bytes size (62 x 4) 
+////////////////////////////////////////////////////
+void saveNArr() 
+{
+  File file = LittleFS.open("nKeysArr", "w");
+  if (!file) return;      
+  file.write((uint8_t *)nKeysArr, sizeof(nKeysArr));
+  file.close();  
+}
+ 
+void readNArr() 
+{ 
+  File file = LittleFS.open("nKeysArr", "r");
+  if (file.size()!=sizeof(nKeysArr)) { file.close(); saveNArr(); return; }  // Save default values 
+  if (file.available()) { file.read((uint8_t *)nKeysArr, sizeof(nKeysArr)); }
   file.close();
 }
 
@@ -5720,6 +5971,7 @@ void SendMath()
     usb_hid.keyboardReport(HIDKbrd, 0, keycode);      delay(100);
     usb_hid.keyboardRelease(HIDKbrd);                 delay(dt25);
 }
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // "\x80 \x81 \x82 \x83 \x84 \x85 \x86 \x87 \x88 \x89 \x8A \x8B \x8C \x8D \x8E \x8F"
 // "\x90 \x91 \x92 \x93 \x94 \x95 \x96 \x97 \x98 \x99 \x9A \x9B \x9C \x9D \x9E \x9F"   // umlauts etc
@@ -5734,6 +5986,7 @@ void TestFonts ()
   tft.setTextSize(KEY_TEXTSIZE); 
   if (KeyFontBold) tft.setFreeFont(&FreeSansBold12pt7b); else tft.setFreeFont(&FreeSans12pt7b);
 }
+
 //////////////////////////////////////////////////////////////////////////
 // Sourcerc nn Target nn   D  Timers RrTt CcTt
 //////////////////////////////////////////////////////////////////////////
@@ -5746,12 +5999,13 @@ void optionsindicators(int Option)
   char DstDispStr[12]   = {"Dst  M  nnn"};
   char MSTArr[6][2] = {"M","S","T","A","K","N"}; 
   char SDNumChar[]  =  "x" ;  
+  uint16_t colourBack = BackgroundColor[Layout-1];
   
   MSTArr[5][0] = nChar;
   
   tft.setTextPadding(110);                              
   tft.setFreeFont(&FreeSansBold9pt7b);
-  tft.setTextColor(Yellow, Black); 
+  tft.setTextColor(Yellow, colourBack); 
   tft.setTextDatum(1);
     
   if (Kbrd) 
@@ -5761,8 +6015,8 @@ void optionsindicators(int Option)
        op2=Option2+1;  a = 48 + op2/100;  b = 48 + (op2/10)-10*(a-48); c = 48 + op2%10;
        // Serial.print(op2); Serial.print(' ');Serial.print(a,HEX); Serial.print(' ');Serial.print(b,HEX);Serial.print(' ');Serial.println(c,HEX);
        DstDispStr[8] = a; DstDispStr[9] = b;  DstDispStr[10] = c;  
-       tft.setTextColor(ColArr[SrcDst][0], Black); tft.drawString(SrcDispStr, MST_X1-56, MST_Y); 
-       tft.setTextColor(ColArr[SrcDst][1], Black); tft.drawString(DstDispStr, MST_X1+54, MST_Y);}
+       tft.setTextColor(ColArr[SrcDst][0], colourBack); tft.drawString(SrcDispStr, MST_X1-56, MST_Y); 
+       tft.setTextColor(ColArr[SrcDst][1], colourBack); tft.drawString(DstDispStr, MST_X1+54, MST_Y);}
   else { tft.setTextPadding(220); tft.drawString(" ", MST_X1, MST_Y); }
   
   MacroTimer18 = MacroTimer8 || MacroTimer7 || MacroTimer6 || MacroTimer5 || Macrotimer4 || MacroTimer3 || Macrotimer2 || MacroTimer1;   
@@ -5771,32 +6025,32 @@ void optionsindicators(int Option)
 
   tft.setTextPadding(18);                // 14 to 16 does not clear "W" OptionOS for next letter L,R - can use "w" or set to 17
 
-  if (SDNum<22) { if (SDCardArr[2]) { SDNumChar[0] = SD2[SDNum]; tft.setTextColor(Cyan, Black); }    // 0,1 Upper/Lowerscase filename 
-                               else { SDNumChar[0] = SD1[SDNum]; tft.setTextColor(Yellow, Black); }  // SDNumArr[1] = 0x00
+  if (SDNum<22) { if (SDCardArr[2]) { SDNumChar[0] = SD2[SDNum]; tft.setTextColor(Cyan, colourBack); }    // 0,1 Upper/Lowerscase filename 
+                               else { SDNumChar[0] = SD1[SDNum]; tft.setTextColor(Silver, colourBack); }  // SDNumArr[1] = 0x00
       tft.drawString(SDNumChar, OPT_X1, OPT_Y); }
       
-  tft.setTextColor(White, Black);
+  tft.setTextColor(colourOS, colourBack);
   tft.drawString(OSChr[OptionOS], OPT_X2, OPT_Y); 
   
-  if (KeyBrdDirect&&Kbrd) { tft.setTextColor(Cyan, Black); tft.drawString("D", OPT_X1, OPT_Y); }
+  if (KeyBrdDirect&&Kbrd) { tft.setTextColor(Cyan, colourBack); tft.drawString("D", OPT_X1, OPT_Y); }
   
   LayerADLetter[0] = 65 + LayerAD;
-  if (LayerAxD) tft.setTextColor(Orange, Black); else tft.setTextColor(White, Black);  
+  if (LayerAxD) tft.setTextColor(Orange, colourBack); else tft.setTextColor(White, colourBack);  
   tft.drawString(LayerADLetter, OPT_X3, OPT_Y);  
 
   tft.setTextPadding(10);
   tft.setFreeFont();   // or NULL => GLX Font
-  if (!CheckSerial) tft.setTextColor(Red, Black); else tft.setTextColor(Green, Black);
+  if (!CheckSerial) tft.setTextColor(Red, colourBack); else tft.setTextColor(Green, colourBack);
   tft.drawString("\xB1", OPT_X0, OPT_Y+5); // glcdfont.c has 177=B1 75%
 
-  if (Layout!=2) { b = Layout - (Layout==1) - 2*(Layout==3||Layout==4); tft.setTextColor(Bank123Color[Bank123[b]-1], Black);
+  if (Layout!=2) { b = Layout - (Layout==1) - 2*(Layout==3||Layout==4); tft.setTextColor(Bank123Color[Bank123[b]-1], colourBack);
       tft.drawString("\xB1", OPT_X0, IND_Y+6); } else tft.drawString(" ", 6, IND_Y+6);// glcdfont.c has 177=B1 75%
 
-  if (TimeSet) tft.setTextColor(Green, Black); else tft.setTextColor(Red, Black);
+  if (TimeSet) tft.setTextColor(Green, colourBack); else tft.setTextColor(Red, colourBack);
   tft.drawString("\xB1", OPT_X4, OPT_Y+5);  
 
-  if (powerEnable || timerEnable || alarmEnable || MacroTimerOK) tft.setTextColor(Yellow, Black); else tft.setTextColor(Red, Black);
-  tft.drawString("\xB1", OPT_X4, IND_Y+6);   
+  if (timerEnable || alarmEnable || MacroTimerOK) tft.setTextColor(Yellow, colourBack); else tft.setTextColor(Red, colourBack);
+  tft.drawString("\xB1", OPT_X4, IND_Y+6);        
                 
   if (KeyFontBold) tft.setFreeFont(&FreeSansBold12pt7b);
               else tft.setFreeFont(&FreeSans12pt7b);   
@@ -5808,7 +6062,7 @@ void optionsindicators(int Option)
 void indicators() 
 { if (BusyCNS) return;
   tft.setTextPadding(18); tft.setFreeFont(&FreeSansBold12pt7b);  
-  tft.setTextColor(Green, Black); 
+  tft.setTextColor(colourCNS, BackgroundColor[Layout-1]); 
   tft.setTextDatum(1);
   
   if (CapsLock)    tft.drawString("C", IND_X1, IND_Y);  else tft.drawString(" ", IND_X1, IND_Y);
@@ -5933,12 +6187,44 @@ void mcpShow(byte Option)
                                             if (mcpType[i] != 1) { Serial.print(" B:"); for (n=8; n<16; n++) Serial.print(mcpPins[i][n]); } SerPr2; } SerPr2; }                                   
 }
 
+///////////////////////////////
+void printNKeysArr() // Gemini
+///////////////////////////////
+{
+  Serial.println("nKeysArr: (1) Colours (2) Maximum Pages (3) nKeys mode (4) Custom Labels");  
+  for (int row=0; row<4; row++) { for (int col=0; col<62; col++) { Serial.print(nKeysArr[row][col]); SerPr1; if (col==25 || col==35 || col==61) SerPr2; } SerPr2; }
+}
+
+//////////////////////////////////
+void ShowSaveOptions()
+//////////////////////////////////
+{  SerPr2;  
+  if (WriteConfig1Change) Serial.print("WriteConfig1Change "); 
+  if (AppState)           Serial.print("AppState ");  
+  if (SaveTime4Data)      Serial.print("SaveTime4Data "); 
+  if (SaveOptionOS)       Serial.print("SaveOptionOS "); 
+  if (MediaChange)        Serial.print("MediaChange "); 
+  if (SaveVar)            Serial.print("SaveVar "); 
+  if (SDNumChange)        Serial.print("SDNumChange "); 
+  if (Bank123Change)      Serial.print("Bank123Change "); 
+  if (colourSave)         Serial.print("colourSave "); 
+  if (nKeysColourSave)    Serial.print("nKeysColourSave "); 
+  if (nKeysArrSave)       Serial.print("nKeysArrSave "); 
+  if (SaveTwist)          Serial.print("SaveTwist "); 
+  if (SaveMCP)            Serial.print("SaveMCP ");   
+  SerPr2;    
+}
+
 /////////////////////////////////
 void showKeyData(byte Option) 
 /////////////////////////////////
 {  byte p, n, m, b;
    char c; 
    File f1, f2, f3;
+   
+   SerPr2;
+   if (KeyLock) Serial.print("KeyLock ON"); else Serial.print("KeyLock OFF");  Serial.print(" - Use *lx* from PC App to unlock or Press Reset"); 
+   SerPr2;
    
    SerPr2;
    Serial.print("Labels M: " );
@@ -5962,24 +6248,12 @@ void showKeyData(byte Option)
    for ( m = 0; m<Config1Size; m++ ) { Serial.print(Config1[m], HEX); SerPr1; if (m==20||m==40||m==60||m==80) SerPr2; }
    SerPr2;
 
-   SerPr2;
-   if (iList) Serial.print("Instruction List ON"); else Serial.print("Instruction List OFF");
-   SerPr2;
-   for ( m = 0; m<3; m++ ) 
-       { Serial.print("MacroInstructionList " ); Serial.print(m+1+1*(m>0)); Serial.print(": ");
-         for ( n = 0; n < iListMax; n++) 
-             { b =  MacroInstructionList[m][n]; Serial.print(b); SerPr1; }
-         SerPr2; }
-         
-   SerPr2;
-   Serial.print("SDCard Set: "); Serial.print(SDNum); SerPr1;   
-   Serial.print("SDCard 0-3: "); Serial.print(SDName[0]); SerPr1;Serial.print(SDName[1]); SerPr1;Serial.print(SDName[2]); SerPr1;
    SerPr2; 
+   Serial.print("nKeys Color: "); for (m=0; m<16; m++) { Serial.print(nColour[m], HEX); SerPr1; } SerPr2;
+   SerPr2;
 
-   if (Option==2) { SerPr2; FSInfo fs_info; SDFS.info(fs_info);
-                    Serial.print("SDCard Total MB:"); Serial.print(fs_info.totalBytes/(1024*1024)); 
-                    Serial.print(" Used kB:"); Serial.println(fs_info.usedBytes/1024); } 
-  
+   printNKeysArr(); 
+
    SerPr2;
    Serial.print("Serial Comms Start and End Markers: "); 
    Serial.print(StartMarker, HEX); SerPr1; Serial.println(EndMarker, HEX);  
@@ -5987,9 +6261,9 @@ void showKeyData(byte Option)
    SerPr2;
    Serial.print("App Switcher Folder State Layer:" ); Serial.print(AppDir); SerPr1; Serial.print(AppState); SerPr1; Serial.print(AppL134);
    SerPr2;
-   
-   DisplayClocks(false); 
-   
+
+   DisplayClocks(0);
+    
    SerPr2;
    ReadTimers(1);
    Serial.printf("LCD Blank Timeout: %d seconds\n", TimePeriod/1000);     // make sure this is never 0 
@@ -6006,12 +6280,14 @@ void showKeyData(byte Option)
    Serial.print("CR LF Filter Mode Char 1 Char 2: "); 
    Serial.print(CRLF); SerPr1; Serial.print(crlf1, HEX); SerPr1; Serial.println(crlf2, HEX);
    SerPr2;
-   Serial.print("nKeys Page Maximum: ");   Serial.print(nKeysPage);  Serial.print(" nKeys Numbers: "); Serial.print(12*nKeysPage); SerPr2; 
-   Serial.print("nKeys Directory Path: "); Serial.print(nDir);       Serial.print(" Size: ");          Serial.print(strlen(nDir)); 
-   Serial.print(" nKeys Dir Mode: ");      Serial.print(nDirX); SerPr2;
-   Serial.print("nKeys Quick-Access:  "); for (int i = 0; i < 10; i++) Serial.print(nKeysCharSet[i]); SerPr2;
-   Serial.print("nKeys Link-String:   "); for (int i = 0; i < 10; i++) Serial.print(nKeysLnkChar[i]); SerPr2;
-   SerPr2;
+   Serial.print("nKeys Options:"); SerPr2; m = nKeysArr[3][getnKeysNum(nChar)];   
+   Serial.print("Page Maximum: ");         Serial.print(nKeysPage);  Serial.print(" Numbers: ");     Serial.print(12*nKeysPage);   SerPr2;   
+   Serial.print("Label Page Maximum: ");   Serial.print(nLabelPage); Serial.print(" Label Pages: "); Serial.print(nKeysArr[1][m]); Serial.print(" Label Mode: "); Serial.print(nKeysArr[3][m]); SerPr2; 
+   Serial.print("Directory Path: ");       Serial.print(nDir);       Serial.print(" Size: ");        Serial.print(strlen(nDir)); 
+   Serial.print(" Dir Mode: ");            Serial.print(nDirX);      Serial.print(" Dir Clear: ");   Serial.print(nDirClear);      SerPr2;
+   Serial.print("Quick-Access:  "); for (int i = 0; i < 10; i++)     Serial.print(nKeysCharSet[i]); SerPr2;
+   Serial.print("Link-String:   "); for (int i = 0; i < 10; i++)     Serial.print(nKeysLnkChar[i]); SerPr2;
+   SerPr2;  
    Serial.print("Macro Delay Time: "); Serial.print(DelayStr[DelayTimeVal]); SerPr2;
    SerPr2;
    Serial.print("Calibration Data: "); for (int i = 0; i < 5; i++) { Serial.print(calData[i]); if (i < 4) Serial.print(", "); } SerPr2;
@@ -6066,6 +6342,8 @@ void showKeyData(byte Option)
     for ( m = 0; m<4; m++ ) { Serial.print(MacroTimerArr7[m]); SerPr1; } Serial.print(TimerName[6]); SerPr2;
     for ( m = 0; m<4; m++ ) { Serial.print(MacroTimerArr8[m]); SerPr1; } Serial.print(TimerName[7]); SerPr2;  
 
+   ShowSaveOptions(); 
+   
    if (Option==0) return;
    
    SerPr2;
@@ -6085,6 +6363,6 @@ void showKeyData(byte Option)
        { Serial.print(m); Serial.print(" Txx 20bytes Size " ); Serial.print(MacroSizeT1T12[m]); Serial.print(" Ttr Status "); Serial.print(MacroT1T12[m]); SerPr1;
          for ( n = 0; n < 20; n++) { b =  Ttr1to12[m][n]; Serial.print(b, HEX); SerPr1; }
          SerPr2;  } 
-         
  } 
-/************* EOF line 6090 *****************/
+ 
+/************* EOF line 6368 *****************/
