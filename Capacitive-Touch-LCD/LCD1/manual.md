@@ -210,7 +210,7 @@ SDCard Filenames accessed by S keys [S1]-[S24] and selectable by [Cfg][Opt] or w
  SDNum 1-3    S0001.txt-S0024.txt A1.txt-A6,txt - C1.txt-C6.txt 01-24  *sd*n=1-3 Can be edited in sdcard.h 
  SDNum 4-9    U-Z + 01-24 = U01-U24 - Z01-Z24                          *sd*n=4-9 or *sd*U-X or *sd*u-g 
  SDnum 10-12  MST mst 01-24 = M01-M24 S01-S24 T01-T24                  *sd*m,s,t *sd*M,S,T  
- SDNum 13-19  A-G a-g 01-24 = A01-A24 - G01-D24                        *sd*A-G   *sd*a-g )
+ SDNum 13-19  A-G a-g 01-24 = A01-A24 - G01-D24                        *sd*A-G   *sd*a-g 
  SDNum 20-21  K,k  K=K01Link-K24Link k = K01-K24                       *sd*K,k
  
 3-Char filenames *sd*4-9 (UVWXYZ U01-U24) *sd*mst (MST M01-M24) *sd*abcdef (A01-A24) can be used in CnnLink files
@@ -275,7 +275,10 @@ A tool is also provided to convert a JSON file with the 144 labels to the Arduin
 the nKeys.
 
 The normal set of nKeys directory functions (*0d*// and *0d*/foldername, can still be used with custom labels - for 
-example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on.
+example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on. If an nKey reports
+that is cannot find its file it is usually either the wrong storage (Flash or SDCard). or the nKeys is using a specific 
+folder. Press the [Data] button in the PC App Config tab and look at the nKeus current directory - set to the default 
+with *0d*
 
 nKeys Layout:
 -----------------------------------------------------------------------------------------------------------------------
@@ -434,7 +437,7 @@ Page 4: Macro Tools                                 Page 5: Modifiers           
 Note A: Use the green Pad [<] to correct entries added - press once to remove one entry and more than once for many
 entries. It will not have any effect if no entries have been [ADD[ed.
 
-Note B: Use the green Pad [o] to change the source and destination from SDCard (brown) to Flash memory (white). The 
+Note B: Use the green Pad [o] to chage the source and destination from SDCard (brown) to Flash memory (white). The 
 following convention is used - the Macro Destination [Dst] is also referred to as the Target Macro here in some cases. 
 Pressing the green Pad [0] will cycle through 5 possible combinations of Source and Destination for SDCard Orange) or 
 Flash (White) storage - for example display shows: White Source M 01  Orange Target A 50
@@ -882,10 +885,10 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
 (E) *0R* Enable/Disable the resistor colour-coded number pad - plain colours used when off
 (F) *0x* Enable/Disable nKeys34 with nKeys count two characters numbers from n00-n99 and then three characters numbers 
     from n100-n996 if true, else nKeys count three characters numbers throughout n000-n996.
-(G) *0d* /dirname, *0d* or *0d* / reset to no nKeys directory, *0d* // use nKeys directory based on first char of current
+(G) *0d*/dirname, *0d* reset to no nKeys directory, *0d*// use nKeys directory based on first char of current
     nKeys set such as /n/nKeyfilename. Add folder name that is added infront of the nKeys filename - for example 
-    *0d* /people will add the string /people/ in front of all nKey filenames for execution and saving. Pressing key n03
-    wil then run the contents of file n03 in the folder /people.
+    *0d*/people will add the string /people/ in front of all nKey filenames for execution and saving. Pressing key n03
+    will then run the contents of file n03 in the folder /people. Do not use *0d*/ i.e. / without a foldername.
 (H) Rename *rn*oldname=newname. For example *rn*s02=a02[EXE] will rename file s02 (if it exists), to a02. Can also use 
     this to rename folders for example rename *Code/old=/new will rename folder old to folder new. Use [EXE] to
     complete the *rn*x=y command, using [Snd] will send *rn*x=y as text, and [Sav] will save *rn*x=y as text in the 
@@ -1081,22 +1084,23 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
      and right combinations are mixed then it is 6,144 unique keys (256x24).
 (Af) *lk* and *lk*0,1 Lock KeyPad *lk* to toggle locked/unlocked or *lk*0,1 unlock/lock - if locked use PCApp or 
      do HW reset of Keypad
-(Ag) *co*nc *co*n n=0-4 c=0-F Added colour change options for the CapNumSCroll-lock using *co* (Green/Orange)
+(Ag) *co*nc *co*n n=0-5 c=0-F Added colour change options for the CapNumSCroll-lock using *co* (Green/Orange)
      or *co*0 (Green/Cyan) or any colour using in Colours[n] with *c0*0n=0-F, or any other colour using *co*0HHH with
-     HHHH = RGB565 value such as 6666 = darkgreen. Also colour options for background, and colour options for 
-     Operating System W L R and for the Key Font Color (can also use *fc* or *fc*c=0-F). For example <*co*41> change 
-     key label to white and <*co*4> toggle key label between white and silver. Also colour change option for nKeys 
-     *co*2 toggles between default darkcyan and brown-maroon. *co*20 will change nKeys to Black and white labels. 
-     Use *co*nc n=0-4 c=0-F to set CapNumSCroll, Background, nKeys, OSColour, KeyFont, to a custom colour in Colour[c]
-     Colours 0-F map to:
-     Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1      
+     HHHH = RGB565 value such as 6666 = darkgreen. Also colour options for Sensors display (HWInfo), background, and 
+     colour options for  Operating System W L R and for the Key Font Color (can also use *fc* or *fc*c=0-F). For 
+     example <*co*41> change key label to white and <*co*4> toggle key label between white and silver. Also colour 
+     change option for nKeys *co*2 toggles between default darkcyan and brown-maroon. *co*20 will change nKeys to 
+     Black and white labels. Use *co*nc n=0-5 c=0-F to set Sensors, CapNumSCroll, Background, nKeys, OSColour, 
+     KeyFont, to a custom colour in Colour[c] Colours 0-F map to:
+     Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1 
+     For example Colour[1] is usually white (the KeyFont colour), i.e. use *co*51 to set the Sensor display to white.     
      Change Colour Array with:
      *co*nnCCCC nn = colour number 1 - 16 in Colour array. CCCC is the colour value as four hex number 0-9A-F
      *co*000011112222....FFFF *co* + 16 four digit hex colour valuse for the 16 colours in Colour array.
      For example *co*0407FF will change the Colour[3]=White to Cyan. Then press [Cfg][Sav] to save Colour[] to Flash
      and then *co*43 will change the Keys Font to Green. Reset Colour[3] to white with *co*04FFFF. To set the
      colour to any colour use *co*407FF which will set the KeyFont to Cyan - it does not have to one of the 16 colours 
-     in the Colour array. In general: *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF. After colour changes made 
+     in the Colour array. In general: *co*nHHHH n = 0,2,3,4,5 HHHH = RGB565 as 0000-FFFF. After colour changes made 
      save with [Cfg]->[Sav]. Colour[] is saved to Flash as Colour file (32 bytes). To reset to default values use *co**
 (Ah) *cn* Added colour change options for the nKeys. Use any colour using in nColours[n] with *cn*0n=0-F, or any 
      other colour using *cn*0HHH with HHHH = RGB565 value such as 6666 = darkgreen. To change nKeys colour number
@@ -1280,4 +1284,3 @@ Panic mode reset. If for any reason your keypad becomes unresponsive or behaves 
 -----------------------------------------------------------------------------------------------------------------------
 
 ```
-
