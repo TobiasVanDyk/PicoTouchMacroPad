@@ -8,7 +8,7 @@
 //                (4) Many examples and documentation from Arduino-Pico
 //                    https://github.com/earlephilhower/arduino-pico/ 
 //
-// Adapted by Tobias van Dyk August 2022 - October 2026 for the Pico 2 RP2350 
+// Adapted by Tobias van Dyk August 2022 - November 2026 for the Pico 2 RP2350 
 // Waveshare RP2350B-A4 FT6336 Capacitive Touch ST7796 LCD 3.5 480x320 with RTC and SDCard module:
 // https://www.waveshare.com/RP2350-Touch-LCD-3.5.htm
 // https://docs.waveshare.com/RP2350-Touch-LCD-3.5?variant=RP2350-Touch-LCD-3.5
@@ -271,7 +271,7 @@ uint8_t static const conv_table1[128][2] =  { HID_ASCII_TO_KEYCODE };
 // 80       MathSet 0            MouseZ 0       MediaConfig[0] 0      StartMarker 0x02   EndMarker 0x03            MacroUL 0         nKeysL134 0   KeyRepeat2 20 
 // 90      tonelen 80   RTCVBatChargeOn 1  BackupChargeVoltage 5      currentVolume 30            Fxx 0             FxxMod 0
 // 96      nKeysClr 2           clrCNS  3               clrOS  1     BackgroundClr0  0 BackgroundClr1 0     BackgroundClr2 0    BackgroundClr3 0
-// 103  nLabelPage 12
+// 103  nLabelPage 12         nDirClear 1           clrSensor  3
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Can use strcpy((char *)&Config1[40], nDir); and inverse, to access char string array nDirZ=0=EOS 
 // Note only nDir only saved if 20 bytes max in size excluding last 0x00 
@@ -280,11 +280,11 @@ cSt byte Config1Size = 128;      //   0   1   2   3   4   5   6   7  8  9  10  1
 byte Config1[Config1Size]          = {1,  1,  0,  1,  0,  0,  0,  1,'n',8,'n','o','p','q','r','s','t','m','a','k', 0,   0x0D,0x0A,0,  1,  0, 0, 0, 0,   0,  0,  8, 
                                       0,  1,  2,  0,  6,  0,  3,  1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,   0,   0,   0,  0,  0, 0, 0, 0,  'n','o','p',
                                      'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0,   0,   65, 32, 33,80,1, 5,   30, 0,  0,  
-                                      2,  3,  1,  0,  0,  0,  0,  12,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };
+                                      2,  3,  1,  0,  0,  0,  0,  12,  1,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };
 cSt byte Config1Reset[Config1Size] = {1,1,0,1,0,0,0,1,'n',8,'n','o','p','q','r','s','t','m','a','k',0,0x0D,0x0A,0, 1, 0, 0, 0, 0, 0,  0,  8, 
                                       0,1,2,0,6,0,3,1,'/',0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0,0,   0,   0, 0, 0, 0, 0, 0, 'n','o','p',
                                      'q','u','v','w','x','y','z', 0, 0, 0, 0,  0,  0,  1,  1,  0,  0,  0,  0, '<', '>', 0, 0, 65, 32, 33,  80, 1, 5, 30, 0, 0, 
-                                      2,  3,  1,  0,  0,  0,  0,  12,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };                                    
+                                      2,  3,  1,  0,  0,  0,  0,  12,  1,  3,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0 };                                    
 bool WriteConfig1Change = false; // Do save if true
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
 
@@ -500,7 +500,8 @@ const int NumKeysPageMax = 8;        // Change Config1[9] as well - normally 8 =
 char nChar = 'n';                    // Current nKeys first char (on keys and filename) can be 0-9, a-z, A-Z change with *0n*char 
 char nDir[80] = "/";                 // Default is nKeys in root folder /nKeysfile, if dirname must start AND end with "/" for strcat filename 
 byte nDirX = 0;                      // 0 = Not changed 1 = Default "/"  2 = /dirname/  3 = /nChar/ 
-char nDirXMsg[4][30] = {"Use /0-20-char dir-name or //", "nKeys default dir /", "nKeys special dir /x/", "nKeys dir changed" };
+char nDirXMsg[4][30] = {"/foldername 0-20 char", "nKeys default dir /", "nKeys x folder /x/", "nKeys folder changed" };
+bool nDirClear = true;               // Clears the nDir at every startup
 bool NumKeys = false;                // Numeric Keyboard
 bool nKeysShow = false;              // Pressing Pad[s] toggles this, if on pressing nKey displays its content not execute it - not saved
 bool nKeys34 = true;                 // nKeys count n00-n99,n100-n996 if true (default), else n000-n996 use different n01-n99 files n001-n099
@@ -516,6 +517,7 @@ byte CRLF = 0;                       // Filter CR 0D \n and LF 0A \r in large te
 byte crlf1 = 0x0D, crlf2 = 0x0A;     // Two Nkeys text filter chars default = 0x0D 0x0A 
 bool nKeysArrSave = false;           // save nKeysArr size 62 x 4 = 248 bytes array if 1
 byte nLabelPage = 11;                // Maximum custom label nKey pages = nLabelPage + 1 = 12 keys per page - 5 char+0 labels = 864 byte labelfile lblX size change with *0L*nn nn=01-84
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Flash nKey files:  26+10+26 = 62 different files accessed through nKeysArr - files n01 and N01 are two different files and two different actions through nKeysArr[nChar->0-61]
 // SDCard nKey files:    26+10 = 26 different files accessed through nKeysArr - files n01 and N01 are the same file (name is case-preserving) - but as indexed through nChar = a-z or A-Z will be treated differently
@@ -602,7 +604,7 @@ byte Fxx = 0;      // F keys option *fx*s,a,c such *fx*a *fx*sc ^fx*acs *fx* = d
 byte FxxMod = 0;   // Modifier byte Shift Control Alt Gui L+R in here for F1-F24 keys
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 bool CmKey = false;                  // Check if *codes are from pressing [*Cm] key or entered directly
-const static int StarCodesMax = 144; // StarCodes Count 16+16+16+16+16+16+16+16+15 StarNum = 0-143
+const static int StarCodesMax = 145; // StarCodes Count 16+16+16+16+16+16+16+16+15 StarNum = 0-144
 const static char StarCode[StarCodesMax][3] =    
 { "ac", "ad", "ae", "am", "ap", "as", "at", "bb", "bl", "br", "ca", "cf", "cm", "cn", "co", "cp", 
   "cr", "ct", "cx", "c1", "c2", "db", "de", "df", "dt", "e0", "e1", "e2", "e3", "e4", "e5", "e6", 
@@ -612,7 +614,7 @@ const static char StarCode[StarCodesMax][3] =
   "pc", "po", "p+", "p-", "pp", "ps", "r0", "r1", "r2", "r3", "rm", "rn", "ro", "rt", "rT", "sa", 
   "sd", "se", "sf", "sF", "sm", "ss", "st", "sx", "ta", "tb", "tc", "tf", "tm", "tp", "tt", "tw", 
   "ua", "ul", "up", "vx", "v+", "v-", "vm", "wa", "x0", "x1", "x2", "x3", "x4", "x5", "x6", "x7", 
-  "x8", "x9", "0R", "09", "0d", "0l", "0L", "0n", "0p", "0s", "0t", "0x", "1s", "1e", "2s", "2e"  };
+  "x8", "x9", "0R", "09", "0c", "0d", "0l", "0L", "0n", "0p", "0s", "0t", "0x", "1s", "1e", "2s", "2e"  };
 
 const static byte StarCodeType[StarCodesMax] =    
 { 96,   57,   59,   1,    86,   1,    1,    2,    36,   5,    6,    56,   7,    100,  99,   93,   
@@ -623,7 +625,7 @@ const static byte StarCodeType[StarCodesMax] =
   72,   25,   88,   88,   88,   88,   37,   26,   40,   41,   77,   49,   27,   24,   24,   28,   
   29,   30,   78,   79,   28,   28,   28,   81,   31,   4,    91,   90,   89,   31,   31,   31,   
   33,   32,   43,   61,   87,   87,   87,   80,   35,   35,   35,   35,   35,   35,   35,   35,   
-  35,   35,   34,   45,   53,   101,  101,  46,   47,   48,   54,   52,   82,   83,   84,   85    };
+  35,   35,   34,   45,   102,  53,   101,  101,  46,   47,   48,   54,   52,   82,   83,   84,   85    };
     
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 3 Small Config Buttons between 1 st and 3rd row Blue Green - if MacroUL=1 then o->O m s t -> M S T
@@ -861,12 +863,13 @@ const int NumButtons = 15;             // Total number of buttons = 12 keys (3 r
 TFT_eSPI_Button key[NumButtons];       // Create 12 keys + 3 config buttons for keypad
 bool pressed = false;                  // Detect touch
 
-bool sSens = false;                    // PC sensor value sent from HWInfo
-char sSArr[2][21]  = { "CPU    C Fan     rpm", "Sys    C Fan     rpm" };  
+bool sSens = false;                    // PC sensor value sent from HWInfo CPU temperature 10-99 Celcius CPU Fan 0-9999 rpm (only displayed if CPU temperature > 9 degrees C)
+char sSArr[2][32]  = { "CPU    C Fan      rpm", "Sys    C Fan      rpm" };  // CPU temperatures < 10 - ambient temperature << 0 Celcius - no fan needed nor displayed
 
 bool mPlay = false;                    // PC Playing Music
 static const int mPlaySize = 96;       // Must check this
-char mPlayArr[mPlaySize]  = { " " };    
+char mPlayArr[mPlaySize]  = { " " };  
+  
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static const unsigned long int tHr  = 60*60*1000; // hour
 static const unsigned long int tMin = 60*1000;    // minute
@@ -911,19 +914,20 @@ static volatile bool alarm_fired = false;  // Set in callback triggers Macro Sen
 static volatile bool power_fired = false;  // Set in callback triggers Restart or PowerOff based on Clock Time
 static volatile bool timer_fired = false;  // Set in callback triggers Restart or PowerOff based on Clock Timer
 bool SaveTime4Data = false; 
-
 ///////////////////////////////////////
 // Setup
 ///////////////////////////////////////
 void setup() 
 { int i, n;
+  
+  SysClkOK = i2s.setSysClk(sampleRate);                 // Align system clock with sample rate - CPU MHz RP2350B: 153.6 for 24,48,96kHz samplerate  
+  // if (!SysClkOK) set_sys_clock_khz(153600, false);   // incase false - 24kHz added by EPH 26 October 2026
+  
   SPI1.setSCK(pinSdClk);
   SPI1.setTX(pinSdMosi);
   SPI1.setRX(pinSdMiso);
   // SPI1.setCS(pinSdCs);  
   // SPI1.begin();                  // SPI1 on RP2350B
-  
-  SysClkOK = i2s.setSysClk(sampleRate);    // Align system clock with sample rate - CPU MHz RP2350B: 135600000 with 44100 samplerate  
     
   Serial.begin(9600);               // serial rate is ignored for usb-serial
   // Serial.ignoreFlowControl(1);   // https://arduino-pico.readthedocs.io/en/latest/serial.html  
@@ -1251,24 +1255,32 @@ void GetTimeData(tmElements_t *a, char *tArr, bool hm, int h, int m)
   tArr[12] = '\0';
 }
 
-/////////////////////////////////////////////////////////////////////////////
-void WriteSensorData()                   // PC sensor value sent from HWInfo
-                                         // Make sure A-D is white not brown
-/////////////////////////////////////////////////////////////////////////////
-// CPU Data <s0    REG_SZ    36>
-//           012345678901234567
-// CPU  Fan <s3    REG_SZ    978 >
-//           01234567890123456789
-///////////////////////////////////////////////////////////////////////////// 
-{ // char sSArr[2][21]  = { "CPU    C Fan     rpm", "Sys    C Fan     rpm" };
-  //                         01234567890123456789    01234567890123456789
-  //                   Option    0        3
-  int i;                 
-  byte Option = RecBytes[1] - 48;
+/////////////////////////////////////////////////////////////////////////////////////
+void WriteSensorData()  // PC sensor value sent from HWInfo CPU degrees + fan speed
+                        // A-D can be white or brown
+/////////////////////////////////////////////////////////////////////////////////////
+// CPU Data <s0    REG_SZ    36 >  CPU temperature degrees Celcius 0-999 Celcius
+//           0123456789012345678   = RecBytes and NumBytes
+// CPU  Fan <s3    REG_SZ    1978>
+//           01234567890123456789 = RecBytes and NumBytes
+//
+// char sSArr[2][32]  = { "CPU    C Fan      rpm", "Sys    C Fan      rpm" };
+//                         012345678901234567890    012345678901234567890
+//                   Option    0        3
+///////////////////////////////////////////////////////////////////////////////////// 
+{ int i;                 
+  byte Option = RecBytes[1] - 48; // Options 1,2,4,5 = 12v, 5v and system temperature and fan rpm
+
+  if (RecBytes[6]!='R'&&RecBytes[7]!='E'&&RecBytes[8]!='G') { for (i=2;  i<NumBytes;  i++) sSArr[0][i-2] = RecBytes[i]; sSArr[0][i-2]=0x00; status(sSArr[0]); sSens = false; return; }
   
-  if (Option==0) { for (i=4;  i<6;  i++) sSArr[0][i] = RecBytes[i+12]; }
+  if (Option==0) { for (i=4;  i<6;  i++) sSArr[0][i] = RecBytes[i+12];   // 10-999 Celcius
+                   if (NumBytes>18) sSArr[0][6] = RecBytes[18];       }  // temperature > 99
   if (Option==3) { for (i=13; i<16; i++) sSArr[0][i] = RecBytes[i+3];  
-                   if (NumBytes>20) sSArr[0][16] = RecBytes[19];       }
+                   if (NumBytes>19) sSArr[0][16] = RecBytes[19];      }  // rpm > 999
+  if (Option==4) { for (i=4;  i<6;  i++) sSArr[1][i] = RecBytes[i+12];   // 10-999 Celcius
+                   if (NumBytes>18) sSArr[1][6] = RecBytes[18];       }  // temperature > 99
+  if (Option==5) { for (i=13; i<16; i++) sSArr[1][i] = RecBytes[i+3];  
+                   if (NumBytes>19) sSArr[1][16] = RecBytes[19];      }  // rpm > 999                 
                    
   status(sSArr[0]);  
   sSens = false;
@@ -2814,9 +2826,9 @@ void buttonpress(int Button)
                    usb_hid.mouseButtonRelease(RID_MOUSE);                    delay(dt50); break; }
      
       // Now includes GetSysInfo(5); and GetSysInfo(3);           
-      if (ConfigKeyCount==1) { if (XFiles&&SaveX1X6) GetSysInfo(4); MediaChange = true;                   // Save Vol Mute Media state if [Sav] pressed
-                               GetSysInfo(0); status("Config and Files Saved"); ConfigKeyCount = 0; }     // Key = [Sav]               
-                        else { status("Start Key Vol A-D Save Mute mCT ROf Media"); ConfigKeyCount++ ; }  // Key = [Cfg]
+      if (ConfigKeyCount==1) { if (XFiles&&SaveX1X6) GetSysInfo(4); MediaChange = true;                    // Save Vol Mute Media state if [Sav] pressed
+                               GetSysInfo(0); status("Config and Files Saved"); ConfigKeyCount = 0; }      // Key = [Sav]               
+                        else { status("Option Key Vol A-D Save Mute mCT ROf Media"); ConfigKeyCount++ ; }  // Key = [Cfg]
       ConfigButtons(1);  break;
       
     case 6: // ARROW RIGHT /////////////////////////////////////////////
@@ -3141,7 +3153,7 @@ void ConfigButtons(uint8_t rowcount) {  // rowcount=0 all 4 rows rowcount=2 last
    if (Layout==2) { padLabel[4][0] = nChar; padColor[3] = padColor[4] = padColor[5] = Blue;
                     if (Kbrd)         { padLabel[3][0] = 'K'; padLabel[4][0] = '<'; padLabel[5][0] = 'o'; padColor[3] = padColor[4] = padColor[5] = DGreen; } 
                     else if (NumKeys) { padLabel[3][0] = '+'; padLabel[5][0] = '-'; padColor[3] = padColor[4] = padColor[5] = Blue; if (nKeysShow) { padColor[4] = Red; } }                                                                 
-                         else if (Math || MouseK) { padLabel[5][0] = 'm'; padColor[5] = Blue; } 
+                         else if (Math || MouseK) { padLabel[5][0] = 'm'; padColor[5] = Blue; if (MathSet==0) padLabel[3][0] = 'S'; else padLabel[3][0] = MathSet+48; } 
                                else { padLabel[5][0] = 'o'; padLabel[3][0] = 'S'; padColor[5] = Red; }  }
 
          
@@ -3429,12 +3441,13 @@ void ConfigMedia()
 void SetColours()
 /////////////////////////
 { byte n;
-  KeyFontColour = Config1[33]; KeyFont = Colour[KeyFontColour];                         // Key Label Color from Colour Array 0-F
-  nKeysColour = nColour[nKeysArr[0][getnKeysNum(nChar)]];                               // Get nKeys colour for current nKey  
-  Colour[Config1[96]] = nKeysColour;                                                    // 96 nKeysClr = 2  Set Colour[nKeys] = current nColour[nKeys]       
-  colourCNS =    Colour[Config1[97]];                                                   // 97 clrCNS   = 3               
-  colourOS =     Colour[Config1[98]];                                                   // 98 clrOS    = 1  
-  for (int n=0; n<4; n++) BackgroundColor[n] = Colour[Config1[99+n]];                   // 99-102 BackgroundClr0,1,2,3 = 0     
+  KeyFontColour = Config1[33]; KeyFont = Colour[KeyFontColour];                            // Key Label Color from Colour Array 0-F
+  nKeysColour = nColour[nKeysArr[0][getnKeysNum(nChar)]];                                  // Get nKeys colour for current nKey  
+  Colour[Config1[96]] = nKeysColour;                                                       // 96 nKeysClr = 2  Set Colour[nKeys] = current nColour[nKeys]   
+  if (Config1[97]!=0)  colourCNS =    Colour[Config1[97]]; else colourCNS = Colour[3];     // 97 clrCNS   = 3               
+  if (Config1[98]!=0)  colourOS =     Colour[Config1[98]]; else colourOS = Colour[1];      // 98 clrOS    = 1 
+  if (Config1[105]!=0) colourSensor = Colour[Config1[105]]; else colourSensor = Colour[3]; // 105 clrSensor = 3 - if black use default
+  for (int n=0; n<4; n++) BackgroundColor[n] = Colour[Config1[99+n]];                      // 99-102 BackgroundClr0,1,2,3 = 0     
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3509,7 +3522,9 @@ void ReadConfig1()
   currentVolume   =     Config1[93];                                   // 0-99 percent 
   Fxx =                 Config1[94];                                   // nKeys = F now function keys F1 - F24 + modifiers *fx*sacg  
   FxxMod =              Config1[95];                                   // nKeys = F modifiers *fx*sacg byte 
-  nLabelPage =          Config1[103];                                  // nKeys custom labels max pages 0-83 - default = 12                                    
+  nLabelPage =          Config1[103];                                  // nKeys custom labels max pages 0-83 - default = 12   
+  nDirClear =           Config1[104];                                  // Clears the nDir at every startup
+  if (nDirClear) { nDir[0] = '/'; nDir[1] = 0x00; }                    // Set to default dir = /
   SetColours();                                                        // Custom colours                       
 }
 
@@ -3571,7 +3586,8 @@ void WriteConfig1(bool Option)
                   Config1[93] = currentVolume;                                // 0-99 percent  
                   Config1[94] = Fxx;                                          // nKeys = F now function keys F1 - F24 + modifiers *fx*sacg  
                   Config1[95] = FxxMod;                                       // nKeys = F modifiers *fx*sacg byte 
-                  Config1[103] = nLabelPage;                                  // nKeys custom labels max pages 0-83 - default = 12                   
+                  Config1[103] = nLabelPage;                                  // nKeys custom labels max pages 0-83 - default = 12 
+                  Config1[104] = nDirClear;                                   // Clears the nDir at every startup                                    
                   if (BackupChargeVoltage>5) BackupChargeVoltage=4;           // Default 3.0v                                                                                 
                 }
                 
@@ -3851,11 +3867,12 @@ void GetSysInfo(int Action)
   byte *BPtr;
   uint32_t  Bt;
   int StrLen, i, n = 0, m = 0, b = 0;
+  bool DoneWrite = false;
   
   if (Action>0) { if (Action==4) { Savex1x6(); SaveX1X6 = false; Config1[28] = XFiles; WriteConfig1(1); WriteConfig1Change = false; }
                   if (SaveLayout>0) SaveLayoutConfig(); return; }  // SaveLayoutConfig sets WriteConfig1Change = true;
 
-  if (WriteConfig1Change && AppState==0) { WriteConfig1(1); SaveTime4Data = SaveOptionOS = MediaChange = SaveVar = LayerADChange = SDNumChange = WriteConfig1Change = false; }
+  if (WriteConfig1Change && AppState==0) { WriteConfig1(1); DoneWrite = true; SaveTime4Data = SaveOptionOS = MediaChange = SaveVar = LayerADChange = SDNumChange = WriteConfig1Change = false; }
   if (SDNumChange) { SaveSDCardArr(); SDNumChange = false; }  
   if (colourSave) { saveColour(); colourSave = false; }
   if (nKeysColourSave) { saveNColour(); nKeysColourSave = false; }
@@ -3874,14 +3891,11 @@ void GetSysInfo(int Action)
   CPUInfo();
   SerPr2;
   
-  Serial.println("Flash Files (Number Name Size):");
-  ListFiles(0);
-  SerPr2;  
-  Serial.println("SDCard Files (Number Name Size):");
-  ListSDFiles(0, 0);
-  
-  DisplayClocks(1);
-  // showKeyData(0);   // If included slows Save - use *ld*0,1 for data list 
+  if (DoneWrite) { Serial.println("Flash Files (Number Name Size):");
+                   ListFiles(0); SerPr2;  
+                   Serial.println("SDCard Files (Number Name Size):");
+                   ListSDFiles(0, 0);  
+                   DisplayClocks(1); }  // Resistive touch must use 0 else large delay in [Sav] button
 }
 
 ////////////////////
@@ -3967,7 +3981,7 @@ void status(const char *msg)
   if (Kbrd) tft.setTextColor(Yellow, colourBack);
   if (Math) tft.setTextColor(White, colourBack);
   if (PowerKeys) tft.setTextColor(Orange, colourBack);
-  if (sSens||mPlay||tTimeDate) tft.setTextColor(Green, colourBack);
+  if (sSens||mPlay||tTimeDate) tft.setTextColor(colourSensor, colourBack);
   
   tft.setTextPadding(480);  tft.setFreeFont(&FreeSansBold9pt7b);
   tft.setTextDatum(1);
@@ -4440,7 +4454,7 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
        { nKeys = !nKeys; Config1[7] = nKeys; WriteConfig1(0); 
          if (nKeys) status("n-Keys n01-n996 On"); else status("NumPad pages 1-8 On"); Numkeys123 = 0; NumKeysChange(); StarOk = true; break; }
          case 46: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x6e *0n*char = 1-9 or aA - zZ Select nKeys Char 
-       { if (knum==4) { nKeysL134  = !nKeysL134; if (nKeysL134) status("L1 L3 L4 L=nChar"); else status("L1 L3 L4"); if (AppState==0) WriteConfig1Change = true; StarOk = true; break; }         
+       { if (knum==4) { nKeysL134  = !nKeysL134; if (nKeysL134) status("n1 n3 n4 n=nChar"); else status("L1 L3 L4"); if (AppState==0) WriteConfig1Change = true; StarOk = true; break; }         
          if (knum==5) { Config1[8] = nChar = KeyBrdByte[4]; m = getnKeysNum(nChar); nKeysColour = nColour[nKeysArr[0][m]]; nKeysPage = nKeysArr[1][m]; nKeys34 = nKeysArr[2][m];
                         if (Numkeys123>nKeysPage) Numkeys123 = nKeysPage-1; if (nKeysArr[3][m]>0) nKeysLabel(0); else NumKeysChange();  // If new nKeys max pages is > old nKeys max pages
                         if (AppState==0) { status("nKeys character changed"); WriteConfig1Change = true; } StarOk = true; break; } }
@@ -4466,11 +4480,14 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
        { if (knum==6) { crlf1 = Config1[21] = KeyBrdByte[4]; crlf2 = Config1[22] = k5;   status("Text filter changed"); StarOk = true; }
          if (knum==5 && b==0) { crlf1 = Config1[21] = 0x0D;  crlf2 = Config1[22] = 0x0A; status("Text filter CR LF");   StarOk = true; } 
          if (StarOk) WriteConfig1(1); break; }
+         case 102: ////////////////////// KeyBrdByte[1]=='0'&&KeyBrdByte[2]=='c' nDirClear toggle clear nDir at start         
+       { nDirClear = !nDirClear; Config1[104] = nDirClear; 
+         if (nDirClear) status("nDir clear at start"); else status("Saved nDir used at start"); WriteConfig1Change = true; StarOk = true; break; }          
          case 52: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x79 *0x* nKeys34 = nKeys count n00-n99,n100-n999 if true else n000-n999         
-       { nKeys34 = !nKeys34; nKeysArr[2][getnKeysNum(nChar)] = nKeys34; Config1[39] = nKeys34; WriteConfig1(0); 
+       { nKeys34 = !nKeys34; nKeysArr[2][getnKeysNum(nChar)] = nKeys34; Config1[39] = nKeys34; 
          if (nKeys34) status("nKey n01-n99 n100-n999"); else status("nKey n001-n999"); NumKeysChange(); nKeysArrSave = true; WriteConfig1Change = true; StarOk = true; break; }  
          case 53: ////////////////////// KeyBrdByte[1]==0x30&&KeyBrdByte[2]==0x64 *0d*/20-char-max or default mode *0d* note that *0d*/ gives nDir=// *0d* gives nDir=/
-       { nDirX=0; if (knum>4) { for (n=0; n<knum-4; n++) nDir[n] = KeyBrdByte[4+n];                       
+       { nDirX=0; if (knum>4) { for (n=0; n<knum-4; n++) nDir[n] = KeyBrdByte[4+n];                       // Must start with / as first character - use /foldername                  
                                      if (k5=='/') { nDir[1]=nChar; nDir[2]='/'; nDir[3]=0x00; nDirX=2; }  // 2: /nChar/
                                              else { nDir[n]='/'; nDir[n+1]=0x00; nDirX=1+(n>1)*2; }  }    // 3: normal /dirname/ 1: default /filename
          if (knum==4) { nDir[0]='/'; nDir[1]=0x00; nDirX=0; }                                             // 0: default /filename but nDirX=0
@@ -4787,15 +4804,17 @@ bool SendBytesStarCodes()    // KeyBrdByte[0] is = '*', KeyBrdByte[3] should be 
                                     for (n=1; n<4; n++) { Config1[99+n] = Config1[99]; BackgroundColor[n] = BackgroundColor[0]; } }
                         if (b==2) { if (Config1[96]==2) { Config1[96] = 10; nKeysColour = Colour[10]; } else { Config1[96] = 2;  nKeysColour = Colour[2];  } nKeysChange = true; }                          
                         if (b==3) { if (Config1[98]==1) { colourOS = Colour[Config1[98] + 8]; } else { Config1[98] = 1; colourOS = Colour[1]; } } 
-                        if (b==4) { if (Config1[33]==1) { KeyFontColour = Config1[33] = 9; KeyFont = Colour[KeyFontColour]; } else { KeyFontColour = Config1[33] = 1; KeyFont = Colour[KeyFontColour]; } } }
+                        if (b==4) { if (Config1[33]==1) { KeyFontColour = Config1[33] = 9; KeyFont = Colour[KeyFontColour]; } else { KeyFontColour = Config1[33] = 1; KeyFont = Colour[KeyFontColour]; } } 
+                        if (b==5) { if (Config1[105]==3) { colourSensor = Cyan; Config1[105] = 4; } else { Config1[105] = 3; colourSensor = Green; } } }
          if (knum==6) { m = HexCharToByte(k5); // Use to set to a custom colour in Colour[]
                         if (b==0) { colourCNS = Colour[m]; Config1[97] = m; }   
                         if (b==1) { BackgroundColor[0] = Colour[m]; Config1[99] = m; for (n=1; n<4; n++) { Config1[99+n] = Config1[99]; BackgroundColor[n] = BackgroundColor[0]; } }
                         if (b==2) { nKeysColour = Colour[m]; Config1[96] = m; nKeysChange = true; }  // Set current nKeys colour to Colour[m]                         
                         if (b==3) { colourOS = Colour[m]; Config1[98] = m; }  
-                        if (b==4) { KeyFont = Colour[m]; KeyFontColour = Config1[33] = m; } } 
+                        if (b==4) { KeyFont = Colour[m]; KeyFontColour = Config1[33] = m; } 
+                        if (b==5) { colourSensor = Colour[m]; Config1[105] = m; }  } 
          if (knum==9) { m = (HexCharToByte(KeyBrdByte[5])<<12) | (HexCharToByte(KeyBrdByte[6])<<8) | (HexCharToByte(KeyBrdByte[7])<<4) | HexCharToByte(KeyBrdByte[8]);
-                        if (b==0) { colourCNS = m; } else if (b==2) { nKeysColour = m; nKeysChange = true; } else if (b==3) { colourOS = m; } else if (b==4) { KeyFont = m; }  // *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF
+                        if (b==0) { colourCNS = m; } else if (b==2) { nKeysColour = m; nKeysChange = true; } else if (b==3) { colourOS = m; } else if (b==4) { KeyFont = m; } else if (b==5) { colourSensor = m; }  // *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF
                         if (b==1) { for (n=0; n<4; n++) { m = HexCharToByte(KeyBrdByte[n+5]); BackgroundColor[n] = Colour[m]; Config1[99+n] = m; } } }                         // *co*b0123 b=1 0-F BackgroundColor[]
          if (knum==10) { if (c99>0 && c99<17) { Colour[c99-1] = (HexCharToByte(KeyBrdByte[6])<<12) | (HexCharToByte(KeyBrdByte[7])<<8) | (HexCharToByte(KeyBrdByte[8])<<4) | HexCharToByte(KeyBrdByte[9]); } }     // *co*nncccc nn=01-16
          if (knum==68) { for (n=0; n<16; n++) { m=4+(n*4); Colour[n]=(HexCharToByte(KeyBrdByte[m])<<12)|(HexCharToByte(KeyBrdByte[m+1])<<8)|(HexCharToByte(KeyBrdByte[m+2])<<4)|HexCharToByte(KeyBrdByte[m+3]); } }                         
@@ -6517,14 +6536,39 @@ void ES8311Show()
   int count = 0; for (byte r=0x00; r<=0x32; r++) { if (r<0x10) Serial.print("0"); Serial.print(r, HEX); SerPr1;   
                                                    byte val = es8311_ReadReg(r);
                                                    if (val<0x10) Serial.print("0"); Serial.print(val, HEX); SerPr1; SerPr1;
-                                                   count++; if (count % 8 == 0) SerPr2; }  
+                                                   count++; if (count % 8 == 0) SerPr2; } 
+ SerPr2;                                                    
+ Serial.printf("setSysClk returned: %d\n", SysClkOK);
+ Serial.printf("f_cpu(): %lu Hz\n", (unsigned long)rp2040.f_cpu());
+ Serial.printf("clk_sys measured: %lu kHz\n", (unsigned long)frequency_count_khz(CLOCKS_FC0_SRC_VALUE_CLK_SYS));                                                  
 }
+
 ///////////////////////////////
 void printNKeysArr() // Gemini
 ///////////////////////////////
 {
   Serial.println("nKeysArr: (1) Colours (2) Maximum Pages (3) nKeys mode (4) Custom Labels");  
   for (int row=0; row<4; row++) { for (int col=0; col<62; col++) { Serial.print(nKeysArr[row][col]); SerPr1; if (col==25 || col==35 || col==61) SerPr2; } SerPr2; }
+}
+
+//////////////////////////////////
+void ShowSaveOptions()
+//////////////////////////////////
+{  SerPr2;  
+  if (WriteConfig1Change) Serial.print("WriteConfig1Change "); 
+  if (AppState)           Serial.print("AppState ");  
+  if (SaveTime4Data)      Serial.print("SaveTime4Data "); 
+  if (SaveOptionOS)       Serial.print("SaveOptionOS "); 
+  if (MediaChange)        Serial.print("MediaChange "); 
+  if (SaveVar)            Serial.print("SaveVar "); 
+  if (SDNumChange)        Serial.print("SDNumChange "); 
+  if (Bank123Change)      Serial.print("Bank123Change "); 
+  if (colourSave)         Serial.print("colourSave "); 
+  if (nKeysColourSave)    Serial.print("nKeysColourSave "); 
+  if (nKeysArrSave)       Serial.print("nKeysArrSave "); 
+  if (SaveTwist)          Serial.print("SaveTwist "); 
+  if (SaveMCP)            Serial.print("SaveMCP ");   
+  SerPr2;    
 }
 
 //////////////////////////
@@ -6652,7 +6696,7 @@ void showKeyData(byte Option)
    Serial.print("Page Maximum: ");         Serial.print(nKeysPage);  Serial.print(" Numbers: ");     Serial.print(12*nKeysPage);   SerPr2;   
    Serial.print("Label Page Maximum: ");   Serial.print(nLabelPage); Serial.print(" Label Pages: "); Serial.print(nKeysArr[1][m]); Serial.print(" Label Mode: "); Serial.print(nKeysArr[3][m]); SerPr2; 
    Serial.print("Directory Path: ");       Serial.print(nDir);       Serial.print(" Size: ");        Serial.print(strlen(nDir)); 
-   Serial.print(" Dir Mode: ");            Serial.print(nDirX);      SerPr2;
+   Serial.print(" Dir Mode: ");            Serial.print(nDirX);      Serial.print(" Dir Clear: ");   Serial.print(nDirClear);      SerPr2;
    Serial.print("Quick-Access:  "); for (int i = 0; i < 10; i++)     Serial.print(nKeysCharSet[i]); SerPr2;
    Serial.print("Link-String:   "); for (int i = 0; i < 10; i++)     Serial.print(nKeysLnkChar[i]); SerPr2;
    SerPr2;
@@ -6718,8 +6762,9 @@ void showKeyData(byte Option)
     for ( m = 0; m<4; m++ ) { Serial.print(MacroTimerArr5[m]); SerPr1; } Serial.print(TimerName[4]); SerPr2;
     for ( m = 0; m<4; m++ ) { Serial.print(MacroTimerArr6[m]); SerPr1; } Serial.print(TimerName[5]); SerPr2; 
     for ( m = 0; m<4; m++ ) { Serial.print(MacroTimerArr7[m]); SerPr1; } Serial.print(TimerName[6]); SerPr2;
-    for ( m = 0; m<4; m++ ) { Serial.print(MacroTimerArr8[m]); SerPr1; } Serial.print(TimerName[7]); SerPr2;  
-
+    for ( m = 0; m<4; m++ ) { Serial.print(MacroTimerArr8[m]); SerPr1; } Serial.print(TimerName[7]); SerPr2;
+      
+   ShowSaveOptions(); 
    if (Option==0) return;
    
    SerPr2;
@@ -6742,4 +6787,4 @@ void showKeyData(byte Option)
  }
 
 
-/************* EOF line 6745 *****************/
+/************* EOF line 6790 *****************/
