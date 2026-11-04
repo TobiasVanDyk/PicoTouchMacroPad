@@ -136,6 +136,7 @@ Pk3, Red };       // [15][8]
 uint16_t nKeysColour = DCyan;     // Save as nKeysClr 4 = Colour[4] = 4 DCyan
 uint16_t colourCNS = Green;       // Save as clrCNS 3 = Colour[3] = 3 Green 
 uint16_t colourOS = White;        // Save as clrOS 1 = Colour[1] = 1 White
+uint16_t colourSensor = Green;    // Save as clrSensor 3 = Colour[3] = 3 Green 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Use colours 0-7 as default for 0 Background 1 KeyFont + OSType 2 nKeys 3 CapsNumScrollLock 4 Indicators 567 cX cC cV
 // Then use colours 8-15 as alternatives for the first 8. Note that you can replace and save all 16 colours with *co* starcommands

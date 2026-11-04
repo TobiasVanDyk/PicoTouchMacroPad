@@ -74,7 +74,7 @@ and enter *1s* and save with the [Cfg]->[Sav] config button, before opening the 
 and save with [Cfg][Sav].
 
 -----------------------------------------------------------------------------------------------------------------------
-Layout 1 - M Keys - [M1]-[M24] - Cycle through Layout 1 to 4 press [L1-L4] or long-press [Vo] 
+Layout 1 - M Keys - [M1]-[M24] - Cycle through Layout 1 to 4 press [L1-L4] or Pads [m,s,t]
 -----------------------------------------------------------------------------------------------------------------------
 [Cut CtrlX] [Copy CtrlC] [Paste CtrlV] [VolUp  Delete]       [  Cut ] [  Cpy ] [  Pst ] [V+][ Del ] [A-D]
 [ TaskMan ] [  Adm CMD ] [    Run    ] [VolMute L1-L4]       [M1 M19] [M2 M20] [M3 M21] [Vo][L1-L4] [MST]
@@ -87,22 +87,17 @@ which contains the /folder/filename of the file that has the custom key labels. 
 label2, label3. Refer to the manual section (K) for more details.
 
 [Cut][Copy][Paste][Delete][Enter] are 8 keys - Layout 1 has one group of 3 (+2) keys and Layouts 3 and 4 another 
-group of 3 (+2) keys - that can be each assigned from 81 options:
-
-1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19  20 21  
-Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi 
-
-22 - 27  28  - 51 52  53  54  55 - 81
-Ts1 Ts6  K1 - K24 Num Cap Scr Control + Keys A N O S P F X C V Z Y T W R D H
+group of 3 (+2) keys - that can be each assigned from 54 options:
+1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  22 - 27  28 - 51  52  53  54 
+Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr
 
 1 Delete 2 Backspace 3 Tab  4 AltTab 5 Insert 6 Esc 7 PScr 8 AltPScr 9 Return 10 Snipping 11 OnScrKeyBrd
 12 UnDo 13 ReDo 14 CtrAltDel 15 Cut 16 Copy 17 Paste 18 TaskMan 19 Run 20 GuiX 21 Copilot 22-27 Tskbar1-6
-28-51 K1-K24 NumLock 52 CapsLock 53 ScrollLock 54 55 - 81 Control + KeysKeys ANOSPFXCVZYTWRDH. K1-K24 can 
-be associated with a macrostring definition: Keys K1 to K24 read the content of files K01Link to K24Link 
-(selectable from the SDCard and/or flash memory), which contains a list of 3-letter file names containing
-macro definitions and/or text strings, such as a01-a99, m01-m24, s01-s24, t01-t24 or any other 3-letter 
-name, to be executed in sequence, with separately defined repetitions and delays. The last is a set of 
-Control + Keys A N O S P F X C V Z Y T W R D H.
+28-51 K1-K24 NumLock 52 CapsLock 53 ScrollLock 54. Keys K1-K24 can be associated with a macrostring definition: 
+Keys K1 to K24 read the content of files K01Link to K24Link (selectable from the SDCard and/or flash memory), 
+which contains a list of 3-letter file names containing macro definitions and/or text strings, such as a01-a99, 
+m01-m24, s01-s24, t01-t24 or any other 3-letter name, to be executed in sequence, with separately defined 
+repetitions and delays. 
 
 If K1-K24 are pressed with no KxxLink file on either the SDCard or Flash, and a macro (max 3 bytes), has been 
 defined for the Kxx key (by using *cm*nnKxx with nn file a01-a99 that will be copied to Key Kxx), then the short 
@@ -148,21 +143,22 @@ another linkfile - the name follows after L0n - can continue ad infinitum.
  no/restore original       x=1 L1n: Restore LayerAxD on completion
            
 The 8 keys Cut-Cpy-Pst-Del-Ret-cX-cC-cV, can also be programmed through starcodes x1, x2, x3 Layout 1, x4, x5,
-x6 for Layout 3 and 4, and x7 and x8 for the [Del] and [Ret] keys. They can use any of the 81 actions for x1 - x8.
-Program as *xn*number n=1-8, number = 1-81.
+x6 for Layout 3 and 4, and x7 and x8 for the [Del] and [Ret] keys. They can use any of the 54 actions for x1 - x8.
+Program as *xn*number n=1-8, number = 1-54.
 
-Press [Cfg] once, and then press [Key] once or twice, to select 81 options for either the [Del] or the [Ret] 
+Press [Cfg] once, and then press [Key] once or twice, to select 54 options for either the [Del] or the [Ret] 
 key which are then selected by pressing the red bottom Pad [o] which will cycle through the 54 options for both the 
 [Del]ete key top right and the [Ret]urn key bottom right. Pressing the [Key] key 3x, 4x or 5x times will select the 
 Layer 1 [Cut], second [Cpy], or third [Pst] key respectively which can then be changed by pressing the bottom Pad 
 i.e. option [o]. Pressing the [Key] key, 6x, 7x, or 8x will select this top-row 3 keys in Layouts 3 or 4, which
-can then be changed to one of the 81 options using the bottom Pad key. The status line will show which key is chosen
+can then be changed to one of the 54 options using the bottom Pad key. The status line will show which key is chosen
 and which option is selected. To save the choice press the [Sav] key just below it, else it will reset to the 
 default [Del], [Ret], [Cut,Copy,Paste] keys after the next reboot. If the [Sav] key is not pressed the new 
 choice(s) will be valid for current session only. To reset the keys to their default options, use the *x1*0 code 
-in the KeyBrd Editor - press [*Cm] until *x1* shows, then press [012] once, then press [ADD][EXE].
+i.e. by pressing the second Pad [k], and then press [*Cm] until *x1* shows, then press [012] once, then press 
+[ADD][EXE].
 
-The key M1-M24 macros listed above are default macros - use the KeyBrd editor to configure new macros or copy, 
+The key M1-M24 macros listed above are default macros - use the macro editor to configure new macros or copy, 
 rename and/or make linkfiles for new or existing macros. Some of the default macros run items on the pinned on the 
 taskbar, and are indicated by GuiL + Key0 - Key9 etc in macroBanks.h WinMacro content.
 
@@ -178,20 +174,20 @@ chosen using the Pad keys [a] or [d] are not saved between a reboot - you must u
 both White/Orange[A-D] state.
 
 Connecting a PC serial monitor to the TouchPad and pressing [Cfg] twice i.e. press [Cfg][Sav] will list all the files
-on both the FlasMem and SDCard filesystems. Delete a file by entering its name in the Macro-editor, and then press 
-[Rmv] remove.
+on both the FlasMem and SDCard filesystems. Delete a file by constructing its name in the Macro-editor, and then 
+press [Rmv] remove.
 
 The default sequence in choosing what to do when the keys M1-M24, S1-S24, T1-T24, K1-K24 are pressed are:
 
 if S Keys Page 3: Keys S1-S24
    if Orange A-D Do SDCard text files    - if ok exit
    if White  A-D Do FlashMem Macro-definitions - if ok exit else Do FlashMem Macro-Link actions - if ok exit
-   if Orange A-D Do SDCard Macro-Link actions  - if ok exit else Do SDCard Macro-definitions    - if ok exit              
+   if Orange A-D Do SDCard Macro-Link actions  - if ok exit else Do SDCard Macro-definitions    - if ok exit
    Do S-keys actions as defined in Bank123     - exit
                   
 if T or M Keys Pages 1 or 4: Keys M1-M24 or T1-T24
    if White  A-D Do FlashMem Macro-definitions - if ok exit else Do FlashMem Macro-Link actions - if ok exit
-   if Orange A-D Do SDCard Macro-Link actions  - if ok exit else Do SDCard Macro-definitions    - if ok exit              
+   if Orange A-D Do SDCard Macro-Link actions  - if ok exit else Do SDCard Macro-definitions    - if ok exit
    Do M,T-keys actions as defined in Bank123   - exit
 
 if K Keys: Keys K1-K24
@@ -222,7 +218,7 @@ SDCard Filenames accessed by S keys [S1]-[S24] and selectable by [Cfg][Opt] or w
 Upper/lowercase filenames - lowercase only through *sd*n n=1-9, U-X u-x mst MST A-G a-g - 4-9 = U,u-Z,z
 *sd* no other parameters: SDFleList sent to Serial Port when using Pad [n] Upper/Lowercase Name or Pad [o] Select Set
 -----------------------------------------------------------------------------------------------------------------------
-Layout 2A - Config - Cycle through Layout 1 to 4 press [L1-L4] or longpress [Vo] if Mute is the current option for [L2]
+Layout 2A - Config - Cycle through Layout 1 to 4 press [L1-L4] if they are [Vo] VolMute then use Pads [m,s,t] instead
 -----------------------------------------------------------------------------------------------------------------------
 [Hme  Stop    Option] [UpArr   Key] [PgeUp            Vol] [VolUp  Delete]        [Hme] [Up ] [Pgu] [V+][Del]
 [ArrL Prev       A-D] [Config Save] [ArrR  Nxt Vo-Mute1L4] [VolMute L1-L4]        [  <] [Cfg] [>  ] [Vo][L14]
@@ -239,14 +235,14 @@ file n01 contains the text /passwords/BoA.txt then pressing key n01 will send th
 Down.
 
 Note that the nKeys first character (default n), can be changed with with *0n*char - for example *0n*p will change the 
-keys, and filenames used to p01 - p96. Any character or digit can be used - but not all will yield valid filenames.
+keys, and filenames used to p01 - p996. Any character or digit can be used - but not all will yield valid filenames.
 
-Example: in the KeyBrd editor set the source as N01 (press the [Src] button), construct the text s11, and press [Sav]
-then the file n01 will be saved on either the SDCard (Source is brown) or Flash (Source is white) and has the contents
-"s11". If n01 is pressed it will execute the macro or text in file s11 if it exists on the same storage medium as n01.
-If the contents of n01 is the text "s11Link" it will attempt the execute the link list in a file s11link.
+Example: in the KBrd set the source as N01, construct the text s11, and press [Sav] then the file n01 will be saved on 
+either the SDCard (Source is brown) or Flash (Source is white) and has the contents "s11". If n01 is pressed it will
+execute the macro or text in file s11 if it exists on the same storage medium as n01. If the contents of n01 is the 
+text "s11Link" it will attempt the execute the link list in a file s11link.
 
-The nKeys minimum to maximum number of pages is 1 to 84, each page with 12 keys per page. Use *0p*nn nn=01-83 to change
+The nKeys minimum to maximum number of pages is 1 to 83, each page with 12 keys per page. Use *0p*nn nn=01-83 to change
 the maximum pages. Use *0x* to toggle nKeys as 3-char numbers n01-n99 followed by 4-char numbers n100-n996 (default).
 Or use 4-char number throughout namely n001-n996. Note that the 2+3-char mode is the more compatible as it uses 
 filenames n01-n99 (assuming n is used as the first char), whilst the 4-char mode will use a different file-set 
@@ -254,8 +250,8 @@ n001-n099 for the keys.
 
 nKeys execute the filename inside the file that has the name of the nKey label. If custom labels are off then pressing 
 nKey n01 will execute the filename found in file n01. If custom labels are on then pressing nKey n01 with the custom 
-label Abby will execute the filename found in file Abby. There is a flag *0L*2 to choose whether a custom label nKey 
-should look for file n01 or its custom label i.e. Abby.
+label Abby will execute the filename found in file Abby. There will be a flag added later to choose whether a custom 
+label nKey should look for file n01 or Abby.
 
 nKeys options are set per nKey character - custom labels for each nKey key - label file (files lbln or LblN with 
 n,N = nKey character - each file has 144 zero-terminated labels) for each of the 62 nKey characters with 144 labels
@@ -274,65 +270,57 @@ case-insensitive (but case-preserving). On the Flash memory the files lbln and L
 
 Because all the options are saved as files (nKeyArr, nColour, lblX X=nChar), it is easy to copy or rename all the 
 files mentioned, from a pool of files kept on the SDCard or Flash, for instant action and colour changes. 
-Instructions and the files used, for using the lblx label files are included in the file nKeysLabelTool.zip.
+Instructions and files required, for using the lblx label files are included in the file nKeysLabelTool.zip.
 
 A tool is also provided to convert a JSON file with the 144 labels to the Arduino character string file used by 
 the nKeys.
 
 The normal set of nKeys directory functions (*0d*// and *0d*/foldername, can still be used with custom labels - for 
-example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on. If an nKey reports
-that is cannot find its file it is usually either the wrong storage (Flash or SDCard). or the nKeys is using a specific 
-folder. Press the [Data] button in the PC App Config tab and look at the nKeus current directory - set to the default 
-with *0d*
-
-nKeys Layout:
+example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on.
 -----------------------------------------------------------------------------------------------------------------------
-[n01] [n02] [n03] [n04]       [n13] [n14] [n15] [n16]    more pages   [n985] [n986] [n987] [n988]  [+]Page or nChar
-[n05] [n06] [n07] [n08]       [n17] [n18] [n19] [n20]   ----------->  [n989] [n990] [n991] [n992]  [n] nKey Character 
-[n09] [n10] [n11] [n12]       [n21] [n22] [n23] [n24]    use *0p*nn   [n993] [n994] [n995] [n996]  [-]Page or nChar
-    Caps  Num  Scroll              C     N     S                            C      N      S        
-                                                                                                   
-1. When middle pad is Blue [n] then use Red Pads [+][-] for PageUp or PageDown  
-   When middle pad is Red  [n] then use Red Pads [+][-] for nChar change from a-z, 0-9, A-Z. The nKeys Char change is 
-   shown on the middel Pad [nChar]. This change may only shown on the 12 nkeys when the the PageUp/Dwn[+][-] Pads are
-   pressed. To save the new nChar press [Cfg][Sav] from Layout 2.                      
-2. nKeys when pressed in the execute mode - blue middle [n] Pad - will execute the nKeys action. nKeys when pressed in
-   show mode - red [n] Pad - show the content of nKey file - i,e the path and name of the file it will execute.
-3. nChar is also changable to 0-9, aA - xX with *0n*char, or from Layout 2 with [Cfg][Opt]Pad[o] from quick-list of 
-   10 chars.
-4. The nKeys key colour can be changed using the *co* code. 
-
+[n01] [n02] [n03] [n04]       [n13] [n14] [n15] [n16]                 [n985] [n986] [n987] [n988]  [+]Page or nChar
+[n05] [n06] [n07] [n08]       [n17] [n18] [n19] [n20]   ----------->  [n989] [n990] [n991] [n992]  [k]
+[n09] [n10] [n11] [n12]       [n21] [n22] [n23] [n24]    more pages   [n993] [n994] [n995] [n996]  [e]     or [s]
+    Caps  Num  Scroll              C     N     S                            C      N      S        [n]
+                                                                                                   [-]Page or nChar
+1. When middle pad is Blue [e] then use Red Pads [+][-] for PageUp or PageDown  
+   When middle pad is Red  [s] then use Red Pads [+][-] for nChar change from a-z, 0-9, A-Z. The nKeys Char change is 
+   shown on the fourth gray Pad [nChar]. This change is only shown on the 12 nkeys when the Pad Red [s] is changed to 
+   Blue [e], and the PageUp/Dwn[+][-] Pads are pressed. To save the new nChar press [Cfg][Sav] from Layout 2.      
+2. Pad [e] when in nkeys mode toggle either nKeys execute (blue Pad [e]), or when pressed show content of nKey (red 
+   Pad [s]).
+3. nChar is also changable to 0-9, aA - xX with *0n*char, or from Layout 2 with [Cfg][Opt]Pad[o] from list of 10 chars.
+ 
 Other indicators:
-[] Red/Green     K 1-3 u-z      w l r          White-FlashMen Orange  [] Time set Green/Red
+[] Red/Green     K 1-3 u-z      w l r          White-FlashMen Orange -SDCard
 Serial-On/Off    SDCard-Set      OS                    Layer A-D 
-
-[]Multicolor                                                          [] SDCard
+[]Multicolor
 Indicator for MacroBank Selected in Layouts 1 3 4 - Orange,Green,Blue,Yellow,White 
 
-Some of these colours can be changed using the *co* code.
-
-Layout 2 (Config) has three pad-buttons on the right side (from top to bottom):
+Layout 2 (Config) has five additional small pad-buttons on the right side (from top to bottom):
 [s] Symbols and Special characters such as Math and Greek Symbols on/off 
+[k] Macro Composition Keypad on/off.
+[m] Mouse Keypad on/off.
 [n] n-Key mode: nxx files (such as n01, n34 etc, on both Flash and SDCard), contains the name of a file to be executed
-                with a filename length <250. The filename can include / char => /paintmacro/paint001.txt will execute 
-                file paint001.txt in the folder /paintmacro. If the file name stored in file nxx ends with 'Link' it 
-				is processed as a linkfile (list of files, repeats, delays etc.) Use the Option Pad [o] to change to 
-				the next page 1 - 84 pages with n01-n12, n13-n24, up to n985-n996 are available. They can be stored 
-				on both the Flash memory or the SDCard. Switch between the n-Key Mode and the Number-Pad mode by using
-				*09*. The n01-n996 files are therefore neither macros, textstrings, or linkfiles. They only point to 
-				another file which has a a path - i.e. folder and name, of any length less than 250 characters, on the
-				same storage (Flash or SDCard), to be executed.
-[n] NumberPad mode:  Number-Keypad on/off - then use red Pad [o] to scroll through NumberPad pages.
-                     Macro Mode - Pressing grey Pad 4 [n] toggles KeyBoard Direct to PC Mode On/Off - show "d" in  
-                     Macro Editor instead of Src/Dst macros. This sends single enries to PC when [EXE] pressed.
-                     SDCard Select Set Mode: Switch Upper/Lower-case filenames for SDCard Filesets 1-21
+with a filename length < 250. The filename can include / char => /paintmacro/paint001.txt will execute file paint001.txt
+in the folder /paintmacro. If the file name stored in file nxx ends with 'Link' it is processed as a linkfile (list of 
+files, repeats, delays etc.) Use the Option Pad [o] to change to the next page - 83 pages with n01-n12, n13-n24, up to
+n985-n996 are available. They can be stored on both the Flash memory or the SDCard. Switch between the n-Key Mode and 
+the Number-Pad mode by using *09*. The n01-n996 files are therefore neither macros, textstrings, or linkfiles. They only
+point to another file which has a a path - i.e. folder and name, of any length less than 250 characters, on the same 
+storage (Flash or SDCard), to be executed.
+[n] Grey Number Pad:  Number-Keypad on/off - then use red Pad [o] to scroll through NumberPad pages.
+                      Macro Mode - Pressing grey Pad 4 [n] toggles KeyBoard Direct to PC Mode On/Off - show "d" in  
+                      Macro Editor instead of Src/Dst macros. This sends single enries to PC when [EXE] pressed.
+                      SDCard Select Set Mode: Switch Upper/Lower-case filenames for SDCard Filesets 1-21
 [o] Red Options Pad:  Config Mode - Toggle Capslock and Numlock on/off in combinations
-    Green Colour ->   KeyBrd Mode - 4-Cycle combinations of Source and Destination SDCard (Orange) or Flash (White) 
-                      NumPad Mode - Switch between 8 NumPad pages.
-                      [Opt] Mode  - Macro Upper/Lower case files, [L1-4][VolMute]Long-Press On/Off, StartupLayout L1-L4,
+    Green Colour ->   Macro Mode  - 4-Cycle combinations of Source and Destination SDCard (Orange) or Flash (White) 
+                      NumPad Mode - Switch between 3 NumPad pages.
+                      [Opt] Mode  - Macro Upper/Lower case files, Key Held Repeat time, StartupLayout L1-L4,
                                     Select M S T MacroBanks 1-5, Select SDCard File Set 1-21 use Pads [o] and [n], 
                                     Send SD+Flash File lists,  Custom Key Labels On/Off for Keys M,S,T 
                       [Key] Mode  - Select 24 options for [Del], [Ret], [Cut,Copy,Paste] keys
+-----------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------
 Layout 2 - Full Media Mode - Play Controls On - Volume Controls On - Tone Controls On 
 -----------------------------------------------------------------------------------------------------------------------
@@ -344,19 +332,19 @@ Layout 2 - Full Media Mode - Play Controls On - Volume Controls On - Tone Contro
 
 Note: Bass and Treble Controls only works with SoundBlaster Audigy and X-Fi Audio Cards
 
-The 3 Pads has the following functions in Layouts 1, 3, and 4 (M S T Keys):
+The 5 Pads has the following functions in Layouts 1, 3, and 4 (M S T Keys):
 [a][d]    Toggle Layers A B C or D with M1-M6->M19-M24, S1-S6->S19-S24, T1-T6->T19-T24
-[m][s][t] Change between SDCard and Flash storage
+[m][s][t] Move to Keys M, S or T Layout Pages
 Note that if Macro Upper Case Files is ON [Cfg][Opt] then the Pad labels are in Uppercase [M][S][T]
 
 Note: If the same Pad Key is pressed in its own Layout - for example press pad S when in the [S1] - [S24] keys layout,
-it will change between SDCard and Flash storage. Toggle it on/off by pressing the Pad once or twice. This applies for 
-all three keysets M, S and T. The A,B,C,D indicator will change from white to orange when this option is On, and back 
-to white when Off. For the set of S keys only: If the SDCard option is enabled, the orange A-D indicator will result 
-in files stored on the SDCard being used when pressing [S1] to [S24] - select which files with [Cf][Opt]5x then Red Pad 
-[o] or use *sd*n. Note that even sending *sd*K, and then pressing [S1] with orange A will print the content of the 
-plaintext LinkFile K01Link, pressing [S7] orange B, will show the contents file K07Link if these files exist on the 
-SDCard.
+it will then ignore any assigned strings and use the Coded programmed action. Toggle it on/off by pressing the 
+Pad once or twice. This applies for all three keysets M, S and T. The A,B,C,D indicator will change from white to 
+orange when this option is On, and back to white when Off. For the set of S keys only: If the SDCard option is enabled,
+the orange A-D indicator will result in files stored on the SDCard being used when pressing [S1] to [S24] - select
+which files with [Cf][Opt]5x then Red Pad [o] or use *sd*n. Note that even sending *sd*K, and then pressing [S1] 
+with orange A will print the content of the plaintext LinkFile K01Link, pressing [S7] orange B, will show the contents 
+file K07Link if these files exist on the SDCard.
 -----------------------------------------------------------------------------------------------------------------------
 Layout 3 - S Keys - [S1]-[S24] - Cycle through Layout 1 to 4 press [L1-L4]  
 Layout 4 - T Keys - [T1]-[T24] - Cycle through Layout 1 to 4 press [L1-L4] 
@@ -369,15 +357,11 @@ Layout 4 - T Keys - [T1]-[T24] - Cycle through Layout 1 to 4 press [L1-L4]
 -----------------------------------------------------------------------------------------------------------------------
 Layouts 1, 3 and 4, four Layers A B C D each with six keys: A = M1-M6, S1-S6, T1-T6 to D = M19-M24, S19-S24, T19-T24
 -----------------------------------------------------------------------------------------------------------------------
-To cycle through the Layouts press [L1-L4]. Long-press [L1-L4] to toggle [Vo][L1-L4]. Use the top or bottom pads [a][d]
-to move through the four layers a,b,c,d.
-
-When the [L1-L4] or [Vo] key is held in for more than 1 second it will change between the two key states [Vo][L1-L4]
-in any of the Layouts 1-4. Note that when in Layout 2 Cfg it will is easier to switch to the [Vo] key using the
-[Cfg][Vo] keys.
+To cycle through the Layouts press [L1-L4]. Also use the three Pads [m][s][t] to move to Layers L1 L3 L4 and use the 
+top or bottom pads [a][d] to move through the four layers a,b,c,d.
 
 Press Config Key (new set of config keys change colour):
-[Vm ] [ArrowRight] - VolumeMute -> L1, L2, L3, L4 -> V1, V2, V3, V4 - press again repeat to restore Vo
+[Vm ] [ArrowRight] - VolumeMute -> L1, L2, L3, L4 - press again repeat to restore Vo
 [Key] [ArrowUp]  ] - Select from 24 key actions (as below) for [Del], [Ret], [Cut,Copy,Paste] keys - press 1x to 8x 
 [Vol] [PageUp]   ] - Vol+ -> Delete and Vol- -> Enter - repeat to restore V+ V-
 [A-D] [ArrowLeft ] - Layouts 1, 3, 4, has 8 cycles: change to Layer A B C D white (Text) and orange (SDCard/Coded)
@@ -385,17 +369,15 @@ Press Config Key (new set of config keys change colour):
                      that mediaplayers may not immediately respond to rapid Play -> Pause -> Play keypresses - allow
                      a second or two between these commands.
 [mCT] [End       ] - Macro Timer Trigger Repeat and Oneshot Countdown or Clock Timers
-[Opt] [Home      ] - Toggle [L1-4]{Vo]Long-Press On/Off, Select Startup Layout L1-L4,
+[Opt] [Home      ] - Key Held Repeat Time
                      Select MacroBanks 1-5 for M,S,T, Select SDCard File Set 1-21
 [Sav] [Config    ] - Info and File List to Serial Monitor and Text/Macro and Config files saved
 [ROf] [ArrowDwn]   - Restart-PowerOff-Logoff - Bottom row [Rst][Log][Off] - cancel by pressing yellow [Stp] 
       [Cfg][ROf]   - Includes long (T) or short (t) Timer options as well and Countdown and Clock Timers
 
 Select Key Actions [Del] and [Ret] keys:
-1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  
-Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi 
-22 - 27  28 - 51  52  53  54  55 - 81
-Ts1-Ts6  K1 - K24 Num Cap Scr Control + Keys A N O S P F X C V Z Y T W R D H
+1   2   3   4   5   6   7   8   9   10  11  12  13  14  15  16  17  18  19 20  21  22 - 27  28 - 51  52  53  54
+Del Bks Tab aTb Ins Esc PrS aPr Ret Snp Osk UnD ReD caD Cut Cpy Pst Tsk Run wX CPi Ts1 Ts6  K1 - K24 Num Cap Scr
 -----------------------------------------------------------------------------------------------------------------------
 Mouse Keyboard: When in Layer 2 - press middle pad [u] to toggle Mouse KeyBoard on/off - these are mouse buttons, 
                 scroll, and cursor movement keys:
@@ -407,16 +389,16 @@ Mouse Keyboard: When in Layer 2 - press middle pad [u] to toggle Mouse KeyBoard 
 Note that a Mouse Right-click can be also programmed as a Shift and F10.
 
 -----------------------------------------------------------------------------------------------------------------------
-Macro Composition Keyboard (KeyBrd editor):
-                                                                                                       Dedicated
+Macro Composition Keyboard:
+                                                                                                        Dedicated
 Keyboard Page 1           Page 2              Page 3                 Page 4               Page 5        Green Pads
-[abc][def][ghi][KPd]  [ABC]-[XY_][Fsp]  [012][345][678][EXE]   [Lst][Ren][Rmv][Snd]   [ALT][SHF][CTR]   [k] Exit
-[jkl][mno][pqr][NXT]   Uppercase [NXT]  [9+-][/=*][*Cm][NXT]   [Snd][Cpy][Lnk][NXT]   [GUI][TEI][CRF]   [<] Delete
-[stu][vwx][yz ][ADD]    Page 1   [ADD]  [Sym][Brc][Fnn][ADD]   [Src][Dst][Num][Sav]   [LHR][UED][UDM]   [o] Src-Dst 
-                                                                Snn  Tnn                                
-                                                              Source Target
+[abc][def][ghi][KPd]  [ABC]-[XY_][F+N]  [012][345][678][EXE]   [Lst][Ren][Rmv][Snd]   [ALT][SHF][CTR]   [s] Save
+[jkl][mno][pqr][NXT]   Uppercase [NXT]  [9+-][/=*][*Cm][NXT]   [Snd][Cpy][Lnk][NXT]   [GUI][TEI][CRF]   [k] Exit
+[stu][vwx][yz ][ADD]    Page 1   [ADD]  [Sym][Brc][Fnn][ADD]   [Src][Dst][Num][Sav]   [LHR][UED][UDM]   [<] Delete
+                                                                Snn  Tnn                                [h] History
+                                                              Source Target                             [o] Src-Dst 
                                                                                                
-Macro Selection: M01-M24 S01-S24 T01-T24 A01-A99 K0-K99 N01-N996
+Macro Selection: M01-M24 S01-S24 T01-T24 A01-A99 K0-K99 N01-N996          Note: [h]istory -> [r]ecall after [s]ave            
 
 Page 1: [xy ] = x y space
 Page 2: [XY_] = X Y underscore  Page 1 and 2 + Caplock reverse characters
@@ -442,42 +424,39 @@ Page 4: Macro Tools                                 Page 5: Modifiers           
 Note A: Use the green Pad [<] to correct entries added - press once to remove one entry and more than once for many
 entries. It will not have any effect if no entries have been [ADD[ed.
 
-Note B: Use the green Pad [o] to change the source and destination from SDCard (brown) to Flash memory (white). The 
+Note B: Use the green Pad [o] to chage the source and destination from SDCard (brown) to Flash memory (white). The 
 following convention is used - the Macro Destination [Dst] is also referred to as the Target Macro here in some cases. 
 Pressing the green Pad [0] will cycle through 5 possible combinations of Source and Destination for SDCard Orange) or 
 Flash (White) storage - for example display shows: White Source M 01  Orange Target A 50
 
+Note C: Pad [h] is the History key, green Pad [h], to access previously added strings.
 Can also send serial string <c ... > directly to MacroEditor buffer for processing. For example send 
 <cmanual.txt=usermanual.txt> with white A and Macroeditor open. Then in macroeditor switch to sdcard (both src and 
 dst brown and then press [Ren] and file manual.txt on SDCard is renamed usermanual.txt. If MacroEditor is closed 
 when string is sent then use the history Pad [h] to access the serial string.
 
-Note C: 3rd option via [UDM] -> "Mod" key in MacroEditor to force the use of the Modifier byte for Control, Shift, 
-Alt and Gui keys, instead of one or more of the 6 available HID simultaneous keycode slots.
+Note D: New third option via [UDM] -> "Mod" key in MacroEditor to force the use of the Modifier byte for Control, 
+Shift, Alt and Gui keys, instead of one or more of the 6 available HID simultaneous keycode slots.
 
-Note D: Additional macro processing options through first char 0x0F2 and 0xF3. Add 0xF2 or 0xF3 through pressing key 
-[Fsp] in MacroEditor: 
+Note E: Additional macro processing options through first char 0xF2 and 0xF3. Add 0xF2 or 0xF3 through pressing key 
+[F+N] in MacroEditor: 
 If 0xF3 added as first char can construct a hex string in MacroEditor that will be sent unchanged (but without the 
-first 0xF3) to the PC. For example construct [Fsp]4x[ADD]D[ADD]F[ADD]8[ADD]9[ADD][Snd] and the hex characters 0xDA 
+first 0xF3) to the PC. For example construct [F+N]4x[ADD]D[ADD]F[ADD]8[ADD]9[ADD][Snd] and the hex characters 0xDA 
 0x89 will be sent to the PC. Can [Sav] or use [EXE] as well to save or execute and then save the string.
 If 0xF2 added as first char then macrokeys M1-M24, S1-S23, T1-T24 behave as nKeys i.e. they contain a filename that
 will be executed. For example file a01 has Ctrl+Shft+Esc, file m07 has filename a01 but with F2 at start i.e. m07 
 content 0xF2 0x61 0x30 0x 31 when key [M7] pressed TaskManager opens. Construct m07 in macroeditor set source to 
-M07 white, press [Fsp]3x[ADD] then a01 via [ADD] then [Sav]. File a01 is already saved in flash content 0xE0 0xE1 0x20 
+M07 white, press [F+N]3x[ADD] then a01 via [ADD] then [Sav]. File a01 is already saved in flash content 0xE0 0xE1 0x20 
 
-Note E: Rename and Remove Macro works for large files > 250 bytes, List will show the first 10 bytes and "LF" for the
+Note F: Rename and Remove Macro works for large files > 250 bytes, List will show the first 10 bytes and "LF" for the
 large file size, but Copy and Send Macro only works on files < 250 bytes.
 
-Note F: m,s,t macros with numbers 25-99 can be entered and saved as well - set the source or target to a, then press 
+Note G: m,s,t macros with numbers 25-99 can be entered and saved as well - set the source or target to a, then press 
 [Num] to increase the displayed number to any number between 25-99, then press either ] or [Dst] for m, s, or t, and 
 the constructed macro can then be executed [EXE] and saved [Up], or to only save with no execution, press the 
 Macroeditor [Sav] key.
 
 -----------------------------------------------------------------------------------------------------------------------
-Note 1: The following convention is used - the Macro Destination [Dst] is also referred to as the Target Macro here 
-in some cases. Pressing the red Pad [0] will cycle through 5 possible combinations of Source and Destination for SDCard
-Orange) or Flash (White) storage - for example display shows: White Source M 01  Orange Target A 50
-
 Composed Macro --> Destination (Composed with the Macro Editor) mM,sS,tT 01-24 or aA,kK 01-99 or nN 01-36
 Link Macro     --> Destination (Set target = T04, enter a01a02d01r06a03, press [Lnk], then press [T4] to run it)
 Unlink Macro   --> Source or enter name without the "Link" part. Note Unlink = Remove/Delete for Link files
@@ -891,10 +870,10 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
 (E) *0R* Enable/Disable the resistor colour-coded number pad - plain colours used when off
 (F) *0x* Enable/Disable nKeys34 with nKeys count two characters numbers from n00-n99 and then three characters numbers 
     from n100-n996 if true, else nKeys count three characters numbers throughout n000-n996.
-(G) *0d* /dirname, *0d* or *0d* / reset to no nKeys directory, *0d* // use nKeys directory based on first char of current
+(G) *0d*/dirname, *0d* reset to no nKeys directory, *0d*// use nKeys directory based on first char of current
     nKeys set such as /n/nKeyfilename. Add folder name that is added infront of the nKeys filename - for example 
-    *0d* /people will add the string /people/ in front of all nKey filenames for execution and saving. Pressing key n03
-    wil then run the contents of file n03 in the folder /people.
+    *0d*/people will add the string /people/ in front of all nKey filenames for execution and saving. Pressing key n03
+    will then run the contents of file n03 in the folder /people. Do not use *0d*/ i.e. / without a foldername.
 (H) Rename *rn*oldname=newname. For example *rn*s02=a02[EXE] will rename file s02 (if it exists), to a02. Can also use 
     this to rename folders for example rename *Code/old=/new will rename folder old to folder new. Use [EXE] to
     complete the *rn*x=y command, using [Snd] will send *rn*x=y as text, and [Sav] will save *rn*x=y as text in the 
@@ -1076,22 +1055,23 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
      Shift+F1-F12 keys in MSWord and the PC App is running. 
 (Ae) *lk* and *lk*0,1 Lock KeyPad *lk* to toggle locked/unlocked or *lk*0,1 unlock/lock - if locked use PCApp or 
      do HW reset of Keypad   
-(Af) *co*nc *co*n n=0-4 c=0-F Added colour change options for the CapNumSCroll-lock using *co* (Green/Orange)
+(Af) *co*nc *co*n n=0-5 c=0-F Added colour change options for the CapNumSCroll-lock using *co* (Green/Orange)
      or *co*0 (Green/Cyan) or any colour using in Colours[n] with *c0*0n=0-F, or any other colour using *co*0HHH with
-     HHHH = RGB565 value such as 6666 = darkgreen. Also colour options for background, and colour options for 
-     Operating System W L R and for the Key Font Color (can also use *fc* or *fc*c=0-F). For example <*co*41> change 
-     key label to white and <*co*4> toggle key label between white and silver. Also colour change option for nKeys 
-     *co*2 toggles between default darkcyan and brown-maroon. *co*20 will change nKeys to Black and white labels. 
-     Use *co*nc n=0-4 c=0-F to set CapNumSCroll, Background, nKeys, OSColour, KeyFont, to a custom colour in Colour[c]
-     Colours 0-F map to:
-     Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1      
+     HHHH = RGB565 value such as 6666 = darkgreen. Also colour options for Sensors display (HWInfo), background, and 
+     colour options for  Operating System W L R and for the Key Font Color (can also use *fc* or *fc*c=0-F). For 
+     example <*co*41> change key label to white and <*co*4> toggle key label between white and silver. Also colour 
+     change option for nKeys *co*2 toggles between default darkcyan and brown-maroon. *co*20 will change nKeys to 
+     Black and white labels. Use *co*nc n=0-5 c=0-F to set Sensors, CapNumSCroll, Background, nKeys, OSColour, 
+     KeyFont, to a custom colour in Colour[c] Colours 0-F map to:
+     Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1 
+     For example Colour[1] is usually white (the KeyFont colour), i.e. use *co*51 to set the Sensor display to white.     
      Change Colour Array with:
      *co*nnCCCC nn = colour number 1 - 16 in Colour array. CCCC is the colour value as four hex number 0-9A-F
      *co*000011112222....FFFF *co* + 16 four digit hex colour valuse for the 16 colours in Colour array.
      For example *co*0407FF will change the Colour[3]=White to Cyan. Then press [Cfg][Sav] to save Colour[] to Flash
      and then *co*43 will change the Keys Font to Green. Reset Colour[3] to white with *co*04FFFF. To set the
      colour to any colour use *co*407FF which will set the KeyFont to Cyan - it does not have to one of the 16 colours 
-     in the Colour array. In general: *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF. After colour changes made 
+     in the Colour array. In general: *co*nHHHH n = 0,2,3,4,5 HHHH = RGB565 as 0000-FFFF. After colour changes made 
      save with [Cfg]->[Sav]. Colour[] is saved to Flash as Colour file (32 bytes). To reset to default values use *co**
 (Ag) *cn* Added colour change options for the nKeys. Use any colour using in nColours[n] with *cn*0n=0-F, or any 
      other colour using *cn*0HHH with HHHH = RGB565 value such as 6666 = darkgreen. To change nKeys colour number
