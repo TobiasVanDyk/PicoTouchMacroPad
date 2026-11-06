@@ -142,7 +142,7 @@ x6 for Layout 3 and 4, and x7 and x8 for the [Del] and [Ret] keys. They can use 
 Program as *xn*number n=1-8, number = 1-81.
 
 Press [Cfg] once, and then press [Key] once or twice, to select 81 options for either the [Del] or the [Ret] 
-key which are then selected by pressing the red bottom Pad [o] which will cycle through the 81 options for both the 
+key which are then selected by pressing the red bottom Pad [o] which will cycle through the 54 options for both the 
 [Del]ete key top right and the [Ret]urn key bottom right. Pressing the [Key] key 3x, 4x or 5x times will select the 
 Layer 1 [Cut], second [Cpy], or third [Pst] key respectively which can then be changed by pressing the bottom Pad 
 i.e. option [o]. Pressing the [Key] key, 6x, 7x, or 8x will select this top-row 3 keys in Layouts 3 or 4, which
@@ -159,7 +159,7 @@ taskbar, and are indicated by GuiL + Key0 - Key9 etc in macroBanks.h WinMacro co
 
 The keys in Layouts 1, 3, and 4 (M, S, and T 1-24 each) are linked to either a lowercase (m01-m23. s01-s24, t02-t24)
 or uppercase (M01-M24, S01-S24, T01-T24), group of 24 files containg macros and/or text strings. Use the [Cf][Opt] 
-keys to toggle between Upper and Lower case names or use the [*Cm] key to send *up*, or use *up*0,1 off/on.  
+keys to toggle between Upper and Lower case names or use the [*Cm] key to send *up*. 
 
 The 8-cycle [A-D] key in Layout 2: If the A-D indicator shows a white A, B. C, or D then the Layouts 
 Mx Sx Tx use FlashMem macrofiles or linkfiles, or the actions assigned with *fm* *fs* *ft* strings. If the indicator
@@ -230,7 +230,7 @@ file n01 contains the text /passwords/BoA.txt then pressing key n01 will send th
 Down.
 
 Note that the nKeys first character (default n), can be changed with with *0n*char - for example *0n*p will change the 
-keys, and filenames used to p01 - p96. Any character or digit can be used - but not all will yield valid filenames.
+keys, and filenames used to p01 - p996. Any character or digit can be used - but not all will yield valid filenames.
 
 Example: in the KBrd set the source as N01, construct the text s11, and press [Sav] then the file n01 will be saved on 
 either the SDCard (Source is brown) or Flash (Source is white) and has the contents "s11". If n01 is pressed it will
@@ -240,8 +240,38 @@ text "s11Link" it will attempt the execute the link list in a file s11link.
 The nKeys minimum to maximum number of pages is 1 to 83, each page with 12 keys per page. Use *0p*nn nn=01-83 to change
 the maximum pages. Use *0x* to toggle nKeys as 3-char numbers n01-n99 followed by 4-char numbers n100-n996 (default).
 Or use 4-char number throughout namely n001-n996. Note that the 2+3-char mode is the more compatible as it uses 
-filenames n01-n99 (assuming n is used as the first char), whilst the 4-char mode will use a different fileset 
+filenames n01-n99 (assuming n is used as the first char), whilst the 4-char mode will use a different file-set 
 n001-n099 for the keys.
+
+nKeys execute the filename inside the file that has the name of the nKey label. If custom labels are off then pressing 
+nKey n01 will execute the filename found in file n01. If custom labels are on then pressing nKey n01 with the custom 
+label Abby will execute the filename found in file Abby. There will be a flag added later to choose whether a custom 
+label nKey should look for file n01 or Abby.
+
+nKeys options are set per nKey character - custom labels for each nKey key - label file (files lbln or LblN with 
+n,N = nKey character - each file has 144 zero-terminated labels) for each of the 62 nKey characters with 144 labels
+(12 pages each with 12 nKeys - change with *0l*0,1), can also set nChar maximum number of pages 1-83 also per nKey 
+character, select nKeys Colour for each nKey character (change with *cn*01-16), and select for each nKey the 
+n01-n99 or n001-n99 mode. The nKeys starcodes only change options for the current nKey for example *0p*83 will 
+set the current nKey maximum pages to 83. Because all the options are saved as files (nKeyArr, nColour, 
+lblX X=nChar), it is easy to copy or rename all the files mentioned, from a pool of files kept on the SDCard or 
+Flash, for instant action and colour changes.
+
+The custom label file the nkeys use are named lblx or LblX for lower and uppercase nKeys respectively. If there is a 
+file lbln on the SDCard, and custom labels are on (*0L*1 or *0l*1) then the nKeys will display the 144 labels in the 
+file lbln instead of n01-n144. If the maximum pages are more than 12 it will use n145 + as the labels after the custom
+labels. Note that on the SDCard nKey=n and nKey=N will both use the labelfile lbln or LblN as the SDCard filesystem is 
+case-insensitive (but case-preserving). On the Flash memory the files lbln and LblN are two different files. 
+
+Because all the options are saved as files (nKeyArr, nColour, lblX X=nChar), it is easy to copy or rename all the 
+files mentioned, from a pool of files kept on the SDCard or Flash, for instant action and colour changes. 
+Instructions and files required, for using the lblx label files are included in the file nKeysLabelTool.zip.
+
+A tool is also provided to convert a JSON file with the 144 labels to the Arduino character string file used by 
+the nKeys.
+
+The normal set of nKeys directory functions (*0d*// and *0d*/foldername, can still be used with custom labels - for 
+example all the custom labels for nKey n will be used inside a folder named /n if *0d*// is on.
 -----------------------------------------------------------------------------------------------------------------------
 [n01] [n02] [n03] [n04]       [n13] [n14] [n15] [n16]                 [n985] [n986] [n987] [n988]  [+]Page or nChar
 [n05] [n06] [n07] [n08]       [n17] [n18] [n19] [n20]   ----------->  [n989] [n990] [n991] [n992]  [k]
@@ -285,6 +315,7 @@ storage (Flash or SDCard), to be executed.
                                     Select M S T MacroBanks 1-5, Select SDCard File Set 1-21 use Pads [o] and [n], 
                                     Send SD+Flash File lists,  Custom Key Labels On/Off for Keys M,S,T 
                       [Key] Mode  - Select 24 options for [Del], [Ret], [Cut,Copy,Paste] keys
+-----------------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------
 Layout 2 - Full Media Mode - Play Controls On - Volume Controls On - Tone Controls On 
 -----------------------------------------------------------------------------------------------------------------------
@@ -684,7 +715,8 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
 (9) Key Font Bold/Normal change - Send the macro *fo* with the built-in keyboard to toggle the labels on the buttons 
     from normal to bold.
 (a) Key Font White/Black change - Send the macro *fc* with the built-in keyboard to toggle the labels on the buttons 
-    from white to black.
+    from white to black. Use *fc*c c=0-F to change to colours Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,
+    Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1
 (b) Macro Copy - Copy a01-a99 to M,S,T K keys. Can use *cm* if the SrcNum DstNum is set up - see the four examples 
     above. Else compose *cm*nnXmm via [ADD] where: nn = a01-a99 X = Keys M S T K mm = 01-24. Keys K1-K24 are max 3
     byte macros - if Knn pressed will run this definition, if no definition will do KnnLink file. See Example 2 
@@ -733,7 +765,7 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     <*x4*0> reset cX cC cV  
     <*x1*0> reset Cut Copy Paste  
     <*x0*>  clear all 8 keys   
-    <*x0*0> reset all 8 keys  
+    <*x0*0> reset all 8 keys    
 (m) Mouse Buttons and Scroll Click and Move, Wiggler, Position, Cursor and Scroll movement-size: 
     *mb*lrm,LMRd mouse buttons click (l,r,m single-click) and (L=d,R,M,double-click)
     *ms*du,DU nn nn=01-99 mouse scrollwheel (u,d) nn scroll. If UD then nn = 10 x scroll
@@ -805,7 +837,7 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     *bl*nn nn=00-99 for inbetween values 
     *bl*2 toggles backlight dimmed/normal. 
     *bl*3 Toggles backlight full-on/full-off. 
-    Unlike pressing the Black Key to switch off, these additional values are not persistant through the dimming period.   
+    Unlike pressing the Black Key to switch off, these additional values are not persistant through the dimming period.    
 (v) Key Held Duration: *kr*num with num = 1-9 or 100-900 msec key press wait duration before repeat.
     Key Treshold: Normally 650 change with *ke*nnn nnn = 100-999
 (w) Key Held Enable: *kh* Enable/Disable Volume Mute Processing if [Vo][L1-L4] key is long-pressed
@@ -818,7 +850,7 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     *lf* /store/+/new/ lists all flash files in the folder /new and the sdcard files in folder /store.
     *lf* /+/new/ lists all flash files in the folder /new and all the sdcard files (the folder is now root /).
     *lf* /+/ lists all flash files and all the sdcard files (the folder for both is now root /).
-(y) *up* or use the [Cf][Opt] keys to toggle between Upper and Lower case macro file names, or use *up*0,1 off/on. 
+(y) *up* or use the [Cf][Opt] keys to toggle between Upper and Lower case macro file names*up*, or use *up*0,1 off/on. 
 (z) *im,s,t*numberlist Macro instruction list numberlist = maximum 12 single characters 0-9 or a-k. Can add less
     than 16 characters after *im,s,t* but last character added must be a zero 0. To see the instruction list use
     *ld* when a serial terminal is connected to the TouchLCD.
@@ -951,7 +983,7 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     Previous Play/Pause Stop. For *v+*nn and *v-*nn the nn is not and absolute number but an increase or decrease of the 
     existing value  divided by two - i.e. if the existing value is 40 and you send *v+*20 then the new volume will be 50
     (not 60 or 20). To set the volume to a specific value first send <*v-*50> which will set it to 0 and mute, then send 
-    <*v+*value/2> i.e. send <*v+*25> if the volume is to be set at 50 percent.
+    <*v+*value/2> i.e. send <*v+*25> if the volume is to be set at 50 percent.*
 (Z) Rotary Encoder plugin with support for coded functions and symbolic link to macro actions in App folders.
     Long-press Twist encoder until "Twist Options d-Z Ready" shows. Then turn encoder for the options vuzsxdwbVUZSXDWB.
     Long-press Twist again to exit the encoder options mode. If the star * option is chosen the Twist mode will change 
@@ -968,7 +1000,10 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
     *tf*s,r = Save or Read twist config file twistCfg 
     *tm*char = vuzsxdwbVUZSXDWB code definitions or use *tm* twistMacro=0x00 Use symbolic file twist not coded macros.
     Default volume vV - *tm*char = vV uU zZ sS xX dD wW etc in vuzsxdbVUZSXDB coded macro options volume =/-/mute
-    undo/redo zoom +/-/reset scroll +/- X /* x -= backspace/delete Wallaper-Next Photoshop Brush Size = b Hardness = B
+    undo/redo zoom +/-/reset macropad-pages+1/scroll +/- X /*=--+#?<>[]() x repeat last key pressed backspace/delete 
+    minimize-all/Wallaper-Next Photoshop Brush Size = b Hardness = B. Note that s = normal scrolling up/down and S is
+    macropad pages + or 1 in nKeys, Math-Symbols, M,ST keys, Layout 2 L1 or L3. Press switch nKeys from e<->s mode,
+    L2 and M,S.T keys A-D brown<->white (SDcard/Flash), Math-Symbols return to L2.
     *tm*0 same as *tm* switch to file-based macros for Twist not the coded macros as in *tm*char = vuzsxdwbVUZSXDWB
 (Aa) CircuitPython device control and used as input and/or output for Pico macropad and/or PC App. 
      *cp* CircuitPython filelist *cp*cnn c=command a,d,r,c nn=filelist index=00-99 *cp*cnnfilename a Activate, 
@@ -1003,8 +1038,41 @@ pressed. *Codes are incremented to the next starcode if no [EXE} pressed. The ma
      *fx*0,1 will disable/enable but leaves mod at its current state. 
      *fx*n will enable and also set mod=0
      Note that the "nKeysChr": "<*0n*F>" in apprules.json should be changed from the default "<*0n*w>" if you use the
-     Shift+F1-F12 keys in MSWord and the PC App is running.
-              
+     Shift+F1-F12 keys in MSWord and the PC App is running. 
+(Ae) *lk* and *lk*0,1 Lock KeyPad *lk* to toggle locked/unlocked or *lk*0,1 unlock/lock - if locked use PCApp or 
+     do HW reset of Keypad   
+(Af) *co*nc *co*n n=0-5 c=0-F Added colour change options for the CapNumSCroll-lock using *co* (Green/Orange)
+     or *co*0 (Green/Cyan) or any colour using in Colours[n] with *c0*0n=0-F, or any other colour using *co*0HHH with
+     HHHH = RGB565 value such as 6666 = darkgreen. Also colour options for Sensors display (HWInfo), background, and 
+     colour options for  Operating System W L R and for the Key Font Color (can also use *fc* or *fc*c=0-F). For 
+     example <*co*41> change key label to white and <*co*4> toggle key label between white and silver. Also colour 
+     change option for nKeys *co*2 toggles between default darkcyan and brown-maroon. *co*20 will change nKeys to 
+     Black and white labels. Use *co*nc n=0-5 c=0-F to set Sensors, CapNumSCroll, Background, nKeys, OSColour, 
+     KeyFont, to a custom colour in Colour[c] Colours 0-F map to:
+     Black,White,DCyan,Green,Cyan,Red,Blue,DGreen1,Black1,Silver,Maroon,Orange,SkyBlue2,Purple2,DGreen,Brown1 
+     For example Colour[1] is usually white (the KeyFont colour), i.e. use *co*51 to set the Sensor display to white.     
+     Change Colour Array with:
+     *co*nnCCCC nn = colour number 1 - 16 in Colour array. CCCC is the colour value as four hex number 0-9A-F
+     *co*000011112222....FFFF *co* + 16 four digit hex colour valuse for the 16 colours in Colour array.
+     For example *co*0407FF will change the Colour[3]=White to Cyan. Then press [Cfg][Sav] to save Colour[] to Flash
+     and then *co*43 will change the Keys Font to Green. Reset Colour[3] to white with *co*04FFFF. To set the
+     colour to any colour use *co*407FF which will set the KeyFont to Cyan - it does not have to one of the 16 colours 
+     in the Colour array. In general: *co*nHHHH n = 0,2,3,4,5 HHHH = RGB565 as 0000-FFFF. After colour changes made 
+     save with [Cfg]->[Sav]. Colour[] is saved to Flash as Colour file (32 bytes). To reset to default values use *co**
+(Ag) *cn* Added colour change options for the nKeys. Use any colour using in nColours[n] with *cn*0n=0-F, or any 
+     other colour using *cn*0HHH with HHHH = RGB565 value such as 6666 = darkgreen. To change nKeys colour number
+     in nKeyArr use *cn*01-16. To reset to default values use *cn**, *cn* set all nKeys to dark cyan.
+     nColours 0-F map to:
+     DCyan,Black,Gold,Silver,dCream,Red,Blue,DGreen1,Black1,Magenta,Maroon,Orange,SkyBlue2,Purple1,DGreen,Brown1     
+     Change Colour Array with:
+     *cn*nnCCCC nn = colour number 1 - 16 in Colour array. CCCC is the colour value as four hex number 0-9A-F
+     *cn*000011112222....FFFF *cn* + 16 four digit hex colour valuse for the 16 colours in Colour array.
+     In general: *co*nHHHH n = 0,2,3,4 HHHH = RGB565 as 0000-FFFF. After colour changes made save with [Cfg][Sav]. 
+     nColour[] is saved to Flash as nColour file (32 bytes).  
+(Ai) *0l*0,1,2 or *0L*0,1,2 or *0l,L* Enable or disable nKeys custom labels for first 144 nKeys per nKey character
+     Option 2 use custom labels but normal nChar+Numbers file. Option 1 use custom labels and filename ame as the
+     custom label.
+       
 ------------------------------------------------------------------------------------------------------------------------
 Symbols-SpecialChar-Math-Greek-Algebra Keyboard: 
 
