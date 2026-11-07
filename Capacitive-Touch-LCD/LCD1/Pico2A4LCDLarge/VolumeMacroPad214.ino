@@ -3232,7 +3232,7 @@ void NumKeysChange()
                                           else { NKeysX[m][1] = e; NKeysX[m][2] = d; NKeysX[m][3] = a; NKeysX[m][4] = b; NKeysX[m][5] = 0x00; } 
                                         } else { strcpy(NumkeysX[m], NumkeysLabel[Numkeys123][m]);  }  
                            }  
-  if (nDirX==2) nDir[1]=nChar; ConfigButtons(5); // Only update 5 Pad keys and only update 2nd char in nDir if /n/ mode
+  if (nDirX==2) nDir[1]=nChar; ConfigButtons(3); // Only update 5 Pad keys and only update 2nd char in nDir if /n/ mode
   // for (m = 0; m<12; m++) for (n = 0; n < 6; n++) {Serial.print(NKeysX[m][n], HEX); Serial.print(' '); } SerPr2;                                      
 }
 
